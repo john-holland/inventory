@@ -1,0 +1,26 @@
+<ActionBar class="action-bar">
+    <!-- 
+    Use the NavigationButton as a side-drawer button in Android
+    because ActionItems are shown on the right side of the ActionBar
+    -->
+    <NavigationButton ios:visibility="collapsed" icon="res://menu" (tap)="onDrawerButtonTap()"></NavigationButton>
+    <!-- 
+    Use the ActionItem for IOS with position set to left. Using the
+    NavigationButton as a side-drawer button in iOS is not possible,
+    because its function is to always navigate back in the application.
+    -->
+    <ActionItem icon="res://navigation/menu" android:visibility="collapsed" (tap)="onDrawerButtonTap()"
+                ios.position="left">
+    </ActionItem>
+    <Label class="action-bar-title" text="Home"></Label>
+</ActionBar>
+
+<GridLayout class="page page-content">
+    <Label class="page-icon fa" text="&#xf015;"></Label>
+    <Label class="page-placeholder" text="<!-- Page content goes here -->"></Label>
+    <label text="name: "><span [text]="item.name" /></label>
+    <label text="owner: "><span [text]="item.owner.name" /></label>
+    <button *ngIf="item.owner.id != this.userService.localUser.id" [nsRouterLink]="['/request-item', item.id]">request!</button>
+    <button *ngIf="item.holder.id == this.userService.localUser.id" [nsRouterLink]="['/return-item', item.id]">return!</button>
+    <button *ngIf="item.owner.id == this.userService.localUser.id && item.isBeingReturned" (click)="itemReturned()">confirm returned item</button>
+</GridLayout>
