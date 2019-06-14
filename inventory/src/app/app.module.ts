@@ -15,6 +15,10 @@ import {UserService} from "~/app/services/user.service";
 import { ItemViewComponent } from './item-view/item-view.component';
 import { RequestItemComponent } from './request-item/request-item.component';
 import { ReturnItemComponent } from './return-item/return-item.component';
+import {BrowseComponent} from "~/app/browse/browse.component";
+import {FeaturedComponent} from "~/app/featured/featured.component";
+import {SearchComponent} from "~/app/search/search.component";
+import {SettingsComponent} from "~/app/settings/settings.component";
 
 @NgModule({
     bootstrap: [
@@ -29,7 +33,13 @@ import { ReturnItemComponent } from './return-item/return-item.component';
         AppComponent,
         ItemViewComponent,
         RequestItemComponent,
-        ReturnItemComponent
+        ReturnItemComponent,
+        LoginComponent,
+        BrowseComponent,
+        FeaturedComponent,
+        SearchComponent,
+        SettingsComponent,
+        HomeComponent
     ],
     providers: [
       AuthService,

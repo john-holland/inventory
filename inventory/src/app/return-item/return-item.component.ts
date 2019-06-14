@@ -6,7 +6,7 @@ import {ActivatedRoute} from "@angular/router";
 @Component({
   selector: 'ns-return-item',
   templateUrl: './return-item.component.html',
-  styleUrls: ['./return-item.component.css'],
+  styleUrls: ['./return-item.component.scss'],
   moduleId: module.id,
 })
 export class ReturnItemComponent implements OnInit {

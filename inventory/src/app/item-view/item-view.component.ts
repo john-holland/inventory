@@ -10,7 +10,7 @@ import {UserService} from "~/app/services/user.service";
 @Component({
   selector: 'ns-item-view',
   templateUrl: './item-view.component.html',
-  styleUrls: ['./item-view.component.css'],
+  styleUrls: ['./item-view.component.scss'],
   moduleId: module.id,
 })
 export class ItemViewComponent implements OnInit {

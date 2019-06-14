@@ -2,156 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9e4fb37e-2521-4f36-9022-5f783657cf5a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inventory.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/.editorconfig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/app.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/AndroidManifest.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-hdpi/background.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-hdpi/icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-hdpi/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-hdpi/menu.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-ldpi/background.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-ldpi/icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-ldpi/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-ldpi/menu.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-mdpi/background.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-mdpi/icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-mdpi/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-mdpi/menu.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-nodpi/splash_screen.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xhdpi/background.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xhdpi/icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xhdpi/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xhdpi/menu.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xxhdpi/background.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xxhdpi/icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xxhdpi/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xxhdpi/menu.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xxxhdpi/background.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xxxhdpi/icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xxxhdpi/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/drawable-xxxhdpi/menu.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/values-v21/colors.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/values-v21/styles.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/values/colors.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/Android/src/main/res/values/styles.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/Contents.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-1024.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-20.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-20@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-20@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-29.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-29@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-29@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-40.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-40@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-40@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-60@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-60@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-76.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-76@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/AppIcon.appiconset/icon-83.5@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/Contents.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Contents.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-1125h.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-568h@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-667h@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-736h@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-Landscape-X.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-Landscape-XR.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-Landscape-XS-Max.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-Landscape.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-Landscape@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-Landscape@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-Portrait-XR.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-Portrait-XS-Max.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-Portrait.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default-Portrait@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchImage.launchimage/Default@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchScreen.AspectFill.imageset/Contents.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchScreen.AspectFill.imageset/LaunchScreen-AspectFill.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchScreen.AspectFill.imageset/LaunchScreen-AspectFill@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchScreen.AspectFill.imageset/LaunchScreen-AspectFill@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchScreen.Center.imageset/Contents.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchScreen.Center.imageset/LaunchScreen-Center.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchScreen.Center.imageset/LaunchScreen-Center@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Assets.xcassets/LaunchScreen.Center.imageset/LaunchScreen-Center@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/Info.plist" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/LaunchScreen.storyboard" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/build.xcconfig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/navigation/menu.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/navigation/menu@2x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/App_Resources/iOS/navigation/menu@3x.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/LICENSE" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/angular.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/nsconfig.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/_app-common.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/_app-variables.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app.android.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app.ios.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/app-routing.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/app.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/app.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/app.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/browse/browse-routing.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/browse/browse.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/browse/browse.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/browse/browse.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/featured/featured-routing.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/featured/featured.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/featured/featured.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/featured/featured.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/home/home-routing.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/home/home.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/home/home.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/home/home.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/item-view/item-view-routing.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/login/login.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/login/login.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/login/login.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/models/item.model.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/models/user.model.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/request-item/request-item-routing.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/request-item/request-item.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/request-item/request-item.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/return-item/return-item-routing.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/search/search-routing.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/search/search.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/search/search.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/search/search.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/services/api-adapter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/services/auth-guard.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/services/auth-providers-helper.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/services/auth.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/services/item.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/services/logger.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/services/search.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/services/user.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/settings/settings-routing.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/settings/settings.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/settings/settings.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/app/settings/settings.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/fonts/FontAwesome.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/main.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/src/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/tsconfig.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/tsconfig.tns.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/tsfmt.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/tslint.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/inventory/webpack.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/inventory/src/app/item-view/item-view.module.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/inventory/src/app/login/login-routing.module.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/inventory/src/app/login/login.module.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/inventory/src/app/request-item/request-item.module.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/inventory/src/app/return-item/return-item.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inventory.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inventory.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inventory/src/app/app-routing.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/inventory/src/app/app-routing.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inventory/src/app/app.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/inventory/src/app/app.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inventory/src/app/browse/browse-routing.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/inventory/src/app/browse/browse-routing.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inventory/src/app/request-item/request-item.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/inventory/src/app/request-item/request-item.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.ts" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -163,105 +27,118 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.ts">
+        <entry file="file://$PROJECT_DIR$/inventory/src/app/app.module.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="7" column="64" selection-start-line="7" selection-start-column="64" selection-end-line="7" selection-end-column="64" />
+            <state relative-caret-position="876">
+              <caret line="47" column="24" lean-forward="true" selection-start-line="47" selection-start-column="24" selection-end-line="47" selection-end-column="24" />
               <folding>
-                <element signature="e#0#50#0" expanded="true" />
+                <element signature="e#0#59#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/inventory/src/app/featured/featured.component.html">
+        <entry file="file://$PROJECT_DIR$/inventory/src/app/services/auth-guard.service.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="384">
-              <caret line="16" lean-forward="true" selection-start-line="16" selection-end-line="16" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="600">
-              <caret line="25" column="13" lean-forward="true" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="13" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/inventory/src/app/login/login.component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="528">
-              <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/inventory/src/app/request-item/request-item.component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="24">
-              <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="24">
-              <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/inventory/src/app/search/search.component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="552">
-              <caret line="23" column="69" lean-forward="true" selection-start-line="23" selection-start-column="69" selection-end-line="23" selection-end-column="69" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/inventory/src/app/search/search.component.ts">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="599">
-              <caret line="35" column="60" lean-forward="true" selection-start-line="35" selection-start-column="60" selection-end-line="35" selection-end-column="60" />
+            <state relative-caret-position="120">
+              <caret line="5" column="42" selection-start-line="5" selection-start-column="42" selection-end-line="5" selection-end-column="63" />
               <folding>
-                <element signature="e#0#50#0" expanded="true" />
+                <element signature="e#0#43#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/inventory/src/app/services/auth.service.ts">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="312">
+              <caret line="13" column="34" selection-start-line="13" selection-start-column="34" selection-end-line="13" selection-end-column="34" />
+              <folding>
+                <element signature="e#0#43#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/inventory/src/app/services/user.service.ts">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <folding>
+                <element signature="e#0#69#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/readme.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-            <state split_layout="SPLIT">
-              <first_editor relative-caret-position="216">
-                <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
-              </first_editor>
-              <second_editor />
+        <entry file="file://$PROJECT_DIR$/inventory/src/app/app-routing.module.ts">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="720">
+              <caret line="30" column="84" lean-forward="true" selection-start-line="30" selection-start-column="84" selection-end-line="30" selection-end-column="84" />
+              <folding>
+                <element signature="e#0#41#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.ts">
+        <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view.module.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="448">
-              <caret line="20" column="54" lean-forward="true" selection-start-line="20" selection-start-column="54" selection-end-line="20" selection-end-column="54" />
+            <state relative-caret-position="432">
+              <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
               <folding>
-                <element signature="e#0#50#0" expanded="true" />
+                <element signature="e#0#59#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view-routing.module.ts">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="240">
+              <caret line="10" column="57" lean-forward="true" selection-start-line="10" selection-start-column="57" selection-end-line="10" selection-end-column="57" />
+              <folding>
+                <element signature="e#0#41#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/inventory/src/app/settings/settings.module.ts">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="456">
+              <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+              <folding>
+                <element signature="e#0#59#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/inventory/src/app/settings/settings-routing.module.ts">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <folding>
+                <element signature="e#0#41#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.scss">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="24">
+              <caret line="1" selection-start-line="1" selection-end-line="1" />
             </state>
           </provider>
         </entry>
@@ -271,10 +148,13 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>result</find>
+      <find>Home</find>
+      <find>settings/</find>
     </findStrings>
     <replaceStrings>
       <replace />
       <replace>respons</replace>
+      <replace>Login</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -291,12 +171,10 @@
         <option value="$PROJECT_DIR$/inventory/src/app/services/networkadapter.service.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/models/user.model.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/services/auth-providers-helper.ts" />
-        <option value="$PROJECT_DIR$/inventory/src/app/app.module.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/services/user.service.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/login/login.component.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/login/login.component.html" />
         <option value="$PROJECT_DIR$/inventory/src/app/services/auth.service.ts" />
-        <option value="$PROJECT_DIR$/inventory/src/app/app-routing.module.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/services/auth-guard.service.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/item-view/item-view-routing.module.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/search/search.component.html" />
@@ -309,20 +187,22 @@
         <option value="$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.html" />
         <option value="$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/home/home.component.ts" />
-        <option value="$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.html" />
         <option value="$PROJECT_DIR$/inventory/src/app/models/item.model.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/browse/browse.component.html" />
         <option value="$PROJECT_DIR$/inventory/src/app/browse/browse.component.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/services/item.service.ts" />
         <option value="$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.ts" />
         <option value="$PROJECT_DIR$/readme.md" />
-      </list>
-    </option>
-  </component>
-  <component name="ProjectConfigurationFiles">
-    <option name="files">
-      <list>
-        <option value="$PROJECT_DIR$/.idea/vcs.xml" />
+        <option value="$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.html" />
+        <option value="$PROJECT_DIR$/inventory/src/app/return-item/return-item.module.ts" />
+        <option value="$PROJECT_DIR$/inventory/src/app/request-item/request-item.module.ts" />
+        <option value="$PROJECT_DIR$/inventory/src/app/login/login-routing.module.ts" />
+        <option value="$PROJECT_DIR$/inventory/src/app/browse/browse-routing.module.ts" />
+        <option value="$PROJECT_DIR$/inventory/src/app/login/login.module.ts" />
+        <option value="$PROJECT_DIR$/inventory/src/app/item-view/item-view.module.ts" />
+        <option value="$PROJECT_DIR$/inventory/src/app/app.component.ts" />
+        <option value="$PROJECT_DIR$/inventory/src/app/app.module.ts" />
+        <option value="$PROJECT_DIR$/inventory/src/app/app-routing.module.ts" />
       </list>
     </option>
   </component>
@@ -336,6 +216,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -347,6 +228,19 @@
               <item name="inventory" type="b2602c69:ProjectViewProjectNode" />
               <item name="inventory" type="462c0819:PsiDirectoryNode" />
               <item name="inventory" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="inventory" type="b2602c69:ProjectViewProjectNode" />
+              <item name="inventory" type="462c0819:PsiDirectoryNode" />
+              <item name="inventory" type="462c0819:PsiDirectoryNode" />
+              <item name="platforms" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="inventory" type="b2602c69:ProjectViewProjectNode" />
+              <item name="inventory" type="462c0819:PsiDirectoryNode" />
+              <item name="inventory" type="462c0819:PsiDirectoryNode" />
+              <item name="platforms" type="462c0819:PsiDirectoryNode" />
+              <item name="android" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="inventory" type="b2602c69:ProjectViewProjectNode" />
@@ -453,7 +347,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -462,7 +355,13 @@
     <property name="editor.config.ad.shown" value="true" />
     <property name="js.ns.project" value="true" />
     <property name="js.ns.project.flavor" value="JavaScript" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/inventory/src/app/return-item" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/inventory/src/app/login" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_interpreter_path" value="C:/Program Files/nodejs/node" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -470,7 +369,9 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\MyFiles\Programming\inventory\inventory\src\app\login" />
       <recent name="D:\MyFiles\Programming\inventory\inventory\src\app\return-item" />
+      <recent name="D:\MyFiles\Programming\inventory\inventory\src\app\request-item" />
       <recent name="D:\MyFiles\Programming\inventory\inventory\src\app\item-view" />
     </key>
   </component>
@@ -496,25 +397,21 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1560405866493</updated>
-      <workItem from="1560405867978" duration="22710000" />
+      <workItem from="1560405867978" duration="23313000" />
+      <workItem from="1560521677764" duration="4871000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="22710000" />
+    <option name="totallyTimeSpent" value="28184000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="2576" height="1456" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2498008" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25219125" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="TypeScript" />
-      <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Terminal" weight="0.3299923" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" visible="true" weight="0.3299923" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.3299923" />
@@ -522,153 +419,369 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="Nativescript Palette" />
+      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="TypeScript" order="9" />
+      <window_info anchor="bottom" id="Terminal" order="10" weight="0.3299923" />
+      <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Nativescript Palette" order="3" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/inventory/src/package.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="6" selection-start-line="6" selection-end-line="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/webpack.config.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/angular.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
-          <caret line="17" selection-start-line="17" selection-end-line="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/main.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="96">
-          <caret line="6" selection-start-line="6" selection-end-line="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/login/login.service.ts">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/services/login.service.ts">
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/request-item/request-item.component.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="24">
           <caret line="1" selection-start-line="1" selection-end-line="1" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/node_modules/@angular/core/core.d.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="149">
-          <caret line="4715" column="2" lean-forward="true" selection-start-line="4715" selection-start-column="2" selection-end-line="4715" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external/lib.es5.d.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="277">
-          <caret line="1405" column="4" selection-start-line="1405" selection-start-column="4" selection-end-line="1405" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/node_modules/tns-core-modules/ui/dialogs/dialogs.d.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="100" column="67" lean-forward="true" selection-start-line="100" selection-start-column="67" selection-end-line="100" selection-end-column="67" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/login/login.component.scss">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="10" selection-start-line="10" selection-end-line="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/services/search.service.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="20" lean-forward="true" selection-start-line="20" selection-end-line="20" />
-          <folding>
-            <element signature="e#0#41#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/services/api-adapter.service.ts">
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="24">
-          <caret line="19" selection-start-line="19" selection-end-line="19" />
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/services/logger.service.ts">
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/search/search.component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="552">
+          <caret line="23" column="69" selection-start-line="23" selection-start-column="69" selection-end-line="23" selection-end-column="69" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/search/search.component.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="720">
+          <caret line="35" column="60" selection-start-line="35" selection-start-column="60" selection-end-line="35" selection-end-column="60" />
+          <folding>
+            <element signature="e#0#50#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/readme.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="816">
+            <caret line="34" column="28" lean-forward="true" selection-start-line="34" selection-start-column="28" selection-end-line="34" selection-end-column="28" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/_app-common.scss">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="192">
-          <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
+          <caret line="8" column="5" selection-start-line="8" selection-start-column="5" selection-end-line="8" selection-end-column="5" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/services/auth-providers-helper.ts">
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/browse/browse.component.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="760">
-          <caret line="63" column="1" selection-start-line="63" selection-start-column="1" selection-end-line="63" selection-end-column="1" />
+        <state relative-caret-position="528">
+          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
           <folding>
-            <element signature="e#0#106#0" expanded="true" />
+            <element signature="e#0#50#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/featured/featured.component.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#50#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/home/home.component.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="336">
+          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
+          <folding>
+            <element signature="e#0#50#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="624">
+          <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="26" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/inventory/src/app/login/login.component.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="23" column="5" selection-start-line="23" selection-start-column="5" selection-end-line="23" selection-end-column="5" />
+        <state relative-caret-position="144">
+          <caret line="6" column="24" lean-forward="true" selection-start-line="6" selection-start-column="24" selection-end-line="6" selection-end-column="24" />
           <folding>
             <element signature="e#0#48#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/node_modules/nativescript-oauth2/index.d.ts">
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/request-item/request-item.component.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="784">
-          <caret line="49" column="41" selection-start-line="49" selection-start-column="41" selection-end-line="49" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/services/auth.service.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="160">
-          <caret line="13" column="34" selection-start-line="13" selection-start-column="34" selection-end-line="13" selection-end-column="34" />
+        <state relative-caret-position="600">
+          <caret line="25" column="15" lean-forward="true" selection-start-line="25" selection-start-column="15" selection-end-line="25" selection-end-column="15" />
           <folding>
-            <element signature="e#0#43#0" expanded="true" />
+            <element signature="e#0#50#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/app.module.ts">
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="552">
-          <caret line="31" column="18" selection-start-line="31" selection-start-column="18" selection-end-line="31" selection-end-column="18" />
+        <state relative-caret-position="480">
+          <caret line="20" column="54" selection-start-line="20" selection-start-column="54" selection-end-line="20" selection-end-column="54" />
+          <folding>
+            <element signature="e#0#50#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/search/search.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
           <folding>
             <element signature="e#0#59#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/app-routing.module.ts">
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/settings/settings.component.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="12" column="106" selection-start-line="12" selection-start-column="106" selection-end-line="12" selection-end-column="106" />
+        <state relative-caret-position="120">
+          <caret line="5" column="16" selection-start-line="5" selection-start-column="16" selection-end-line="5" selection-end-column="16" />
+          <folding>
+            <element signature="e#0#50#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/settings/settings.component.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/services/api-adapter.service.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="19" selection-start-line="19" selection-end-line="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/home/home.component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="600">
+          <caret line="25" column="13" lean-forward="true" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/browse/browse.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#59#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/home/home.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="312">
+          <caret line="13" column="6" lean-forward="true" selection-start-line="11" selection-start-column="3" selection-end-line="13" selection-end-column="6" />
+          <folding>
+            <element signature="e#0#59#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/return-item/return-item-routing.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="336">
+          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/return-item/return-item.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="3" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/featured/featured-routing.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/browse/browse-routing.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="7" column="19" selection-start-line="7" selection-start-column="19" selection-end-line="7" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/request-item/request-item.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="48">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/request-item/request-item-routing.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="336">
+          <caret line="14" selection-start-line="14" selection-end-line="14" />
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/login/login-routing.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="7" column="37" selection-start-line="7" selection-start-column="37" selection-end-line="7" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="7" column="64" selection-start-line="7" selection-start-column="64" selection-end-line="7" selection-end-column="64" />
+          <folding>
+            <element signature="e#0#50#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/home/home-routing.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/login/login.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="336">
+          <caret line="14" column="6" selection-start-line="14" selection-start-column="6" selection-end-line="14" selection-end-column="6" />
+          <folding>
+            <element signature="e#0#59#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/app.component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="900">
+          <caret line="39" column="74" selection-start-line="39" selection-start-column="74" selection-end-line="39" selection-end-column="74" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/app.component.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="6" selection-start-line="6" selection-end-line="6" />
+          <folding>
+            <element signature="e#0#50#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/newApp/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="936">
+          <caret line="39" selection-start-line="39" selection-end-line="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/newApp/package-lock.json">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/newApp/angular.json">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/newApp/webpack.config.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-6900" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/newApp/src/main.ts">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/main.ts">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/package.json">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/newApp/src/package.json">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/package.json">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.scss">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="24">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
+          <folding>
+            <element signature="e#0#59#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view-routing.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="10" column="57" lean-forward="true" selection-start-line="10" selection-start-column="57" selection-end-line="10" selection-end-column="57" />
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/settings/settings.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="456">
+          <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+          <folding>
+            <element signature="e#0#59#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/settings/settings-routing.module.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
           <folding>
             <element signature="e#0#41#0" expanded="true" />
           </folding>
@@ -685,256 +798,42 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.css">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/browse/browse-routing.module.ts">
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/services/auth.service.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
+        <state relative-caret-position="312">
+          <caret line="13" column="34" selection-start-line="13" selection-start-column="34" selection-end-line="13" selection-end-column="34" />
           <folding>
-            <element signature="e#0#41#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/featured/featured-routing.module.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#41#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/request-item/request-item-routing.module.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="14" selection-start-line="14" selection-end-line="14" />
-          <folding>
-            <element signature="e#0#41#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/request-item/request-item.component.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="600">
-          <caret line="25" column="15" lean-forward="true" selection-start-line="25" selection-start-column="15" selection-end-line="25" selection-end-column="15" />
-          <folding>
-            <element signature="e#0#50#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/search/search.module.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#59#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/search/search-routing.module.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#41#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/return-item/return-item-routing.module.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
-          <folding>
-            <element signature="e#0#41#0" expanded="true" />
+            <element signature="e#0#43#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/inventory/src/app/services/user.service.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="277">
-          <caret line="64" column="4" selection-start-line="64" selection-start-column="4" selection-end-line="64" selection-end-column="4" />
+        <state>
+          <folding>
+            <element signature="e#0#69#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/home/home.module.ts">
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/app.module.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
+        <state relative-caret-position="876">
+          <caret line="47" column="24" lean-forward="true" selection-start-line="47" selection-start-column="24" selection-end-line="47" selection-end-column="24" />
           <folding>
             <element signature="e#0#59#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/home/home-routing.module.ts">
+    <entry file="file://$PROJECT_DIR$/inventory/src/app/app-routing.module.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
+        <state relative-caret-position="720">
+          <caret line="30" column="84" lean-forward="true" selection-start-line="30" selection-start-column="84" selection-end-line="30" selection-end-column="84" />
           <folding>
             <element signature="e#0#41#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/home/home.component.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
-          <folding>
-            <element signature="e#0#50#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view-routing.module.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="14" selection-start-line="14" selection-end-line="14" />
-          <folding>
-            <element signature="e#0#41#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/models/user.model.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="6" column="48" lean-forward="true" selection-start-line="6" selection-start-column="48" selection-end-line="6" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/models/item.model.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="6" column="22" selection-start-line="6" selection-start-column="22" selection-end-line="6" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/home/home.component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="22" column="30" selection-start-line="20" selection-end-line="24" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/services/item.service.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="592">
-          <caret line="73" column="74" selection-start-line="73" selection-start-column="74" selection-end-line="73" selection-end-column="74" />
-          <folding>
-            <element signature="e#0#56#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/browse/browse.component.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
-          <folding>
-            <element signature="e#0#50#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/browse/browse.module.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#59#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/browse/browse.component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="552">
-          <caret line="23" column="13" lean-forward="true" selection-start-line="23" selection-start-column="13" selection-end-line="23" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/featured/featured.component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="16" lean-forward="true" selection-start-line="16" selection-end-line="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="7" column="64" selection-start-line="7" selection-start-column="64" selection-end-line="7" selection-end-column="64" />
-          <folding>
-            <element signature="e#0#50#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/item-view/item-view.component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="600">
-          <caret line="25" column="13" lean-forward="true" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/login/login.component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/request-item/request-item.component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="24">
-          <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="448">
-          <caret line="20" column="54" lean-forward="true" selection-start-line="20" selection-start-column="54" selection-end-line="20" selection-end-column="54" />
-          <folding>
-            <element signature="e#0#50#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/return-item/return-item.component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="24">
-          <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/search/search.component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="552">
-          <caret line="23" column="69" lean-forward="true" selection-start-line="23" selection-start-column="69" selection-end-line="23" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inventory/src/app/search/search.component.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="599">
-          <caret line="35" column="60" lean-forward="true" selection-start-line="35" selection-start-column="60" selection-end-line="35" selection-end-column="60" />
-          <folding>
-            <element signature="e#0#50#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/readme.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="216">
-            <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
-          </first_editor>
-          <second_editor />
         </state>
       </provider>
     </entry>
