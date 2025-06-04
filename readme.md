@@ -1,87 +1,117 @@
-# inventory
+# Distributed Inventory Sharing Network
 
-a simple implementation of a distributed lending library
+A decentralized platform for sharing physical items with smart contract-based security and automated shipping fee management.
 
-please note, this is a "app sketch" of sorts
+## Features
 
-# todo
+- Smart contract-based item lending and borrowing
+- Double shipping fee deposit system for security
+- Optional buyout prices for permanent transfers
+- Ethereum-based transaction security
+- Modern web interface with Material-UI
+- Kotlin backend with JAX-RS (Jersey)
 
-debug, write backend, put some mock data in there
+## Prerequisites
 
-# design
+- JDK 17 or later
+- Node.js 16 or later
+- Ethereum wallet (MetaMask recommended)
+- PostgreSQL database
 
-app side: angular with nativescript, shared app and web services / templates where applicable
+## Project Structure
 
-backend: node based microservices, Eth for contracts, document store or postgres whichever is more appropriate
+```
+.
+├── backend/                 # Kotlin backend
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── kotlin/     # Kotlin source files
+│   │   │   └── resources/  # Configuration files
+│   │   │
+│   │   └── build.gradle.kts    # Gradle build configuration
+├── frontend/               # React TypeScript frontend
+│   ├── src/
+│   │   ├── components/    # React components
+│   │   ├── contracts/     # Smart contracts
+│   │   └── services/      # TypeScript services
+│   └── package.json       # NPM package configuration
+└── README.md
+```
 
-# Q & A
+## Setup
 
-## commerce
+### Backend
 
-inventory is not supposed to be a for profit platform. inventory is meant to help people obtain things they need to live well without breaking their respective banks.
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
 
-### ok noble, but how does it support itself?
+2. Build the project:
+   ```bash
+   ./gradlew build
+   ```
 
-inventory charges double the cost of shipping to request an item, and if you are ok with never seeing something again, you can set a buy out price. Once the request is confirmed by the user, inventory prints a shipping label for the owner of the item in question, the other half, the duplicate cost of shipping is held in a safe investment portfolio and is released in the following scenarios:
+3. Run the application:
+   ```bash
+   ./gradlew appRun
+   ```
 
-- the item is returned, in which case the hold will be used for return shipping 
-- the item is requested by another user, and the current holder confirms this, the hold will be used to pay for forward shipping, and any delta returned
-- the item is bought, in which case the hold will be used to purchase the item
+### Frontend
 
-once inventory takes off, should that savings account start to yield enough money to support the business with a surplus, we can start to offer small, items in circulation based dividends to users who have non-rent based items up for grabs, creating an incentive beyond simple good nature :)
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
 
-### alright, but what about shipping labels
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-smart post will be used initially to be supplemented by other third parties if inventory takes off
+3. Start the development server:
+   ```bash
+   npm start
+   ```
 
-### ok fine, sounds good so far, how will i know someone will honor their contract?
+## Smart Contract
 
-you uh, won't? inventory will use smart contracts to ensure cryptographically secure digitally signable agreements.
+The platform uses a Solidity smart contract to manage:
+- Item creation and ownership
+- Lending and borrowing
+- Shipping fee deposits
+- Buyout transactions
 
-### sure, yeah, smart contracts, but what if i want to check in on my item (like expensive hardware etc)
+The contract ensures:
+- Double shipping fee deposit for security
+- Automatic return of deposits upon item return
+- Secure transfer of ownership for buyouts
 
-currently the plan is to use Ethereum, which is a deeply extensible platform. the thinking goes, that if we want to extend the contract somehow, like with a motion tracker to ensure use, or a user confirmed picture mechanism, we will use that.
+## Security Features
 
-### that actually sort of sounds a little sketchy, like kidnapping for physical goods
+1. Double Shipping Fee Deposit:
+   - One portion covers shipping costs
+   - Second portion held as security deposit
+   - Automatically returned upon item return
 
-yeah, the ethics of using motion trackers or picture confirmation systems is a little weird, i for one will likely only use the normal contract mechanism, but to each their own.
+2. Smart Contract Security:
+   - Cryptographic verification of transactions
+   - Immutable record of item status
+   - Automated enforcement of lending terms
 
-### ok, lets say i accept the above, what does this service really get me?
+3. User Protection:
+   - Suspension system for malicious users
+   - Buyout options for permanent transfers
+   - Location tracking for valuable items
 
-lets say you want a nice purse for a ball, or a mixing board for an upcoming show, or anything else out of your means currently - inventory would allow you to obtain those things without making a full purchase, with the knowledge others will also be able to do so in the future.
+## Contributing
 
-or!
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-lets say you have something you're not using, you can share that thing with others, with some knowledge 
+## License
 
-### whoa fine, that sounds cool, but what if someone just steals my shit??
-
-report them! they will be given a certain amount of time to return the item, or buy it if the owner set that as an option. if they continue to not return stuff, they'll be suspended, and eventually banned if deemed melicious.
-
-### sounds good, what's to stop people from creating a ton of accounts?
-
-the same cyber sec that other commerce companies use, and the knowledge that shipping times 2 isn't lucrative for most items people are willing to share.
-
-### i see where you're going i guess, what about bigger items? like if i have a table that's older and in storage, but want to share it, it would be cheaper to just tell them to buy a used one somewhere?
-
-oh yeah, so one shipping type is user pickup, which will use average fuel price as the hold, but since they have to drive their and back, the hold is:
-
-- road distance * 2 * max price of fuel * avg truck mpg from the last 30 years
-
-### how do i know if a user is legit?
-
-everyone starts in good graces, no impossible sales gambit to reach 100% or DIAMOND!?!?!?!, mostly just please don't steal, and if you do, the system will automagically deal with you
-
-for review:
-- shipping * 2, half is used for return shipping
-- buy out price
-- suspension / expulsion
-
-### sounds ok, but there seems to be a lot of legal eagle stuff you're missing
-
-yeah, i know, note the note at the top, this is an app sketch, not the real thing!
-
-### should you be able to request a return?
-
-maybe with a refund of the shipping, and possible limits? idk i'll think about that. the idea of the service is ideally
- not lend anything you would need in short order, just items you would otherwise keep in storage or that go largely unused.
+This project is licensed under the MIT License - see the LICENSE file for details.
