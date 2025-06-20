@@ -1,5 +1,7 @@
 const { wrap } = require("@mikro-orm/core");
 const { WaterLimitService } = require("./waterLimitService");
+const pLimit = require('p-limit');
+const pBatch = require('p-batch');
 
 class InvestmentService {
   constructor(DI) {
@@ -11,9 +13,26 @@ class InvestmentService {
       'bonds': ['vanguard', 'fidelity', 'schwab'],
       'real_estate': ['fundrise', 'realty_mogul']
     };
+    
+    // Batch processing configuration
+    this.batchConfig = {
+      maxConcurrent: 5, // Maximum concurrent API calls
+      batchSize: 10, // Number of investments to process in each batch
+      delayBetweenBatches: 1000, // 1 second delay between batches
+      retryAttempts: 3, // Number of retry attempts for failed requests
+      retryDelay: 2000 // 2 seconds delay between retries
+    };
+    
+    // Service fees for different investment types
+    this.serviceFees = {
+      crypto: 0.01, // 1% for cryptocurrency investments
+      stocks: 0.005, // 0.5% for stock investments
+      bonds: 0.003, // 0.3% for bond investments
+      real_estate: 0.02 // 2% for real estate investments
+    };
   }
 
-  // Create a new investment for a user
+  // Create a new investment for a user with service fee calculation
   async createInvestment(userId, amount, investmentType, service) {
     // Validate investment parameters
     if (!this.supportedServices[investmentType]) {
@@ -30,8 +49,13 @@ class InvestmentService {
 
     // Check if user has sufficient available balance
     const user = await this.DI.userRepository.findOneOrFail({ id: userId });
-    if (user.availableBalance < amount) {
-      throw new Error('Insufficient available balance');
+    
+    // Calculate service fee
+    const serviceFee = this.calculateServiceFee(amount, investmentType);
+    const totalAmount = amount + serviceFee;
+    
+    if (user.availableBalance < totalAmount) {
+      throw new Error(`Insufficient available balance. Required: $${totalAmount} (including $${serviceFee} service fee)`);
     }
 
     // Create investment record
@@ -43,13 +67,13 @@ class InvestmentService {
       'active'
     );
 
-    // Deduct from user's available balance
+    // Deduct from user's available balance (including service fee)
     wrap(user).assign({
-      availableBalance: user.availableBalance - amount
+      availableBalance: user.availableBalance - totalAmount
     });
 
-    // Create transaction record
-    const transaction = new this.DI.transactionRepository.entity(
+    // Create transaction record for investment
+    const investmentTransaction = new this.DI.transactionRepository.entity(
       'investment',
       userId,
       null,
@@ -58,22 +82,98 @@ class InvestmentService {
       'completed'
     );
 
-    transaction.referenceId = `INV_${Date.now()}`;
+    investmentTransaction.referenceId = `INV_${Date.now()}`;
+    investmentTransaction.metadata = {
+      investmentType,
+      service,
+      serviceFee: 0 // Investment amount doesn't include service fee
+    };
+
+    // Create transaction record for service fee
+    const serviceFeeTransaction = new this.DI.transactionRepository.entity(
+      'service_fee',
+      userId,
+      null,
+      -serviceFee,
+      `Service fee for ${investmentType} investment via ${service}`,
+      'completed'
+    );
+
+    serviceFeeTransaction.referenceId = `FEE_${Date.now()}`;
+    serviceFeeTransaction.metadata = {
+      feeType: 'investment_service_fee',
+      investmentType,
+      service,
+      originalAmount: amount
+    };
+
+    // Add service fee to water limit
+    await this.waterLimitService.addToWaterLimit(
+      userId,
+      serviceFee,
+      'investment_service_fee',
+      investment.id
+    );
 
     await this.DI.investmentRepository.persistAndFlush(investment);
-    await this.DI.transactionRepository.persistAndFlush(transaction);
+    await this.DI.transactionRepository.persistAndFlush(investmentTransaction);
+    await this.DI.transactionRepository.persistAndFlush(serviceFeeTransaction);
     await this.DI.userRepository.flush();
 
-    return investment;
+    return {
+      investment,
+      serviceFee,
+      totalAmount,
+      note: `Service fee of $${serviceFee} (${(this.serviceFees[investmentType] * 100).toFixed(1)}%) applied to investment`
+    };
   }
 
-  // Update investment values (called by cron job)
+  // Update investment values with batched processing
   async updateInvestmentValues() {
     const activeInvestments = await this.DI.investmentRepository.find({
       status: 'active'
     });
 
-    for (const investment of activeInvestments) {
+    // Process investments in batches
+    const limit = pLimit(this.batchConfig.maxConcurrent);
+    const batches = this.createBatches(activeInvestments, this.batchConfig.batchSize);
+    
+    console.log(`Processing ${activeInvestments.length} investments in ${batches.length} batches`);
+
+    for (let i = 0; i < batches.length; i++) {
+      const batch = batches[i];
+      console.log(`Processing batch ${i + 1}/${batches.length} with ${batch.length} investments`);
+
+      // Process batch with concurrency limit
+      const promises = batch.map(investment => 
+        limit(() => this.processInvestmentUpdate(investment))
+      );
+
+      await Promise.all(promises);
+
+      // Add delay between batches to avoid rate limiting
+      if (i < batches.length - 1) {
+        await this.delay(this.batchConfig.delayBetweenBatches);
+      }
+    }
+
+    console.log('Investment value updates completed');
+  }
+
+  // Create batches from array
+  createBatches(array, batchSize) {
+    const batches = [];
+    for (let i = 0; i < array.length; i += batchSize) {
+      batches.push(array.slice(i, i + batchSize));
+    }
+    return batches;
+  }
+
+  // Process individual investment update with retry logic
+  async processInvestmentUpdate(investment) {
+    let attempts = 0;
+    
+    while (attempts < this.batchConfig.retryAttempts) {
       try {
         const newValue = await this.calculateCurrentValue(investment);
         const returnAmount = newValue - investment.amount;
@@ -108,7 +208,8 @@ class InvestmentService {
 
           returnTransaction.metadata = {
             waterLimitType: 'investment_return',
-            returnRate: returnRate
+            returnRate: returnRate,
+            batchProcessed: true
           };
 
           await this.DI.transactionRepository.persistAndFlush(returnTransaction);
@@ -122,10 +223,25 @@ class InvestmentService {
         }
 
         await this.DI.investmentRepository.flush();
+        return { success: true, investmentId: investment.id, newValue, returnAmount };
       } catch (error) {
-        console.error(`Failed to update investment ${investment.id}:`, error);
+        attempts++;
+        console.error(`Failed to update investment ${investment.id} (attempt ${attempts}):`, error);
+        
+        if (attempts >= this.batchConfig.retryAttempts) {
+          console.error(`Max retry attempts reached for investment ${investment.id}`);
+          return { success: false, investmentId: investment.id, error: error.message };
+        }
+        
+        // Wait before retrying
+        await this.delay(this.batchConfig.retryDelay);
       }
     }
+  }
+
+  // Utility function for delays
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   // Calculate current value of investment (simplified - would integrate with real APIs)
@@ -197,11 +313,12 @@ class InvestmentService {
       totalReturn,
       returnAmount,
       returnRate: investment.returnRate,
-      waterLimitStatus: 'pending'
+      waterLimitStatus: 'pending',
+      note: `Liquidation completed. Funds will be released from water limit according to platform schedule.`
     };
   }
 
-  // Get user's investment portfolio
+  // Get user's investment portfolio with service fee information
   async getUserPortfolio(userId) {
     const investments = await this.DI.investmentRepository.find({
       userId,
@@ -213,6 +330,12 @@ class InvestmentService {
     const totalReturn = totalCurrentValue - totalInvested;
     const totalReturnRate = totalInvested > 0 ? (totalReturn / totalInvested) * 100 : 0;
 
+    // Calculate total service fees paid
+    const totalServiceFees = investments.reduce((sum, inv) => {
+      const serviceFee = this.calculateServiceFee(inv.amount, inv.investmentType);
+      return sum + serviceFee;
+    }, 0);
+
     // Get water limit summary for investment returns
     const waterLimitSummary = await this.waterLimitService.getUserWaterLimitSummary(userId);
 
@@ -222,13 +345,16 @@ class InvestmentService {
         totalInvested,
         totalCurrentValue,
         totalReturn,
-        totalReturnRate
+        totalReturnRate,
+        totalServiceFees,
+        netReturn: totalReturn - totalServiceFees
       },
       waterLimitSummary: {
         pendingReturns: waterLimitSummary.byType.investment_return?.pending || 0,
         releasedReturns: waterLimitSummary.byType.investment_return?.released || 0,
         totalReturns: waterLimitSummary.byType.investment_return?.total || 0
-      }
+      },
+      serviceFeeNote: `Total service fees paid: $${totalServiceFees.toFixed(2)}. Service fees vary by investment type: Crypto (1%), Stocks (0.5%), Bonds (0.3%), Real Estate (2%).`
     };
   }
 
@@ -240,18 +366,27 @@ class InvestmentService {
 
     const waterLimitSummary = await this.waterLimitService.getUserWaterLimitSummary(userId);
 
-    const performance = investments.map(inv => ({
-      id: inv.id,
-      investmentType: inv.investmentType,
-      service: inv.service,
-      amount: inv.amount,
-      currentValue: inv.currentValue,
-      returnRate: inv.returnRate,
-      status: inv.status,
-      createdAt: inv.createdAt,
-      lastUpdated: inv.lastUpdated,
-      waterLimitStatus: waterLimitSummary.details.find(w => w.investmentId === inv.id)?.status || 'none'
-    }));
+    const performance = investments.map(inv => {
+      const serviceFee = this.calculateServiceFee(inv.amount, inv.investmentType);
+      const netReturn = inv.currentValue - inv.amount - serviceFee;
+      const netReturnRate = inv.amount > 0 ? (netReturn / inv.amount) * 100 : 0;
+
+      return {
+        id: inv.id,
+        investmentType: inv.investmentType,
+        service: inv.service,
+        amount: inv.amount,
+        currentValue: inv.currentValue,
+        returnRate: inv.returnRate,
+        serviceFee,
+        netReturn,
+        netReturnRate,
+        status: inv.status,
+        createdAt: inv.createdAt,
+        lastUpdated: inv.lastUpdated,
+        waterLimitStatus: waterLimitSummary.details.find(w => w.investmentId === inv.id)?.status || 'none'
+      };
+    });
 
     return {
       performance,
@@ -260,6 +395,39 @@ class InvestmentService {
         releasedReturns: waterLimitSummary.byType.investment_return?.released || 0,
         totalReturns: waterLimitSummary.byType.investment_return?.total || 0
       }
+    };
+  }
+
+  // Calculate service fee for investment
+  calculateServiceFee(amount, investmentType) {
+    const feeRate = this.serviceFees[investmentType];
+    if (!feeRate) {
+      throw new Error(`Unknown investment type: ${investmentType}`);
+    }
+    return amount * feeRate;
+  }
+
+  // Get service fee information
+  getServiceFeeInfo() {
+    return {
+      fees: this.serviceFees,
+      note: "Service fees are charged once at the time of investment and help cover platform costs, API integrations, and regulatory compliance."
+    };
+  }
+
+  // Get batch processing statistics
+  async getBatchProcessingStats() {
+    const activeInvestments = await this.DI.investmentRepository.count({ status: 'active' });
+    const totalBatches = Math.ceil(activeInvestments / this.batchConfig.batchSize);
+    const estimatedProcessingTime = (totalBatches * this.batchConfig.delayBetweenBatches) / 1000;
+
+    return {
+      activeInvestments,
+      batchSize: this.batchConfig.batchSize,
+      maxConcurrent: this.batchConfig.maxConcurrent,
+      totalBatches,
+      estimatedProcessingTimeSeconds: estimatedProcessingTime,
+      retryAttempts: this.batchConfig.retryAttempts
     };
   }
 }

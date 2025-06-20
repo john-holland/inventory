@@ -1,6 +1,6 @@
 # Distributed Peer-to-Peer Inventory System
 
-A comprehensive inventory management system with investment pools, shipping routes, purchase agreements, backup systems, and warehouse management. Built with Node.js, PostgreSQL, Redis, and Docker.
+A comprehensive inventory management system with investment pools, shipping routes, purchase agreements, backup systems, warehouse management, and cryptocurrency payment support. Built with Node.js, PostgreSQL, Redis, and Docker.
 
 ## 🚀 Quick Start
 
@@ -109,6 +109,16 @@ A comprehensive inventory management system with investment pools, shipping rout
 - **Herd Pools**: Community investment pools
 - **Automatic Pools**: AI-driven investment based on water levels
 - **Risk Management**: Configurable risk levels and strategies
+- **Batched Processing**: Efficient investment updates with rate limiting
+- **Service Fees**: Transparent fee structure for different investment types
+
+### Cryptocurrency & Payment System
+- **Coinbase Commerce Integration**: Secure cryptocurrency payments
+- **Multiple Cryptocurrencies**: Support for BTC, ETH, USDC, USDT, LTC, BCH, XRP, ADA, DOT, LINK
+- **QR Code Payments**: Easy mobile payment scanning
+- **OAuth2 Authentication**: Secure API access for cryptocurrency services
+- **Service Fee Transparency**: Clear fee structure with detailed breakdowns
+- **Webhook Processing**: Real-time payment status updates
 
 ### Shipping & Logistics
 - **Multi-Address Support**: Multiple addresses per user
@@ -152,6 +162,30 @@ A comprehensive inventory management system with investment pools, shipping rout
 - `POST /api/pools/:id/invest` - Make investment
 - `GET /api/pools/:id/analytics` - Pool analytics
 
+### Cryptocurrency & OAuth2
+- `POST /api/crypto/payments` - Create cryptocurrency payment
+- `GET /api/crypto/payments/status/:chargeId` - Get payment status
+- `GET /api/crypto/payments/history` - Get payment history
+- `GET /api/crypto/supported` - Get supported cryptocurrencies
+- `POST /api/crypto/webhook` - Coinbase Commerce webhook
+- `GET /api/crypto/oauth/:provider/url` - Generate OAuth2 URL with QR code
+- `GET /api/crypto/oauth/:provider/callback` - OAuth2 callback handler
+- `GET /api/crypto/oauth/credentials` - Get OAuth credentials
+- `DELETE /api/crypto/oauth/credentials/:credentialId` - Revoke OAuth credentials
+- `POST /api/crypto/oauth/credentials/:credentialId/refresh` - Refresh access token
+- `GET /api/crypto/analytics` - Cryptocurrency payment analytics
+- `GET /api/crypto/oauth/analytics` - OAuth2 authentication analytics
+I’m 
+### Tax & Compliance
+- `GET /api/tax/consumer/info` - Get consumer tax information for tax year
+- `GET /api/tax/consumer/breakdown` - Get detailed tax breakdown with optional transaction history
+- `GET /api/tax/consumer/summary` - Get multi-year tax summary for planning
+- `GET /api/tax/consumer/export` - Export tax data in JSON or CSV format
+- `GET /api/tax/rates` - Get current tax rates for US Federal, State, and VAT
+- `GET /api/tax/business/info` - Get business revenue and tax information (Admin)
+- `GET /api/tax/business/analytics` - Get business revenue analytics (Admin)
+- `GET /api/tax/business/compliance` - Get comprehensive tax compliance report (Admin)
+
 ### Shipping & Holds
 - `GET /api/routes` - List shipping routes
 - `POST /api/routes` - Create shipping route
@@ -174,6 +208,29 @@ A comprehensive inventory management system with investment pools, shipping rout
 - `GET /api/warehouse/stats` - Warehouse statistics
 - `POST /api/warehouse/verify` - Verify data integrity
 
+## 💰 Service Fees & Revenue Model
+
+### Investment Service Fees
+- **Cryptocurrency**: 1% of investment amount
+- **Stocks**: 0.5% of investment amount  
+- **Bonds**: 0.3% of investment amount
+- **Real Estate**: 2% of investment amount
+
+### Cryptocurrency Payment Fees
+- **Transaction Fee**: 1% of payment amount
+- **Conversion Fee**: 0.5% for crypto to USD conversion
+- **OAuth Verification**: 0.1% verification fee
+
+### Hold Stagnation Revenue
+- **Base Rate**: 0.1% per day
+- **Maximum Rate**: 1% per day (after 10 days)
+- **Purpose**: Encourages platform usage and covers operational costs
+
+### Energy Efficiency Revenue
+- **Platform Share**: 50% of energy savings
+- **Sources**: Optimized routing, reduced shipping, digital transactions
+- **Transparency**: All savings tracked and reported
+
 ## 🕐 Cron Jobs
 
 ### Automated Tasks
@@ -182,6 +239,9 @@ A comprehensive inventory management system with investment pools, shipping rout
 - **Warehouse Lifecycle**: `0 4 * * *` - Manage data tiers
 - **Integrity Checks**: `0 5 * * *` - Verify data integrity
 - **Compliance Reports**: `0 6 * * 0` - Generate weekly reports
+- **Investment Updates**: `0 */2 * * *` - Batched investment value updates
+- **Hold Stagnation**: `0 1 * * *` - Process hold stagnation revenue
+- **Energy Efficiency**: `0 8 * * *` - Calculate energy efficiency revenue
 
 ## 📈 Analytics & Monitoring
 
@@ -193,12 +253,15 @@ A comprehensive inventory management system with investment pools, shipping rout
 - Investment pool performance
 - Backup success rates
 - Warehouse storage utilization
+- Cryptocurrency payment volumes
+- OAuth2 authentication rates
+- Service fee revenue tracking
 
 ### Dashboards
 - **System Health**: Overall system status
 - **Performance**: API and database metrics
 - **Business**: Investment and inventory analytics
-- **Security**: Access logs and audit trails
+- **Cryptocurrency**: Payment and OAuth analytics
 
 ## 🔒 Security Features
 

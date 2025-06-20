@@ -22,12 +22,17 @@ const userAddressController = require('./controllers/userAddress.controller');
 const userController = require('./controllers/user.controller');
 const shippingController = require('./controllers/shipping.controller');
 const backupController = require('./controllers/backup.controller');
+const cryptoController = require('./controllers/cryptoController');
+const taxController = require('./controllers/taxController');
 
 // Import services
 const InvestmentPoolService = require('./services/investmentPoolService');
 const UserAddressService = require('./services/userAddressService');
 const BackupService = require('./services/backupService');
 const WarehouseService = require('./services/warehouseService');
+const CoinbaseCommerceService = require('./services/coinbaseCommerceService');
+const OAuth2Service = require('./services/oauth2Service');
+const TaxService = require('./services/taxService');
 
 // Import configuration
 const { getCoefficient } = require('./config/ConstantMarketCoefficients');
@@ -206,6 +211,36 @@ app.post('/api/warehouse/lifecycle', authMiddleware, backupController.triggerWar
 app.get('/api/audit/compliance', authMiddleware, backupController.getAuditComplianceReport);
 app.get('/api/backups/:backupId/audit-export', authMiddleware, backupController.exportBackupForAudit);
 
+// Cryptocurrency and OAuth2 routes
+app.post('/api/crypto/payments', authMiddleware, cryptoController.createCryptoPayment);
+app.get('/api/crypto/payments/status/:chargeId', authMiddleware, cryptoController.getPaymentStatus);
+app.get('/api/crypto/payments/history', authMiddleware, cryptoController.getUserCryptoPayments);
+app.get('/api/crypto/supported', cryptoController.getSupportedCryptocurrencies);
+app.post('/api/crypto/webhook', cryptoController.handleWebhook);
+
+// OAuth2 routes
+app.get('/api/crypto/oauth/:provider/url', authMiddleware, cryptoController.generateOAuthURL);
+app.get('/api/crypto/oauth/:provider/callback', cryptoController.handleOAuthCallback);
+app.get('/api/crypto/oauth/credentials', authMiddleware, cryptoController.getUserOAuthCredentials);
+app.delete('/api/crypto/oauth/credentials/:credentialId', authMiddleware, cryptoController.revokeOAuthCredentials);
+app.post('/api/crypto/oauth/credentials/:credentialId/refresh', authMiddleware, cryptoController.refreshAccessToken);
+
+// Cryptocurrency analytics
+app.get('/api/crypto/analytics', authMiddleware, cryptoController.getCryptoAnalytics);
+app.get('/api/crypto/oauth/analytics', authMiddleware, cryptoController.getOAuthAnalytics);
+
+// Tax routes - Consumer endpoints
+app.get('/api/tax/consumer/info', authMiddleware, taxController.getConsumerTaxInfo);
+app.get('/api/tax/consumer/breakdown', authMiddleware, taxController.getConsumerTaxBreakdown);
+app.get('/api/tax/consumer/summary', authMiddleware, taxController.getConsumerTaxSummary);
+app.get('/api/tax/consumer/export', authMiddleware, taxController.exportTaxData);
+app.get('/api/tax/rates', taxController.getTaxRates);
+
+// Tax routes - Business/Admin endpoints
+app.get('/api/tax/business/info', authMiddleware, taxController.getBusinessTaxInfo);
+app.get('/api/tax/business/analytics', authMiddleware, taxController.getBusinessRevenueAnalytics);
+app.get('/api/tax/business/compliance', authMiddleware, taxController.getTaxComplianceReport);
+
 // Admin routes (protected by admin middleware)
 app.get('/api/admin/users', authMiddleware, userController.getAllUsers);
 app.put('/api/admin/users/:userId/status', authMiddleware, userController.updateUserStatus);
@@ -226,6 +261,9 @@ const investmentPoolService = new InvestmentPoolService();
 const userAddressService = new UserAddressService();
 const backupService = new BackupService();
 const warehouseService = new WarehouseService();
+const coinbaseCommerceService = new CoinbaseCommerceService();
+const oAuth2Service = new OAuth2Service();
+const taxService = new TaxService();
 
 // Cron jobs for automated tasks
 function setupCronJobs() {
@@ -347,21 +385,4 @@ async function startServer() {
             console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
             console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
             console.log(`🌐 Web Interface: http://localhost:${PORT}`);
-            console.log(`💾 Backup System: Enabled`);
-            console.log(`🏭 Warehouse System: Enabled`);
-            console.log(`💰 Investment Pools: Enabled`);
-            console.log(`🚚 Enhanced Shipping: Enabled`);
-        });
-    } catch (error) {
-        console.error('Failed to start server:', error);
-        process.exit(1);
-    }
-}
-
-// Export for testing
-module.exports = app;
-
-// Start server if this file is run directly
-if (require.main === module) {
-    startServer();
-}
+            console.log(`

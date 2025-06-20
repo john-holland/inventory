@@ -96,7 +96,16 @@
     "sanitize-html": "^2.10.0",
     "xss": "^1.0.14",
     "sql-injection": "^1.0.0",
-    "rate-limiter-flexible": "^2.4.2"
+    "rate-limiter-flexible": "^2.4.2",
+    "coinbase-commerce-node": "^1.0.3",
+    "passport": "^0.6.0",
+    "passport-oauth2": "^1.7.0",
+    "passport-coinbase": "^0.1.0",
+    "qrcode": "^1.5.3",
+    "speakeasy": "^2.0.0",
+    "batch-request": "^1.0.0",
+    "p-limit": "^4.0.0",
+    "p-batch": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
