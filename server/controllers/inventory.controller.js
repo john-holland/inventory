@@ -41,7 +41,10 @@ const InventoryController = (DI) => {
       location,
       shippingMethod,
       images,
-      tags
+      tags,
+      weight,
+      dimensions,
+      quantity
     } = req.body;
 
     if (!title || !description || !category || !condition || !value || !location || !shippingMethod) {
@@ -61,7 +64,10 @@ const InventoryController = (DI) => {
         location,
         shippingMethod,
         images,
-        tags
+        tags,
+        weight: weight || 0,
+        dimensions: dimensions || '',
+        quantity: quantity || 1
       });
 
       res.status(201).send({
@@ -343,6 +349,35 @@ const InventoryController = (DI) => {
         success: true,
         message: `Items in category ${category} retrieved successfully`,
         items
+      });
+    } catch (e) {
+      return res.status(400).send({ success: false, message: e.message });
+    }
+  });
+
+  // Get items near a specific location
+  router.post("/items/nearby", async (req, res) => {
+    try {
+      const { latitude, longitude, radius = 50, category } = req.body;
+      
+      if (!latitude || !longitude) {
+        return res.status(400).send({
+          success: false,
+          message: "Latitude and longitude are required"
+        });
+      }
+
+      const items = await inventoryService.getItemsNearLocation(
+        parseFloat(latitude),
+        parseFloat(longitude),
+        parseFloat(radius),
+        category
+      );
+
+      res.status(200).send({
+        success: true,
+        message: "Nearby items retrieved successfully",
+        data: items
       });
     } catch (e) {
       return res.status(400).send({ success: false, message: e.message });

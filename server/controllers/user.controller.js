@@ -151,7 +151,8 @@ const UserController = (DI) => {
           rating: user.rating,
           totalTransactions: user.totalTransactions,
           location: user.location,
-          preferences: user.preferences
+          preferences: user.preferences,
+          useMetricUnits: user.useMetricUnits
         }
       });
     } catch (e) {
@@ -257,6 +258,48 @@ const UserController = (DI) => {
       });
     } catch (e) {
       return res.status(400).send({ success: false, message: e.message });
+    }
+  });
+
+  // Update user preferences
+  router.put('/preferences', async (req, res) => {
+    try {
+      const token = req.headers.authorization?.split(' ')[1];
+      
+      if (!token) {
+        return res.status(401).send({
+          success: false,
+          message: "Authentication token required",
+        });
+      }
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      const user = await DI.userRepository.findOneOrFail({ id: decoded.userId });
+
+      const { useMetricUnits } = req.body;
+      
+      if (typeof useMetricUnits === 'boolean') {
+        user.useMetricUnits = useMetricUnits;
+      }
+      
+      if (req.body.preferences) {
+        user.preferences = { ...user.preferences, ...req.body.preferences };
+      }
+      
+      user.updatedAt = new Date();
+      await DI.userRepository.flush();
+      
+      res.status(200).send({
+        success: true,
+        message: 'Preferences updated successfully',
+        data: {
+          useMetricUnits: user.useMetricUnits,
+          preferences: user.preferences
+        }
+      });
+    } catch (error) {
+      console.error('Error updating user preferences:', error);
+      res.status(500).send({ success: false, message: 'Error updating preferences' });
     }
   });
 

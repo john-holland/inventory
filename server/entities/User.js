@@ -16,6 +16,7 @@ class User extends BaseEntity {
     this.heldBalance = 0;
     this.location = null;
     this.preferences = {};
+    this.useMetricUnits = false;
   }
 }
 
@@ -34,6 +35,7 @@ const schema = new EntitySchema({
     heldBalance: { type: "number", default: 0 },
     location: { type: "json", nullable: true },
     preferences: { type: "json", default: {} },
+    useMetricUnits: { type: "boolean", default: false },
   },
 });
 

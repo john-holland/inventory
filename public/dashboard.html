@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory System Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.25rem;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        .stats-card.primary {
+            border-left: 4px solid #007bff;
+        }
+        .stats-card.success {
+            border-left: 4px solid #28a745;
+        }
+        .stats-card.warning {
+            border-left: 4px solid #ffc107;
+        }
+        .stats-card.danger {
+            border-left: 4px solid #dc3545;
+        }
+        .item-card {
+            transition: transform 0.2s;
+        }
+        .item-card:hover {
+            transform: translateY(-2px);
+        }
+        .hold-status {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .map-container {
+            height: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .water-limit-indicator {
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 0.5rem;
+        }
+        .chart-container {
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+        .quick-actions {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .quick-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.2s;
+        }
+        .quick-action-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #007bff;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .quick-action-btn i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar p-0">
+                <div class="p-3">
+                    <h4><i class="fas fa-boxes"></i> Inventory</h4>
+                    <p class="text-muted">Peer-to-Peer System</p>
+                </div>
+                
+                <nav class="nav flex-column p-3">
+                    <a class="nav-link active" href="#" onclick="showSection('overview')">
+                        <i class="fas fa-tachometer-alt"></i> Overview
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('inventory')">
+                        <i class="fas fa-box"></i> My Items
+                        <span class="badge bg-light text-dark ms-2" id="itemCount">0</span>
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('holds')">
+                        <i class="fas fa-handshake"></i> My Holds
+                        <span class="badge bg-light text-dark ms-2" id="holdCount">0</span>
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('marketplace')">
+                        <i class="fas fa-store"></i> Marketplace
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('investments')">
+                        <i class="fas fa-chart-line"></i> Investments
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('shipping')">
+                        <i class="fas fa-shipping-fast"></i> Shipping
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('notifications')">
+                        <i class="fas fa-bell"></i> Notifications
+                        <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('watchlist')">
+                        <i class="fas fa-eye"></i> Watch List
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('disputes')">
+                        <i class="fas fa-exclamation-triangle"></i> Disputes
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('water-limits')">
+                        <i class="fas fa-tint"></i> Water Limits
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('profile')">
+                        <i class="fas fa-user"></i> Profile
+                    </a>
+                    
+                    <!-- Admin/Moderator Links -->
+                    <div id="adminLinks" style="display: none;">
+                        <hr class="my-3">
+                        <h6 class="text-muted">Admin</h6>
+                        <a class="nav-link" href="#" onclick="showSection('moderation')">
+                            <i class="fas fa-gavel"></i> Moderation
+                        </a>
+                        <a class="nav-link" href="#" onclick="showSection('analytics')">
+                            <i class="fas fa-chart-bar"></i> Analytics
+                        </a>
+                    </div>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content p-4">
+                <!-- Overview Section -->
+                <div id="overviewSection">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Dashboard Overview</h2>
+                        <div>
+                            <span class="text-muted">Welcome, </span>
+                            <span id="userName">User</span>
+                            <button class="btn btn-outline-secondary btn-sm ms-2" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stats-card primary">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h3 id="totalItems">0</h3>
+                                        <p class="text-muted mb-0">Total Items</p>
+                                    </div>
+                                    <i class="fas fa-box fa-2x text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card success">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h3 id="activeHolds">0</h3>
+                                        <p class="text-muted mb-0">Active Holds</p>
+                                    </div>
+                                    <i class="fas fa-handshake fa-2x text-success"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card warning">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h3 id="totalInvested">$0</h3>
+                                        <p class="text-muted mb-0">Total Invested</p>
+                                    </div>
+                                    <i class="fas fa-chart-line fa-2x text-warning"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card danger">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h3 id="pendingNotifications">0</h3>
+                                        <p class="text-muted mb-0">Notifications</p>
+                                    </div>
+                                    <i class="fas fa-bell fa-2x text-danger"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Water Limit Status -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="stats-card">
+                                <h5>Water Limit Status</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 id="waterLimitAmount">$0</h4>
+                                        <p class="text-muted mb-0">Available for Release</p>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="water-limit-indicator"></div>
+                                        <small class="text-muted">Next release: <span id="nextRelease">--</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stats-card">
+                                <h5>Recent Activity</h5>
+                                <div id="recentActivity">
+                                    <!-- Recent activity will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="quick-actions">
+                                <h5 class="mb-3">Quick Actions</h5>
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <a href="#" class="quick-action-btn" onclick="showSection('inventory')">
+                                            <i class="fas fa-plus"></i>
+                                            <span>Add Item</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="#" class="quick-action-btn" onclick="showSection('marketplace')">
+                                            <i class="fas fa-search"></i>
+                                            <span>Browse Items</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="#" class="quick-action-btn" onclick="showSection('investments')">
+                                            <i class="fas fa-dollar-sign"></i>
+                                            <span>Invest</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="#" class="quick-action-btn" onclick="showSection('shipping')">
+                                            <i class="fas fa-shipping-fast"></i>
+                                            <span>Ship</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="#" class="quick-action-btn" onclick="showSection('notifications')">
+                                            <i class="fas fa-bell"></i>
+                                            <span>Notifications</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="#" class="quick-action-btn" onclick="showSection('profile')">
+                                            <i class="fas fa-cog"></i>
+                                            <span>Settings</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map and Charts -->
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="stats-card">
+                                <h5>Shipping Routes</h5>
+                                <div id="shippingMap" class="map-container"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <h5>Investment Performance</h5>
+                                <div id="investmentChart" class="chart-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other sections will be loaded dynamically -->
+                <div id="otherSections"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="itemModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Item Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="itemModalBody">
+                    <!-- Item details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="holdModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Hold Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="holdModalBody">
+                    <!-- Hold details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let currentUser = null;
+        let map = null;
+        let investmentChart = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            initializeMap();
+            initializeCharts();
+        });
+
+        async function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/users/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    document.getElementById('userName').textContent = currentUser.username;
+                    
+                    // Show admin links if user is moderator
+                    if (currentUser.isModerator) {
+                        document.getElementById('adminLinks').style.display = 'block';
+                    }
+                    
+                    loadOverviewData();
+                } else {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            }
+        }
+
+        function initializeMap() {
+            map = L.map('shippingMap').setView([40.7128, -74.0060], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        }
+
+        function initializeCharts() {
+            const ctx = document.getElementById('investmentChart').getContext('2d');
+            investmentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Investment Value',
+                        data: [],
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadOverviewData() {
+            await Promise.all([
+                loadStats(),
+                loadRecentActivity(),
+                loadWaterLimitStatus(),
+                loadNotifications(),
+                loadShippingRoutes()
+            ]);
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/inventory/stats', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('totalItems').textContent = data.stats.totalItems;
+                    document.getElementById('activeHolds').textContent = data.stats.activeHolds;
+                    document.getElementById('totalInvested').textContent = `$${data.stats.totalInvested.toFixed(2)}`;
+                    document.getElementById('pendingNotifications').textContent = data.stats.pendingNotifications;
+                    
+                    document.getElementById('itemCount').textContent = data.stats.totalItems;
+                    document.getElementById('holdCount').textContent = data.stats.activeHolds;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadRecentActivity() {
+            try {
+                const response = await fetch('/api/notifications?limit=5', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const container = document.getElementById('recentActivity');
+                    container.innerHTML = data.notifications.map(notification => `
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <small class="text-muted">${notification.title}</small>
+                                <br>
+                                <small>${notification.message}</small>
+                            </div>
+                            <small class="text-muted">${new Date(notification.createdAt).toLocaleDateString()}</small>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+            }
+        }
+
+        async function loadWaterLimitStatus() {
+            try {
+                const response = await fetch('/api/water-limits/summary', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('waterLimitAmount').textContent = `$${data.summary.availableAmount.toFixed(2)}`;
+                    document.getElementById('nextRelease').textContent = data.summary.nextReleaseDate ? 
+                        new Date(data.summary.nextReleaseDate).toLocaleDateString() : 'N/A';
+                }
+            } catch (error) {
+                console.error('Error loading water limit status:', error);
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/api/notifications/unread-count', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.count > 0) {
+                    document.getElementById('notificationCount').textContent = data.count;
+                    document.getElementById('notificationCount').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        async function loadShippingRoutes() {
+            try {
+                const response = await fetch('/api/shipping/routes', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Clear existing markers
+                    map.eachLayer((layer) => {
+                        if (layer instanceof L.Marker) {
+                            map.removeLayer(layer);
+                        }
+                    });
+                    
+                    // Add shipping routes
+                    data.routes.forEach(route => {
+                        const marker = L.marker([route.latitude, route.longitude])
+                            .bindPopup(`Route: ${route.name}<br>Distance: ${route.distance}km`)
+                            .addTo(map);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading shipping routes:', error);
+            }
+        }
+
+        function showSection(section) {
+            // Hide all sections
+            document.getElementById('overviewSection').style.display = 'none';
+            document.getElementById('otherSections').innerHTML = '';
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show selected section
+            if (section === 'overview') {
+                document.getElementById('overviewSection').style.display = 'block';
+            } else {
+                loadSection(section);
+            }
+        }
+
+        async function loadSection(section) {
+            const container = document.getElementById('otherSections');
+            container.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Loading...</p></div>';
+            
+            try {
+                const response = await fetch(`/sections/${section}.html`);
+                const html = await response.text();
+                container.innerHTML = html;
+                
+                // Initialize section-specific functionality
+                switch(section) {
+                    case 'inventory':
+                        loadUserItems();
+                        break;
+                    case 'holds':
+                        loadUserHolds();
+                        break;
+                    case 'marketplace':
+                        loadMarketplace();
+                        break;
+                    case 'investments':
+                        loadInvestments();
+                        break;
+                    case 'notifications':
+                        loadNotifications();
+                        break;
+                    case 'disputes':
+                        loadUserDisputes();
+                        break;
+                    case 'moderation':
+                        window.location.href = '/dispute-moderation.html';
+                        break;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="alert alert-danger">Error loading section: ${error.message}</div>`;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        }
+
+        // Placeholder functions for section loading
+        function loadUserItems() {
+            // Implementation for loading user items
+        }
+
+        function loadUserHolds() {
+            // Implementation for loading user holds
+        }
+
+        function loadMarketplace() {
+            // Implementation for loading marketplace
+        }
+
+        function loadInvestments() {
+            // Implementation for loading investments
+        }
+
+        function loadUserDisputes() {
+            // Implementation for loading user disputes
+        }
+    </script>
+</body>
+</html> 

@@ -24,6 +24,10 @@ const { Disbursement } = require("./Disbursement");
 const { MetaMarketplaceItem } = require("./MetaMarketplaceItem");
 const { UserAddress } = require("./UserAddress");
 const { InvestmentPool } = require("./InvestmentPool");
+const { CarePhoto } = require("./CarePhoto");
+const { Dispute } = require("./Dispute");
+const { Notification } = require("./Notification");
+const { WatchList } = require("./WatchList");
 
 module.exports = [
   BaseEntity, 
@@ -51,5 +55,9 @@ module.exports = [
   Disbursement,
   MetaMarketplaceItem,
   UserAddress,
-  InvestmentPool
+  InvestmentPool,
+  CarePhoto,
+  Dispute,
+  Notification,
+  WatchList
 ];

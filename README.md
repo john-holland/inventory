@@ -1,6 +1,6 @@
 # Distributed Peer-to-Peer Inventory System
 
-A comprehensive inventory management system with investment pools, shipping routes, purchase agreements, backup systems, warehouse management, and cryptocurrency payment support. Built with Node.js, PostgreSQL, Redis, and Docker.
+A comprehensive inventory management system with investment pools, shipping routes, purchase agreements, backup systems, warehouse management, cryptocurrency payment support, care photo management, dispute resolution, comprehensive notifications, and watch lists. Built with Node.js, PostgreSQL, Redis, and Docker.
 
 ## 🚀 Quick Start
 
@@ -104,6 +104,46 @@ A comprehensive inventory management system with investment pools, shipping rout
 - **Category System**: Organize items by categories and tags
 - **Search & Filter**: Advanced search with multiple criteria
 
+### Care Photo System
+- **Photo Upload**: Upload photos when receiving packages (receipt, condition, dispute)
+- **Photo Confirmation**: Both parties must confirm photos before shipment
+- **Required Photos**: Receipt photos required before shipping to next party
+- **Photo Types**: Support for receipt, condition, and dispute photos
+- **Photo Management**: View, delete, and manage photos with permissions
+- **Photo Validation**: Ensure photos are confirmed before shipment
+
+### Dispute Resolution System
+- **Dispute Creation**: Create disputes with photos and detailed descriptions
+- **Dispute Types**: Condition, damage, missing items, and other issues
+- **Email Notifications**: Automatic email notifications to all parties
+- **Moderation System**: Admin/moderator resolution with notes
+- **Photo Evidence**: Upload additional photos as dispute evidence
+- **Resolution Tracking**: Track dispute status and resolution history
+
+### Notification System
+- **Multi-Type Notifications**: Hold reminders, disputes, watch lists, system messages
+- **Priority Levels**: Low, normal, high, urgent priority notifications
+- **Read/Unread Tracking**: Mark notifications as read/unread
+- **Action URLs**: Direct links to relevant pages
+- **Bulk Operations**: Mark all as read, bulk notifications
+- **Notification Preferences**: User-configurable notification settings
+
+### Watch List System
+- **Item Watching**: Watch items for price changes, availability, updates
+- **Smart Notifications**: Notify when watched items change
+- **Notification Preferences**: Configure what triggers notifications
+- **Watch Management**: Add/remove items, bulk operations
+- **Watch Statistics**: Track watch list usage and preferences
+- **Integration**: Seamless integration with item browsing
+
+### Hold Duration Management
+- **Minimum Keep Time**: Set minimum days before hold can be released
+- **Maximum Keep Time**: Set maximum days before hold expires
+- **Gentle Reminders**: Notifications for hold duration milestones
+- **Automatic Notifications**: Daily reminders for long holds
+- **Hold Extensions**: Extend holds with proper notifications
+- **Hold Analytics**: Track hold duration patterns
+
 ### Investment System
 - **Individual Pools**: Personal investment management
 - **Herd Pools**: Community investment pools
@@ -137,6 +177,7 @@ A comprehensive inventory management system with investment pools, shipping rout
 - **File Upload**: Secure file handling with size limits
 - **API Rate Limiting**: Protection against abuse
 - **Monitoring**: Prometheus metrics and Grafana dashboards
+- **Automated Cron Jobs**: Daily notifications, hold reminders, watch list updates
 
 ## 🔧 API Endpoints
 
@@ -153,6 +194,44 @@ A comprehensive inventory management system with investment pools, shipping rout
 - `PUT /api/items/:id` - Update item
 - `DELETE /api/items/:id` - Delete item
 - `POST /api/items/:id/upload` - Upload item images
+
+### Care Photos
+- `POST /api/care-photos/upload/:holdId` - Upload care photos
+- `POST /api/care-photos/confirm/:photoId` - Confirm care photo
+- `GET /api/care-photos/hold/:holdId` - Get hold photos
+- `DELETE /api/care-photos/:photoId` - Delete care photo
+- `GET /api/care-photos/stats/:holdId` - Get photo statistics
+- `GET /api/care-photos/validate-shipment/:holdId` - Validate photos for shipment
+
+### Disputes
+- `POST /api/disputes/create/:holdId` - Create dispute
+- `PUT /api/disputes/:disputeId` - Update dispute
+- `POST /api/disputes/resolve/:disputeId` - Resolve dispute (moderators)
+- `GET /api/disputes/:disputeId` - Get dispute details
+- `GET /api/disputes/hold/:holdId` - Get hold disputes
+- `GET /api/disputes/stats/overview` - Get dispute statistics (moderators)
+- `GET /api/disputes/admin/all` - Get all disputes (moderators)
+
+### Notifications
+- `GET /api/notifications/user` - Get user notifications
+- `GET /api/notifications/unread-count` - Get unread count
+- `POST /api/notifications/mark-read/:notificationId` - Mark as read
+- `POST /api/notifications/mark-all-read` - Mark all as read
+- `DELETE /api/notifications/:notificationId` - Delete notification
+- `PUT /api/notifications/preferences` - Update notification preferences
+- `GET /api/notifications/stats` - Get notification statistics
+- `POST /api/notifications/system` - Send system notification (admin)
+- `POST /api/notifications/bulk` - Send bulk notifications (admin)
+
+### Watch List
+- `POST /api/watch-list/add/:itemId` - Add item to watch list
+- `DELETE /api/watch-list/remove/:itemId` - Remove from watch list
+- `GET /api/watch-list/user` - Get user's watch list
+- `GET /api/watch-list/check/:itemId` - Check if item is watched
+- `PUT /api/watch-list/preferences/:itemId` - Update watch preferences
+- `GET /api/watch-list/stats` - Get watch list statistics
+- `POST /api/watch-list/bulk-add` - Bulk add items to watch list
+- `POST /api/watch-list/bulk-remove` - Bulk remove from watch list
 
 ### Investment Pools
 - `GET /api/pools` - List investment pools
@@ -175,7 +254,7 @@ A comprehensive inventory management system with investment pools, shipping rout
 - `POST /api/crypto/oauth/credentials/:credentialId/refresh` - Refresh access token
 - `GET /api/crypto/analytics` - Cryptocurrency payment analytics
 - `GET /api/crypto/oauth/analytics` - OAuth2 authentication analytics
-I’m 
+
 ### Tax & Compliance
 - `GET /api/tax/consumer/info` - Get consumer tax information for tax year
 - `GET /api/tax/consumer/breakdown` - Get detailed tax breakdown with optional transaction history
@@ -198,15 +277,6 @@ I’m
 - `POST /api/purchases` - Create purchase
 - `GET /api/purchases/:id` - Get purchase details
 - `PUT /api/purchases/:id` - Update purchase
-- `POST /api/purchases/:id/agreement` - Create purchase agreement
-
-### Backup & Warehouse
-- `POST /api/backup/create` - Create backup
-- `GET /api/backup/list` - List backups
-- `POST /api/backup/restore/:id` - Restore backup
-- `GET /api/backup/audit` - Generate audit report
-- `GET /api/warehouse/stats` - Warehouse statistics
-- `POST /api/warehouse/verify` - Verify data integrity
 
 ## 💰 Service Fees & Revenue Model
 

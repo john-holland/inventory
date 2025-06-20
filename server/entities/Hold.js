@@ -16,6 +16,13 @@ class Hold extends BaseEntity {
     this.expiryDate = null;
     this.consumerInvestmentId = null; // Associated consumer investment
     
+    // Hold duration limits
+    this.minKeepTime = 1; // Minimum days to keep (default 1 day)
+    this.maxKeepTime = 30; // Maximum days to keep (default 30 days)
+    this.minKeepTimeNotified = false; // Whether min keep time notification sent
+    this.maxKeepTimeNotified = false; // Whether max keep time notification sent
+    this.keepTimeReminders = []; // Array of reminder dates sent
+    
     // Investment pool association
     this.investmentPoolId = null; // Associated investment pool
     this.investmentType = 'individual'; // 'individual', 'herd', 'automatic'
@@ -63,6 +70,11 @@ const schema = new EntitySchema({
     releaseDate: { type: "Date", nullable: true },
     cancelledDate: { type: "Date", nullable: true },
     expiryDate: { type: "Date", nullable: true },
+    minKeepTime: { type: "number", default: 1 },
+    maxKeepTime: { type: "number", default: 30 },
+    minKeepTimeNotified: { type: "boolean", default: false },
+    maxKeepTimeNotified: { type: "boolean", default: false },
+    keepTimeReminders: { type: "json", default: [] },
     consumerInvestmentId: { type: "number", nullable: true },
     investmentPoolId: { type: "number", nullable: true },
     investmentType: { type: "string", default: "individual" },

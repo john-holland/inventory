@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Inventory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+        }
+        .login-sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .login-form {
+            padding: 3rem 2rem;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+        }
+        .feature-list li i {
+            margin-right: 1rem;
+            color: rgba(255,255,255,0.8);
+        }
+        .social-login {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .social-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: white;
+            color: #495057;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .social-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+            text-decoration: none;
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+        }
+        .input-group {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="row g-0">
+                <!-- Sidebar -->
+                <div class="col-md-5">
+                    <div class="login-sidebar">
+                        <h2 class="mb-4">
+                            <i class="fas fa-boxes"></i> Inventory System
+                        </h2>
+                        <p class="mb-4">Peer-to-peer inventory management with innovative revenue models</p>
+                        
+                        <h5 class="mb-3">Key Features</h5>
+                        <ul class="feature-list">
+                            <li>
+                                <i class="fas fa-handshake"></i>
+                                <span>2x Shipping Cost Holds</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-chart-line"></i>
+                                <span>Investment Trading Robots</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-map-marked-alt"></i>
+                                <span>Shipping Route Visualization</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-tint"></i>
+                                <span>Water Limit System</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-gavel"></i>
+                                <span>Dispute Resolution</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-bell"></i>
+                                <span>Smart Notifications</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="mt-4">
+                            <small class="text-muted">
+                                Revenue from hold stagnation and energy efficiency optimization
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Login Form -->
+                <div class="col-md-7">
+                    <div class="login-form">
+                        <div class="text-center mb-4">
+                            <h3>Welcome Back</h3>
+                            <p class="text-muted">Sign in to your account</p>
+                        </div>
+                        
+                        <!-- Alert for errors/success -->
+                        <div id="alertContainer"></div>
+                        
+                        <!-- Login Form -->
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" required>
+                                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                                        <i class="fas fa-eye" id="passwordIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">
+                                    Remember me
+                                </label>
+                            </div>
+                            
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt"></i> Sign In
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Social Login -->
+                        <div class="text-center mb-3">
+                            <small class="text-muted">Or continue with</small>
+                        </div>
+                        <div class="social-login">
+                            <a href="#" class="social-btn" onclick="socialLogin('google')">
+                                <i class="fab fa-google"></i> Google
+                            </a>
+                            <a href="#" class="social-btn" onclick="socialLogin('facebook')">
+                                <i class="fab fa-facebook"></i> Facebook
+                            </a>
+                            <a href="#" class="social-btn" onclick="socialLogin('github')">
+                                <i class="fab fa-github"></i> GitHub
+                            </a>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Register Link -->
+                        <div class="text-center">
+                            <p class="mb-0">
+                                Don't have an account? 
+                                <a href="#" onclick="showRegisterForm()" class="text-decoration-none">
+                                    Sign up here
+                                </a>
+                            </p>
+                        </div>
+                        
+                        <!-- Forgot Password -->
+                        <div class="text-center mt-2">
+                            <a href="#" onclick="showForgotPassword()" class="text-decoration-none">
+                                Forgot your password?
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="regUsername" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="regUsername" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="regEmail" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="regEmail" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="regPassword" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="regPassword" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="regConfirmPassword" class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="regConfirmPassword" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="regPhone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="regPhone">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="regAddress" class="form-label">Default Address</label>
+                            <textarea class="form-control" id="regAddress" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">
+                                I agree to the <a href="#" onclick="showTerms()">Terms of Service</a> and 
+                                <a href="#" onclick="showPrivacy()">Privacy Policy</a>
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Create Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reset Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="forgotPasswordForm">
+                        <div class="mb-3">
+                            <label for="resetEmail" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="resetEmail" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send Reset Link
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                window.location.href = '/index.html';
+            }
+        });
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            try {
+                const response = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        rememberMe
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    showAlert('success', 'Login successful! Redirecting...');
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 1000);
+                } else {
+                    showAlert('danger', data.error || 'Login failed');
+                }
+            } catch (error) {
+                showAlert('danger', 'Network error. Please try again.');
+            }
+        });
+
+        // Register form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const phone = document.getElementById('regPhone').value;
+            const address = document.getElementById('regAddress').value;
+            
+            if (password !== confirmPassword) {
+                showAlert('danger', 'Passwords do not match');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/users/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password,
+                        phone,
+                        defaultAddress: address
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('success', 'Account created successfully! Please log in.');
+                    bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
+                    document.getElementById('registerForm').reset();
+                } else {
+                    showAlert('danger', data.error || 'Registration failed');
+                }
+            } catch (error) {
+                showAlert('danger', 'Network error. Please try again.');
+            }
+        });
+
+        // Forgot password form submission
+        document.getElementById('forgotPasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('resetEmail').value;
+            
+            try {
+                const response = await fetch('/api/users/forgot-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('success', 'Password reset link sent to your email!');
+                    bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal')).hide();
+                    document.getElementById('forgotPasswordForm').reset();
+                } else {
+                    showAlert('danger', data.error || 'Failed to send reset link');
+                }
+            } catch (error) {
+                showAlert('danger', 'Network error. Please try again.');
+            }
+        });
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.className = 'fas fa-eye';
+            }
+        }
+
+        function showRegisterForm() {
+            new bootstrap.Modal(document.getElementById('registerModal')).show();
+        }
+
+        function showForgotPassword() {
+            new bootstrap.Modal(document.getElementById('forgotPasswordModal')).show();
+        }
+
+        function socialLogin(provider) {
+            // Implement social login
+            showAlert('info', `${provider} login coming soon!`);
+        }
+
+        function showTerms() {
+            // Show terms of service
+            alert('Terms of Service - Coming soon');
+        }
+
+        function showPrivacy() {
+            // Show privacy policy
+            alert('Privacy Policy - Coming soon');
+        }
+
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = alertContainer.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html> 

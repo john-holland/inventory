@@ -1,10 +1,5 @@
 // Global state
-let currentUser = {
-    id: 1,
-    name: 'John Doe',
-    balance: 1250.00
-};
-
+let currentUser = null;
 let inventoryItems = [];
 let holds = [];
 let pendingOffers = [];
@@ -15,12 +10,129 @@ const API_BASE = '/api';
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+    checkAuthentication();
     initializeApp();
 });
+
+// Check if user is authenticated
+async function checkAuthentication() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login.html';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/users/profile`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                currentUser = data.user;
+                updateUserDisplay();
+            } else {
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            }
+        } else {
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        }
+    } catch (error) {
+        console.error('Authentication error:', error);
+        localStorage.removeItem('token');
+        window.location.href = '/login.html';
+    }
+}
+
+// Update user display
+function updateUserDisplay() {
+    if (currentUser) {
+        const userNameElement = document.getElementById('user-name');
+        const userBalanceElement = document.getElementById('user-balance');
+        
+        if (userNameElement) {
+            userNameElement.textContent = currentUser.username || currentUser.email;
+        }
+        
+        if (userBalanceElement) {
+            const totalBalance = (currentUser.availableBalance || 0) + (currentUser.heldBalance || 0);
+            userBalanceElement.textContent = `$${totalBalance.toFixed(2)}`;
+        }
+    }
+}
+
+// Show user menu
+function showUserMenu() {
+    const menu = document.createElement('div');
+    menu.className = 'user-menu';
+    menu.innerHTML = `
+        <div class="user-menu-item" onclick="showUserProfile()">
+            <i class="fas fa-user"></i>
+            Profile
+        </div>
+        <div class="user-menu-item" onclick="showUserSettings()">
+            <i class="fas fa-cog"></i>
+            Settings
+        </div>
+        <div class="user-menu-item" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+        </div>
+    `;
+    
+    // Remove existing menu
+    const existingMenu = document.querySelector('.user-menu');
+    if (existingMenu) {
+        existingMenu.remove();
+    }
+    
+    // Add new menu
+    document.body.appendChild(menu);
+    
+    // Position menu
+    const userAvatar = document.querySelector('.user-avatar');
+    const rect = userAvatar.getBoundingClientRect();
+    menu.style.position = 'absolute';
+    menu.style.top = `${rect.bottom + 5}px`;
+    menu.style.right = '20px';
+    menu.style.zIndex = '1000';
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function closeMenu(e) {
+        if (!menu.contains(e.target) && !userAvatar.contains(e.target)) {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        }
+    });
+}
+
+// Logout function
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login.html';
+}
+
+// User profile function
+function showUserProfile() {
+    showNotification('User profile coming soon!', 'info');
+}
+
+// User settings function
+function showUserSettings() {
+    showNotification('User settings coming soon!', 'info');
+}
 
 function initializeApp() {
     setupTabNavigation();
     setupImageUpload();
+    setupAccordion();
+    initializeUnitPreferences();
     loadInventory();
     loadHolds();
     loadOffers();
@@ -108,6 +220,49 @@ function removeImage(index) {
     const previewItems = document.querySelectorAll('.image-preview-item');
     if (previewItems[index]) {
         previewItems[index].remove();
+    }
+}
+
+// Accordion Functionality
+function setupAccordion() {
+    // Auto-open the first section when the Add Item tab is clicked
+    const addItemTab = document.querySelector('[data-tab="add-item"]');
+    if (addItemTab) {
+        addItemTab.addEventListener('click', () => {
+            setTimeout(() => {
+                const firstSection = document.querySelector('.accordion-section');
+                if (firstSection && !firstSection.classList.contains('active')) {
+                    toggleAccordion('basic');
+                }
+            }, 100);
+        });
+    }
+}
+
+function toggleAccordion(sectionName) {
+    const section = document.querySelector(`[data-section="${sectionName}"]`);
+    const allSections = document.querySelectorAll('.accordion-section');
+    
+    if (!section) return;
+    
+    // Close all other sections
+    allSections.forEach(s => {
+        if (s !== section) {
+            s.classList.remove('active');
+        }
+    });
+    
+    // Toggle current section
+    section.classList.toggle('active');
+    
+    // Auto-open next section if current is closed and there's a next section
+    if (!section.classList.contains('active')) {
+        const nextSection = section.nextElementSibling;
+        if (nextSection && nextSection.classList.contains('accordion-section')) {
+            setTimeout(() => {
+                toggleAccordion(nextSection.dataset.section);
+            }, 300);
+        }
     }
 }
 
@@ -217,8 +372,177 @@ async function saveItem() {
     }
 }
 
+// Unit Conversion Functions
+const UNIT_CONVERSIONS = {
+    // Weight conversions
+    kgToLbs: (kg) => kg * 2.20462,
+    lbsToKg: (lbs) => lbs / 2.20462,
+    
+    // Length conversions
+    mToInches: (m) => m * 39.3701,
+    inchesToM: (inches) => inches / 39.3701,
+    
+    // Volume conversions (for shipping calculations)
+    m3ToFt3: (m3) => m3 * 35.3147,
+    ft3ToM3: (ft3) => ft3 / 35.3147
+};
+
+// Initialize unit preferences
+function initializeUnitPreferences() {
+    const metricCheckbox = document.getElementById('use-metric-units');
+    if (metricCheckbox) {
+        // Load user preference
+        loadUserUnitPreference();
+        
+        // Add event listener for preference changes
+        metricCheckbox.addEventListener('change', function() {
+            updateUnitLabels();
+            saveUserUnitPreference();
+        });
+    }
+}
+
+// Load user's unit preference
+async function loadUserUnitPreference() {
+    try {
+        const response = await fetch(`${API_BASE}/users/profile`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                const metricCheckbox = document.getElementById('use-metric-units');
+                metricCheckbox.checked = data.user.useMetricUnits;
+                updateUnitLabels();
+            }
+        }
+    } catch (error) {
+        console.error('Error loading user unit preference:', error);
+    }
+}
+
+// Save user's unit preference
+async function saveUserUnitPreference() {
+    const metricCheckbox = document.getElementById('use-metric-units');
+    const useMetric = metricCheckbox.checked;
+    
+    try {
+        const response = await fetch(`${API_BASE}/users/preferences`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                useMetricUnits: useMetric
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('Unit preference saved', 'success');
+        }
+    } catch (error) {
+        console.error('Error saving user unit preference:', error);
+        showNotification('Error saving unit preference', 'error');
+    }
+}
+
+// Update form labels based on unit preference
+function updateUnitLabels() {
+    const metricCheckbox = document.getElementById('use-metric-units');
+    const useMetric = metricCheckbox.checked;
+    
+    // Update weight label
+    const weightLabel = document.querySelector('label[for="item-weight"]');
+    if (weightLabel) {
+        weightLabel.textContent = useMetric ? 'Weight (kg)' : 'Weight (lbs)';
+    }
+    
+    // Update weight input placeholder
+    const weightInput = document.getElementById('item-weight');
+    if (weightInput) {
+        weightInput.placeholder = useMetric ? '0.0' : '0.0';
+    }
+    
+    // Update dimensions label
+    const dimensionsLabel = document.querySelector('label[for="item-dimensions"]');
+    if (dimensionsLabel) {
+        dimensionsLabel.textContent = useMetric ? 'Dimensions (m)' : 'Dimensions (inches)';
+    }
+    
+    // Update dimensions input placeholder
+    const dimensionsInput = document.getElementById('item-dimensions');
+    if (dimensionsInput) {
+        dimensionsInput.placeholder = useMetric ? 'L x W x H meters' : 'L x W x H inches';
+    }
+}
+
+// Convert form data to imperial units before sending to server
+function convertFormDataToImperial(formData) {
+    const metricCheckbox = document.getElementById('use-metric-units');
+    const useMetric = metricCheckbox.checked;
+    
+    if (!useMetric) {
+        return formData; // Already in imperial units
+    }
+    
+    const convertedData = { ...formData };
+    
+    // Convert weight from kg to lbs
+    if (formData.weight) {
+        convertedData.weight = UNIT_CONVERSIONS.kgToLbs(parseFloat(formData.weight));
+    }
+    
+    // Convert dimensions from meters to inches
+    if (formData.dimensions) {
+        const dimensions = formData.dimensions.split('x').map(d => d.trim());
+        if (dimensions.length === 3) {
+            const convertedDimensions = dimensions.map(d => 
+                UNIT_CONVERSIONS.mToInches(parseFloat(d))
+            );
+            convertedData.dimensions = convertedDimensions.join(' x ');
+        }
+    }
+    
+    return convertedData;
+}
+
+// Convert display data from imperial to metric for user display
+function convertDisplayDataToMetric(displayData) {
+    const metricCheckbox = document.getElementById('use-metric-units');
+    const useMetric = metricCheckbox.checked;
+    
+    if (!useMetric) {
+        return displayData; // Keep imperial units
+    }
+    
+    const convertedData = { ...displayData };
+    
+    // Convert weight from lbs to kg
+    if (displayData.weight) {
+        convertedData.weight = UNIT_CONVERSIONS.lbsToKg(parseFloat(displayData.weight));
+    }
+    
+    // Convert dimensions from inches to meters
+    if (displayData.dimensions) {
+        const dimensions = displayData.dimensions.split('x').map(d => d.trim());
+        if (dimensions.length === 3) {
+            const convertedDimensions = dimensions.map(d => 
+                UNIT_CONVERSIONS.inchesToM(parseFloat(d))
+            );
+            convertedData.dimensions = convertedDimensions.join(' x ');
+        }
+    }
+    
+    return convertedData;
+}
+
+// Update the getFormData function to handle unit conversion
 function getFormData() {
-    return {
+    const formData = {
         title: document.getElementById('item-title').value,
         description: document.getElementById('item-description').value,
         category: document.getElementById('item-category').value,
@@ -230,6 +554,9 @@ function getFormData() {
         shippingCost: parseFloat(document.getElementById('item-shipping').value) || 0,
         images: getImageFiles()
     };
+    
+    // Convert to imperial units before sending to server
+    return convertFormDataToImperial(formData);
 }
 
 function getImageFiles() {
@@ -576,8 +903,21 @@ function closeModal(modalId) {
     modal.classList.remove('active');
 }
 
-function showAddItemModal() {
-    showModal('add-item-modal');
+function switchToAddItemTab() {
+    // Remove 'active' from all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    // Remove 'active' from all nav buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    // Activate the Add Item tab and nav button
+    document.getElementById('add-item').classList.add('active');
+    document.querySelector('.nav-btn[data-tab="add-item"]').classList.add('active');
+    // Optionally, open the first accordion section
+    setTimeout(() => {
+        const firstSection = document.querySelector('#add-item .accordion-section');
+        if (firstSection && !firstSection.classList.contains('active')) {
+            toggleAccordion('basic');
+        }
+    }, 100);
 }
 
 // Utility Functions
@@ -646,4 +986,105 @@ function renderInvestmentPools(pools) {
 }
 
 // Initialize investment pools when investment tab is shown
-document.querySelector('[data-tab="investment"]').addEventListener('click', loadInvestmentPools); 
+document.querySelector('[data-tab="investment"]').addEventListener('click', loadInvestmentPools);
+
+// Near Me Functionality
+async function findNearMe() {
+    const nearMeBtn = document.getElementById('near-me-btn');
+    
+    if (!navigator.geolocation) {
+        showNotification('Geolocation is not supported by your browser', 'error');
+        return;
+    }
+    
+    // Show loading state
+    nearMeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Finding...';
+    nearMeBtn.disabled = true;
+    
+    try {
+        const position = await getCurrentPosition();
+        const { latitude, longitude } = position.coords;
+        
+        // Search for items near the user's location
+        await searchNearbyItems(latitude, longitude);
+        
+        // Update button state
+        nearMeBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Near Me';
+        nearMeBtn.classList.add('active');
+        
+        showNotification('Found items near your location!', 'success');
+        
+    } catch (error) {
+        console.error('Error getting location:', error);
+        showNotification('Unable to get your location. Please check your browser settings.', 'error');
+        
+        // Reset button state
+        nearMeBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Near Me';
+        nearMeBtn.disabled = false;
+    }
+}
+
+function getCurrentPosition() {
+    return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000 // 5 minutes
+        });
+    });
+}
+
+async function searchNearbyItems(latitude, longitude) {
+    try {
+        const response = await fetch(`${API_BASE}/inventory/items/nearby`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                latitude,
+                longitude,
+                radius: 50 // 50 mile radius
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Filter inventory to show only nearby items
+            inventoryItems = data.data;
+            renderInventory();
+            
+            // Update search input to show it's filtered
+            const searchInput = document.getElementById('inventory-search');
+            const clearFilterBtn = document.getElementById('clear-filter-btn');
+            searchInput.value = 'Nearby items';
+            searchInput.disabled = true;
+            clearFilterBtn.style.display = 'inline-flex';
+            
+        } else {
+            throw new Error(data.error || 'Failed to find nearby items');
+        }
+        
+    } catch (error) {
+        console.error('Error searching nearby items:', error);
+        showNotification('Error finding nearby items', 'error');
+    }
+}
+
+// Clear Near Me filter
+function clearNearMeFilter() {
+    const nearMeBtn = document.getElementById('near-me-btn');
+    const clearFilterBtn = document.getElementById('clear-filter-btn');
+    const searchInput = document.getElementById('inventory-search');
+    
+    nearMeBtn.classList.remove('active');
+    clearFilterBtn.style.display = 'none';
+    searchInput.value = '';
+    searchInput.disabled = false;
+    
+    // Reload all inventory
+    loadInventory();
+    
+    showNotification('Filter cleared', 'info');
+} 

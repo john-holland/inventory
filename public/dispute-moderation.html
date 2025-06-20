@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dispute Moderation - Inventory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .dispute-card {
+            border-left: 4px solid #dc3545;
+            margin-bottom: 1rem;
+        }
+        .dispute-card.resolved {
+            border-left-color: #28a745;
+        }
+        .dispute-card.under-review {
+            border-left-color: #ffc107;
+        }
+        .evidence-photos {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .moderation-actions {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .ban-level-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .priority-high {
+            background-color: #dc3545;
+            color: white;
+        }
+        .priority-normal {
+            background-color: #6c757d;
+            color: white;
+        }
+        .priority-low {
+            background-color: #28a745;
+            color: white;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .modal-xl {
+            max-width: 90%;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #dee2e6;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 0.5rem;
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+            background-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row bg-dark text-white p-3">
+            <div class="col">
+                <h1><i class="fas fa-gavel"></i> Dispute Moderation Panel</h1>
+                <p class="mb-0">Manage and resolve disputes between users</p>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-outline-light" onclick="refreshData()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="totalDisputes">0</h3>
+                    <p>Total Disputes</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="openDisputes">0</h3>
+                    <p>Open Disputes</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="resolvedDisputes">0</h3>
+                    <p>Resolved</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="avgResolutionTime">0</h3>
+                    <p>Avg Resolution (hrs)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="row mt-3">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="open">Open</option>
+                                    <option value="under_review">Under Review</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Type</label>
+                                <select class="form-select" id="typeFilter">
+                                    <option value="">All Types</option>
+                                    <option value="condition">Condition</option>
+                                    <option value="damage">Damage</option>
+                                    <option value="missing">Missing</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Ban Level</label>
+                                <select class="form-select" id="banLevelFilter">
+                                    <option value="">All Ban Levels</option>
+                                    <option value="no-buy">No Buy</option>
+                                    <option value="no-list">No List</option>
+                                    <option value="hide">Hide</option>
+                                    <option value="ip-ban">IP Ban</option>
+                                    <option value="email-ban">Email Ban</option>
+                                    <option value="unlist">Unlist</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Actions</label>
+                                <div class="d-grid">
+                                    <button class="btn btn-primary" onclick="applyFilters()">
+                                        <i class="fas fa-filter"></i> Apply Filters
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disputes List -->
+        <div class="row mt-3">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Disputes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="disputesList">
+                            <!-- Disputes will be loaded here -->
+                        </div>
+                        <div id="pagination" class="d-flex justify-content-center mt-3">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dispute Detail Modal -->
+    <div class="modal fade" id="disputeModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Dispute Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="disputeDetails">
+                        <!-- Dispute details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resolution Modal -->
+    <div class="modal fade" id="resolutionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Resolve Dispute</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="resolutionForm">
+                        <div class="mb-3">
+                            <label class="form-label">Resolution</label>
+                            <textarea class="form-control" id="resolution" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Moderation Notes</label>
+                            <textarea class="form-control" id="moderationNotes" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="moderation-actions">
+                            <h6>Moderation Actions</h6>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="holdReleaseOrdered">
+                                    <label class="form-check-label" for="holdReleaseOrdered">
+                                        Order Hold Release
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="createShipmentLabel">
+                                    <label class="form-check-label" for="createShipmentLabel">
+                                        Create Return Shipment Label
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="banUser">
+                                    <label class="form-check-label" for="banUser">
+                                        Ban User
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="banDetails" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label">User ID</label>
+                                        <input type="text" class="form-control" id="banUserId">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Ban Level</label>
+                                        <select class="form-select" id="banLevel">
+                                            <option value="no-buy">No Buy</option>
+                                            <option value="no-list">No List</option>
+                                            <option value="hide">Hide</option>
+                                            <option value="ip-ban">IP Ban</option>
+                                            <option value="email-ban">Email Ban</option>
+                                            <option value="unlist">Unlist</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Reason</label>
+                                        <input type="text" class="form-control" id="banReason">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Expiry Date (optional)</label>
+                                        <input type="datetime-local" class="form-control" id="banExpiryDate">
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <label class="form-label">Disbursement Information (JSON)</label>
+                                        <textarea class="form-control" id="disbursementInfo" rows="2" placeholder='{"amount": 100, "method": "refund", "details": "..."}'></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="resolveDispute()">Resolve Dispute</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentDisputeId = null;
+        let currentPage = 1;
+        let currentFilters = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            loadDisputes();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('banUser').addEventListener('change', function() {
+                document.getElementById('banDetails').style.display = this.checked ? 'block' : 'none';
+            });
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/disputes/stats/overview', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('totalDisputes').textContent = data.stats.total;
+                    document.getElementById('openDisputes').textContent = data.stats.open;
+                    document.getElementById('resolvedDisputes').textContent = data.stats.resolved;
+                    document.getElementById('avgResolutionTime').textContent = 
+                        Math.round(data.stats.averageResolutionTime / (1000 * 60 * 60));
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadDisputes(page = 1) {
+            try {
+                const params = new URLSearchParams({
+                    page: page,
+                    limit: 20,
+                    ...currentFilters
+                });
+
+                const response = await fetch(`/api/disputes/admin/all?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayDisputes(data.disputes);
+                    displayPagination(data.pagination);
+                }
+            } catch (error) {
+                console.error('Error loading disputes:', error);
+            }
+        }
+
+        function displayDisputes(disputes) {
+            const container = document.getElementById('disputesList');
+            container.innerHTML = '';
+
+            disputes.forEach(dispute => {
+                const card = createDisputeCard(dispute);
+                container.appendChild(card);
+            });
+        }
+
+        function createDisputeCard(dispute) {
+            const card = document.createElement('div');
+            card.className = `card dispute-card ${dispute.status}`;
+            
+            const priorityClass = getPriorityClass(dispute.disputeType);
+            const statusBadge = getStatusBadge(dispute.status);
+            const banBadge = dispute.banLevel ? `<span class="badge bg-danger ban-level-badge">${dispute.banLevel}</span>` : '';
+
+            card.innerHTML = `
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="card-title">
+                                Dispute #${dispute.id.substring(0, 8)} 
+                                ${statusBadge} 
+                                ${banBadge}
+                                <span class="badge ${priorityClass}">${dispute.disputeType}</span>
+                            </h6>
+                            <p class="card-text">${dispute.description.substring(0, 100)}...</p>
+                            <small class="text-muted">
+                                Created: ${new Date(dispute.createdAt).toLocaleString()}
+                                ${dispute.resolvedAt ? `| Resolved: ${new Date(dispute.resolvedAt).toLocaleString()}` : ''}
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewDispute('${dispute.id}')">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                ${dispute.status === 'open' || dispute.status === 'under_review' ? `
+                                    <button class="btn btn-sm btn-success" onclick="openResolutionModal('${dispute.id}')">
+                                        <i class="fas fa-gavel"></i> Resolve
+                                    </button>
+                                ` : ''}
+                                ${dispute.holdReleaseOrdered ? `
+                                    <span class="badge bg-success">Hold Released</span>
+                                ` : ''}
+                                ${dispute.shipmentLabelCreated ? `
+                                    <span class="badge bg-info">Label Created</span>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function getPriorityClass(disputeType) {
+            switch (disputeType) {
+                case 'damage': return 'priority-high';
+                case 'missing': return 'priority-high';
+                case 'condition': return 'priority-normal';
+                default: return 'priority-low';
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'open': '<span class="badge bg-danger">Open</span>',
+                'under_review': '<span class="badge bg-warning">Under Review</span>',
+                'resolved': '<span class="badge bg-success">Resolved</span>',
+                'closed': '<span class="badge bg-secondary">Closed</span>'
+            };
+            return badges[status] || '';
+        }
+
+        function displayPagination(pagination) {
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+
+            if (pagination.pages <= 1) return;
+
+            const nav = document.createElement('nav');
+            nav.innerHTML = `
+                <ul class="pagination">
+                    ${pagination.page > 1 ? `
+                        <li class="page-item">
+                            <a class="page-link" href="#" onclick="loadDisputes(${pagination.page - 1})">Previous</a>
+                        </li>
+                    ` : ''}
+                    
+                    ${Array.from({length: Math.min(5, pagination.pages)}, (_, i) => {
+                        const pageNum = i + 1;
+                        return `
+                            <li class="page-item ${pageNum === pagination.page ? 'active' : ''}">
+                                <a class="page-link" href="#" onclick="loadDisputes(${pageNum})">${pageNum}</a>
+                            </li>
+                        `;
+                    }).join('')}
+                    
+                    ${pagination.page < pagination.pages ? `
+                        <li class="page-item">
+                            <a class="page-link" href="#" onclick="loadDisputes(${pagination.page + 1})">Next</a>
+                        </li>
+                    ` : ''}
+                </ul>
+            `;
+            container.appendChild(nav);
+        }
+
+        async function viewDispute(disputeId) {
+            try {
+                const response = await fetch(`/api/disputes/${disputeId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayDisputeDetails(data.dispute);
+                    new bootstrap.Modal(document.getElementById('disputeModal')).show();
+                }
+            } catch (error) {
+                console.error('Error loading dispute details:', error);
+            }
+        }
+
+        function displayDisputeDetails(dispute) {
+            const container = document.getElementById('disputeDetails');
+            
+            const photosHtml = dispute.photos && dispute.photos.length > 0 ? `
+                <div class="evidence-photos">
+                    <h6>Evidence Photos</h6>
+                    <div class="row">
+                        ${dispute.photos.map(photo => `
+                            <div class="col-md-3 mb-2">
+                                <img src="${photo.imageUrl}" class="img-fluid rounded" alt="Evidence">
+                                <small class="d-block text-muted">${photo.description}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : '';
+
+            const moderationActionsHtml = dispute.moderationActions && dispute.moderationActions.length > 0 ? `
+                <div class="timeline">
+                    <h6>Moderation Actions</h6>
+                    ${dispute.moderationActions.map(action => `
+                        <div class="timeline-item">
+                            <strong>${action.action}</strong> - ${new Date(action.timestamp).toLocaleString()}
+                            ${action.details ? `<br><small>${JSON.stringify(action.details)}</small>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
+
+            container.innerHTML = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5>Dispute #${dispute.id.substring(0, 8)}</h5>
+                        <p><strong>Type:</strong> ${dispute.disputeType}</p>
+                        <p><strong>Status:</strong> ${dispute.status}</p>
+                        <p><strong>Description:</strong> ${dispute.description}</p>
+                        ${dispute.resolution ? `<p><strong>Resolution:</strong> ${dispute.resolution}</p>` : ''}
+                        ${dispute.moderationNotes ? `<p><strong>Moderation Notes:</strong> ${dispute.moderationNotes}</p>` : ''}
+                        
+                        ${photosHtml}
+                        ${moderationActionsHtml}
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6>Dispute Info</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Created:</strong> ${new Date(dispute.createdAt).toLocaleString()}</p>
+                                ${dispute.resolvedAt ? `<p><strong>Resolved:</strong> ${new Date(dispute.resolvedAt).toLocaleString()}</p>` : ''}
+                                ${dispute.resolvedBy ? `<p><strong>Resolved By:</strong> ${dispute.resolvedBy}</p>` : ''}
+                                
+                                ${dispute.holdReleaseOrdered ? '<p><span class="badge bg-success">Hold Release Ordered</span></p>' : ''}
+                                ${dispute.shipmentLabelCreated ? '<p><span class="badge bg-info">Return Shipment Label Created</span></p>' : ''}
+                                ${dispute.banLevel ? `
+                                    <p><strong>Ban Level:</strong> <span class="badge bg-danger">${dispute.banLevel}</span></p>
+                                    <p><strong>Ban Reason:</strong> ${dispute.banReason}</p>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openResolutionModal(disputeId) {
+            currentDisputeId = disputeId;
+            document.getElementById('resolutionForm').reset();
+            document.getElementById('banDetails').style.display = 'none';
+            new bootstrap.Modal(document.getElementById('resolutionModal')).show();
+        }
+
+        async function resolveDispute() {
+            try {
+                const resolution = document.getElementById('resolution').value;
+                const moderationNotes = document.getElementById('moderationNotes').value;
+                
+                const moderationActions = {
+                    holdReleaseOrdered: document.getElementById('holdReleaseOrdered').checked,
+                    createShipmentLabel: document.getElementById('createShipmentLabel').checked,
+                    banUser: document.getElementById('banUser').checked
+                };
+
+                if (moderationActions.banUser) {
+                    moderationActions.banUser = {
+                        userId: document.getElementById('banUserId').value,
+                        banLevel: document.getElementById('banLevel').value,
+                        reason: document.getElementById('banReason').value,
+                        expiryDate: document.getElementById('banExpiryDate').value,
+                        disbursementInfo: document.getElementById('disbursementInfo').value ? 
+                            JSON.parse(document.getElementById('disbursementInfo').value) : null
+                    };
+                }
+
+                const response = await fetch(`/api/disputes/resolve/${currentDisputeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        resolution,
+                        moderationNotes,
+                        moderationActions
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('resolutionModal')).hide();
+                    loadStats();
+                    loadDisputes();
+                    alert('Dispute resolved successfully!');
+                } else {
+                    alert('Error resolving dispute: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error resolving dispute:', error);
+                alert('Error resolving dispute');
+            }
+        }
+
+        function applyFilters() {
+            currentFilters = {
+                status: document.getElementById('statusFilter').value,
+                type: document.getElementById('typeFilter').value,
+                banLevel: document.getElementById('banLevelFilter').value
+            };
+            
+            // Remove empty filters
+            Object.keys(currentFilters).forEach(key => {
+                if (!currentFilters[key]) delete currentFilters[key];
+            });
+            
+            loadDisputes(1);
+        }
+
+        function refreshData() {
+            loadStats();
+            loadDisputes();
+        }
+    </script>
+</body>
+</html> 

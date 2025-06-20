@@ -22,6 +22,9 @@ class Item extends BaseEntity {
     this.tags = [];
     this.estimatedShippingCost = 0;
     this.actualShippingCost = 0;
+    this.weight = 0; // Weight in pounds (converted from user's preferred units)
+    this.dimensions = ''; // Dimensions in inches (converted from user's preferred units)
+    this.quantity = 1;
   }
 }
 
@@ -46,6 +49,9 @@ const schema = new EntitySchema({
     tags: { type: "json", default: [] },
     estimatedShippingCost: { type: "number", default: 0 },
     actualShippingCost: { type: "number", default: 0 },
+    weight: { type: "number", default: 0 },
+    dimensions: { type: "string", default: '' },
+    quantity: { type: "number", default: 1 },
   },
 });
 
