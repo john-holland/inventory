@@ -1,0 +1,1 @@
+curl -X POST -H "Content-Type: application/json" -d '{\"title\": \"test\", \"author\": \"john\", \"content\": \"This is a story all about how i tested postgres upside down, open a transaction, and sit right there, ill tell you how i became ERR NO RECORD of postgres\"}' "localhost:3000"
