@@ -29,6 +29,21 @@ const { Dispute } = require("./Dispute");
 const { Notification } = require("./Notification");
 const { WatchList } = require("./WatchList");
 
+// New entities for eBay integration
+const { eBayProduct } = require("./eBayProduct");
+const { eBayUser } = require("./eBayUser");
+
+// New entities for chat system
+const { Chat } = require("./Chat");
+const { Message } = require("./Message");
+const { FriendRequest } = require("./FriendRequest");
+
+// New entities for HR system
+const { Interview } = require("./Interview");
+const { Employee } = require("./Employee");
+const { JobChange } = require("./JobChange");
+const { Meeting } = require("./Meeting");
+
 module.exports = [
   BaseEntity, 
   Post, 
@@ -59,5 +74,20 @@ module.exports = [
   CarePhoto,
   Dispute,
   Notification,
-  WatchList
+  WatchList,
+  
+  // eBay entities
+  eBayProduct,
+  eBayUser,
+  
+  // Chat entities
+  Chat,
+  Message,
+  FriendRequest,
+  
+  // HR entities
+  Interview,
+  Employee,
+  JobChange,
+  Meeting
 ];

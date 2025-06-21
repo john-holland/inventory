@@ -4,421 +4,227 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Distributed Inventory System</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 3rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .feature {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .feature-desc {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .status {
+            background: #e8f5e8;
+            color: #2d5a2d;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 2rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Navigation -->
-        <nav class="navbar">
-            <div class="nav-container">
-                <div class="nav-brand">
-                    <i class="fas fa-cube"></i>
-                    <span>Inventory System</span>
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-boxes"></i> Inventory
+        </div>
+        <p class="subtitle">Distributed Peer-to-Peer Inventory System</p>
+        
+        <div class="status" id="status">
+            <i class="fas fa-spinner fa-spin"></i> Checking system status...
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-shipping-fast"></i>
                 </div>
-                <div class="nav-menu">
-                    <button class="nav-btn active" data-tab="inventory">
-                        <i class="fas fa-boxes"></i>
-                        Inventory
-                    </button>
-                    <button class="nav-btn" data-tab="add-item">
-                        <i class="fas fa-plus"></i>
-                        Add Item
-                    </button>
-                    <button class="nav-btn" data-tab="holds">
-                        <i class="fas fa-hand-holding"></i>
-                        Holds
-                    </button>
-                    <button class="nav-btn" data-tab="purchases">
-                        <i class="fas fa-shopping-cart"></i>
-                        Purchases
-                    </button>
-                    <button class="nav-btn" data-tab="investment">
-                        <i class="fas fa-chart-line"></i>
-                        Investment
-                    </button>
-                </div>
-                <div class="nav-user">
-                    <div class="user-info">
-                        <span class="user-name" id="user-name">Loading...</span>
-                        <span class="user-balance" id="user-balance">$0.00</span>
-                    </div>
-                    <button class="user-avatar" onclick="showUserMenu()">
-                        <i class="fas fa-user"></i>
-                    </button>
-                </div>
+                <div class="feature-title">2x Shipping Hold</div>
+                <div class="feature-desc">Reserve items with 2x shipping cost hold</div>
             </div>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Inventory Tab -->
-            <div id="inventory" class="tab-content active">
-                <div class="content-header">
-                    <h1>My Inventory</h1>
-                    <div class="header-actions">
-                        <div class="search-container">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input type="text" placeholder="Search items..." id="inventory-search">
-                            </div>
-                            <button class="btn btn-outline" id="near-me-btn" onclick="findNearMe()">
-                                <i class="fas fa-map-marker-alt"></i>
-                                Near Me
-                            </button>
-                            <button class="btn btn-outline" id="clear-filter-btn" onclick="clearNearMeFilter()" style="display: none;">
-                                <i class="fas fa-times"></i>
-                                Clear
-                            </button>
-                        </div>
-                        <button class="btn btn-primary" onclick="switchToAddItemTab()">
-                            <i class="fas fa-plus"></i>
-                            Add Item
-                        </button>
-                    </div>
+            
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-robot"></i>
                 </div>
-                
-                <div class="inventory-grid" id="inventory-grid">
-                    <!-- Items will be loaded here -->
-                </div>
+                <div class="feature-title">Investment Robots</div>
+                <div class="feature-desc">Automated trading bots every 6 hours</div>
             </div>
-
-            <!-- Add Item Tab -->
-            <div id="add-item" class="tab-content">
-                <div class="content-header">
-                    <h1>Add New Item</h1>
+            
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-map-marked-alt"></i>
                 </div>
-                
-                <div class="add-item-form">
-                    <div class="accordion-container">
-                        <!-- Basic Information Section -->
-                        <div class="accordion-section" data-section="basic">
-                            <div class="accordion-header" onclick="toggleAccordion('basic')">
-                                <h3>
-                                    <i class="fas fa-info-circle"></i>
-                                    Basic Information
-                                </h3>
-                                <i class="fas fa-chevron-down accordion-icon"></i>
-                            </div>
-                            <div class="accordion-content">
-                                <div class="form-group">
-                                    <label for="item-title">Title</label>
-                                    <input type="text" id="item-title" placeholder="Enter item title">
-                                </div>
-                                <div class="form-group">
-                                    <label for="item-description">Description</label>
-                                    <textarea id="item-description" rows="4" placeholder="Describe your item..."></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label for="item-category">Category</label>
-                                    <select id="item-category">
-                                        <option value="">Select category</option>
-                                        <option value="electronics">Electronics</option>
-                                        <option value="furniture">Furniture</option>
-                                        <option value="clothing">Clothing</option>
-                                        <option value="books">Books</option>
-                                        <option value="tools">Tools</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Pricing & Condition Section -->
-                        <div class="accordion-section" data-section="pricing">
-                            <div class="accordion-header" onclick="toggleAccordion('pricing')">
-                                <h3>
-                                    <i class="fas fa-dollar-sign"></i>
-                                    Pricing & Condition
-                                </h3>
-                                <i class="fas fa-chevron-down accordion-icon"></i>
-                            </div>
-                            <div class="accordion-content">
-                                <div class="form-group">
-                                    <label for="item-price">Price ($)</label>
-                                    <input type="number" id="item-price" placeholder="0.00" step="0.01">
-                                </div>
-                                <div class="form-group">
-                                    <label for="item-condition">Condition</label>
-                                    <select id="item-condition">
-                                        <option value="">Select condition</option>
-                                        <option value="new">New</option>
-                                        <option value="like_new">Like New</option>
-                                        <option value="good">Good</option>
-                                        <option value="fair">Fair</option>
-                                        <option value="poor">Poor</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="item-quantity">Quantity</label>
-                                    <input type="number" id="item-quantity" placeholder="1" min="1">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Physical Details Section -->
-                        <div class="accordion-section" data-section="physical">
-                            <div class="accordion-header" onclick="toggleAccordion('physical')">
-                                <h3>
-                                    <i class="fas fa-ruler-combined"></i>
-                                    Physical Details
-                                </h3>
-                                <i class="fas fa-chevron-down accordion-icon"></i>
-                            </div>
-                            <div class="accordion-content">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="item-weight">Weight (lbs)</label>
-                                        <input type="number" id="item-weight" placeholder="0.0" step="0.1">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="item-dimensions">Dimensions</label>
-                                        <input type="text" id="item-dimensions" placeholder="L x W x H inches">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="item-shipping">Shipping Cost ($)</label>
-                                    <input type="number" id="item-shipping" placeholder="0.00" step="0.01">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Images Section -->
-                        <div class="accordion-section" data-section="images">
-                            <div class="accordion-header" onclick="toggleAccordion('images')">
-                                <h3>
-                                    <i class="fas fa-images"></i>
-                                    Images
-                                </h3>
-                                <i class="fas fa-chevron-down accordion-icon"></i>
-                            </div>
-                            <div class="accordion-content">
-                                <div class="image-upload-area" id="image-upload">
-                                    <div class="upload-placeholder">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <p>Drag & drop images here or click to browse</p>
-                                        <input type="file" id="item-images" multiple accept="image/*" style="display: none;">
-                                    </div>
-                                </div>
-                                <div class="image-preview" id="image-preview"></div>
-                            </div>
-                        </div>
-
-                        <!-- Unit Preferences Section -->
-                        <div class="accordion-section" data-section="preferences">
-                            <div class="accordion-header" onclick="toggleAccordion('preferences')">
-                                <h3>
-                                    <i class="fas fa-cog"></i>
-                                    Unit Preferences
-                                </h3>
-                                <i class="fas fa-chevron-down accordion-icon"></i>
-                            </div>
-                            <div class="accordion-content">
-                                <div class="unit-preferences">
-                                    <div class="form-group">
-                                        <label class="checkbox-label">
-                                            <input type="checkbox" id="use-metric-units">
-                                            <span class="checkmark"></span>
-                                            Use Metric Units (Meters & Kilograms)
-                                        </label>
-                                    </div>
-                                    <div class="unit-note">
-                                        <i class="fas fa-info-circle"></i>
-                                        <p><strong>Note:</strong> All dimensions are automatically converted to Imperial units (inches and pounds) for shipping calculations and display.</p>
-                                    </div>
-                                    <div class="unit-examples">
-                                        <div class="example-item">
-                                            <strong>Weight:</strong> 1 kg → 2.2 lbs
-                                        </div>
-                                        <div class="example-item">
-                                            <strong>Dimensions:</strong> 1 m × 0.5 m × 0.3 m → 39.4" × 19.7" × 11.8"
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button class="btn btn-secondary" onclick="resetForm()">Reset</button>
-                        <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
-                    </div>
-                </div>
+                <div class="feature-title">Map Interface</div>
+                <div class="feature-desc">Visual shipping routes with eyelash arcs</div>
             </div>
-
-            <!-- Holds Tab -->
-            <div id="holds" class="tab-content">
-                <div class="content-header">
-                    <h1>My Holds</h1>
-                    <div class="header-actions">
-                        <div class="filter-dropdown">
-                            <select id="hold-filter">
-                                <option value="all">All Holds</option>
-                                <option value="active">Active</option>
-                                <option value="expired">Expired</option>
-                                <option value="released">Released</option>
-                            </select>
-                        </div>
-                    </div>
+            
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-water"></i>
                 </div>
-                
-                <div class="holds-list" id="holds-list">
-                    <!-- Holds will be loaded here -->
-                </div>
+                <div class="feature-title">Water Limit</div>
+                <div class="feature-desc">Buffer system before returns to users</div>
             </div>
+        </div>
 
-            <!-- Purchases Tab -->
-            <div id="purchases" class="tab-content">
-                <div class="content-header">
-                    <h1>Purchase Management</h1>
-                </div>
-                
-                <div class="purchase-sections">
-                    <div class="purchase-section">
-                        <h3>Pending Offers</h3>
-                        <div class="offers-list" id="pending-offers">
-                            <!-- Pending offers will be loaded here -->
-                        </div>
-                    </div>
-                    
-                    <div class="purchase-section">
-                        <h3>My Offers</h3>
-                        <div class="offers-list" id="my-offers">
-                            <!-- My offers will be loaded here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Investment Tab -->
-            <div id="investment" class="tab-content">
-                <div class="content-header">
-                    <h1>Investment Pools</h1>
-                </div>
-                
-                <div class="investment-dashboard">
-                    <div class="investment-cards">
-                        <div class="investment-card">
-                            <div class="card-header">
-                                <h3>Individual Pool</h3>
-                                <span class="pool-status active">Active</span>
-                            </div>
-                            <div class="card-content">
-                                <div class="balance-info">
-                                    <span class="balance-label">Current Balance</span>
-                                    <span class="balance-amount">$750.00</span>
-                                </div>
-                                <div class="return-info">
-                                    <span class="return-label">Expected Return</span>
-                                    <span class="return-rate">8.0%</span>
-                                </div>
-                            </div>
-                            <div class="card-actions">
-                                <button class="btn btn-sm btn-primary">Add Funds</button>
-                                <button class="btn btn-sm btn-secondary">View Details</button>
-                            </div>
-                        </div>
-
-                        <div class="investment-card">
-                            <div class="card-header">
-                                <h3>Herd Pool</h3>
-                                <span class="pool-status active">Active</span>
-                            </div>
-                            <div class="card-content">
-                                <div class="balance-info">
-                                    <span class="balance-label">Contribution</span>
-                                    <span class="balance-amount">$300.00</span>
-                                </div>
-                                <div class="return-info">
-                                    <span class="return-label">Expected Return</span>
-                                    <span class="return-rate">12.0%</span>
-                                </div>
-                            </div>
-                            <div class="card-actions">
-                                <button class="btn btn-sm btn-primary">Add Funds</button>
-                                <button class="btn btn-sm btn-secondary">View Details</button>
-                            </div>
-                        </div>
-
-                        <div class="investment-card">
-                            <div class="card-header">
-                                <h3>Automatic Pool</h3>
-                                <span class="pool-status active">Active</span>
-                            </div>
-                            <div class="card-content">
-                                <div class="balance-info">
-                                    <span class="balance-label">Current Balance</span>
-                                    <span class="balance-amount">$200.00</span>
-                                </div>
-                                <div class="return-info">
-                                    <span class="return-label">Current Allocation</span>
-                                    <span class="allocation">60% Individual, 40% Herd</span>
-                                </div>
-                            </div>
-                            <div class="card-actions">
-                                <button class="btn btn-sm btn-primary">Configure</button>
-                                <button class="btn btn-sm btn-secondary">View Details</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Modals -->
-    <div id="purchase-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Purchase Item</h2>
-                <button class="modal-close" onclick="closeModal('purchase-modal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="purchase-form">
-                    <div class="item-details">
-                        <img src="" alt="Item" id="purchase-item-image">
-                        <div class="item-info">
-                            <h3 id="purchase-item-title"></h3>
-                            <p id="purchase-item-description"></p>
-                            <div class="item-specs">
-                                <span id="purchase-item-price"></span>
-                                <span id="purchase-item-condition"></span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="purchase-terms">
-                        <h4>Purchase Agreement</h4>
-                        <div class="agreement-form">
-                            <div class="form-group">
-                                <label for="purchase-price">Your Offer Price ($)</label>
-                                <input type="number" id="purchase-price" placeholder="Enter your offer">
-                            </div>
-                            <div class="form-group">
-                                <label for="purchase-message">Message to Seller</label>
-                                <textarea id="purchase-message" rows="3" placeholder="Optional message..."></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="purchase-agreement">
-                                    <span class="checkmark"></span>
-                                    I agree to the purchase terms and conditions
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('purchase-modal')">Cancel</button>
-                <button class="btn btn-primary" onclick="submitPurchase()">Submit Offer</button>
-            </div>
+        <div class="cta-buttons">
+            <a href="/dashboard" class="btn btn-primary">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="/map" class="btn btn-secondary">
+                <i class="fas fa-map"></i> Map View
+            </a>
+            <a href="/api/status" class="btn btn-secondary" target="_blank">
+                <i class="fas fa-code"></i> API Status
+            </a>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Check system status
+        async function checkStatus() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                
+                if (data.status === 'healthy') {
+                    document.getElementById('status').innerHTML = `
+                        <i class="fas fa-check-circle"></i> System Online - ${data.message}
+                    `;
+                    document.getElementById('status').style.background = '#e8f5e8';
+                    document.getElementById('status').style.color = '#2d5a2d';
+                } else {
+                    throw new Error('System not healthy');
+                }
+            } catch (error) {
+                document.getElementById('status').innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i> System Offline - Please check server
+                `;
+                document.getElementById('status').style.background = '#ffe8e8';
+                document.getElementById('status').style.color = '#5a2d2d';
+            }
+        }
+
+        // Check status on load
+        checkStatus();
+        
+        // Check status every 30 seconds
+        setInterval(checkStatus, 30000);
+    </script>
 </body>
 </html> 

@@ -103,12 +103,12 @@ let orm;
 async function initializeORM() {
     try {
         orm = await MikroORM.init(config);
-        console.log('MikroORM initialized successfully');
+        console.log('✅ MikroORM initialized successfully');
         
         // Run migrations
         const migrator = orm.getMigrator();
         await migrator.up();
-        console.log('Database migrations completed');
+        console.log('✅ Database migrations completed');
         
         // Initialize services and controllers
         initializeServices();
@@ -117,7 +117,7 @@ async function initializeORM() {
         setupCronJobs(orm);
         
     } catch (error) {
-        console.error('Failed to initialize MikroORM:', error);
+        console.error('❌ Failed to initialize MikroORM:', error);
         process.exit(1);
     }
 }
@@ -150,6 +150,8 @@ function initializeServices() {
     global.notificationService = new NotificationService(em, notificationRepository, userRepository);
     global.watchListService = new WatchListService(em, watchListRepository, userRepository, global.notificationService);
     global.shippingService = new ShippingService(em, shippingRouteRepository, userRepository);
+    
+    console.log('✅ Services initialized');
 }
 
 function initializeControllers() {
@@ -166,6 +168,8 @@ function initializeControllers() {
     global.disputeController = new DisputeController(global.disputeService, authMiddleware);
     global.notificationController = new NotificationController(global.notificationService, authMiddleware);
     global.watchListController = new WatchListController(global.watchListService, authMiddleware);
+    
+    console.log('✅ Controllers initialized');
 }
 
 function setupRoutes() {
@@ -183,53 +187,108 @@ function setupRoutes() {
 
     // Frontend routes
     app.get('/', (req, res) => {
-        res.sendFile(__dirname + '/../public/login.html');
-    });
-
-    app.get('/login', (req, res) => {
-        res.sendFile(__dirname + '/../public/login.html');
+        res.sendFile(path.join(__dirname, '../public/index.html'));
     });
 
     app.get('/dashboard', (req, res) => {
-        res.sendFile(__dirname + '/../public/dashboard.html');
+        res.sendFile(path.join(__dirname, '../public/dashboard.html'));
     });
 
-    app.get('/dispute-moderation', (req, res) => {
-        res.sendFile(__dirname + '/../public/dispute-moderation.html');
+    app.get('/map', (req, res) => {
+        res.sendFile(path.join(__dirname, '../public/map.html'));
     });
 
-    // Catch-all route for SPA
-    app.get('*', (req, res) => {
-        res.sendFile(__dirname + '/../public/dashboard.html');
+    // Health check
+    app.get('/health', (req, res) => {
+        res.json({ 
+            status: 'healthy', 
+            timestamp: new Date().toISOString(),
+            version: '3.0.0'
+        });
     });
+    
+    console.log('✅ Routes configured');
+}
+
+function setupCronJobs(orm) {
+    // Investment robot updates - every 6 hours
+    cron.schedule('0 */6 * * *', async () => {
+        try {
+            console.log('🤖 Running investment robot updates...');
+            await global.investmentService.runInvestmentRobots();
+            console.log('✅ Investment robot updates completed');
+        } catch (error) {
+            console.error('❌ Investment robot update failed:', error);
+        }
+    });
+
+    // Hold stagnation revenue - daily at 2 AM
+    cron.schedule('0 2 * * *', async () => {
+        try {
+            console.log('💰 Processing hold stagnation revenue...');
+            await global.billingService.processHoldStagnationRevenue();
+            console.log('✅ Hold stagnation revenue processed');
+        } catch (error) {
+            console.error('❌ Hold stagnation revenue processing failed:', error);
+        }
+    });
+
+    // Energy efficiency revenue - daily at 3 AM
+    cron.schedule('0 3 * * *', async () => {
+        try {
+            console.log('⚡ Processing energy efficiency revenue...');
+            await global.billingService.processEnergyEfficiencyRevenue();
+            console.log('✅ Energy efficiency revenue processed');
+        } catch (error) {
+            console.error('❌ Energy efficiency revenue processing failed:', error);
+        }
+    });
+
+    // Water limit releases - every 4 hours
+    cron.schedule('0 */4 * * *', async () => {
+        try {
+            console.log('💧 Processing water limit releases...');
+            await global.waterLimitService.processReleases();
+            console.log('✅ Water limit releases processed');
+        } catch (error) {
+            console.error('❌ Water limit release processing failed:', error);
+        }
+    });
+
+    console.log('✅ Cron jobs scheduled');
 }
 
 // Error handling middleware
 app.use(errorHandler);
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'OK', 
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
+// 404 handler
+app.use('*', (req, res) => {
+    res.status(404).json({ 
+        success: false, 
+        message: 'Route not found' 
     });
 });
 
-// Start server
 async function startServer() {
-    await initializeORM();
-    
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-        console.log(`Dashboard available at http://localhost:${PORT}/dashboard`);
-        console.log(`Dispute moderation at http://localhost:${PORT}/dispute-moderation`);
-    });
+    try {
+        await initializeORM();
+        
+        app.listen(PORT, () => {
+            console.log(`🚀 Distributed Inventory System running on port ${PORT}`);
+            console.log(`📊 Dashboard: http://localhost:${PORT}/dashboard`);
+            console.log(`🗺️  Map Interface: http://localhost:${PORT}/map`);
+            console.log(`🔧 API: http://localhost:${PORT}/api`);
+            console.log(`💚 Health Check: http://localhost:${PORT}/health`);
+        });
+    } catch (error) {
+        console.error('❌ Failed to start server:', error);
+        process.exit(1);
+    }
 }
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-    console.log('SIGTERM received, shutting down gracefully');
+    console.log('🛑 Received SIGTERM, shutting down gracefully...');
     if (orm) {
         await orm.close();
     }
@@ -237,13 +296,14 @@ process.on('SIGTERM', async () => {
 });
 
 process.on('SIGINT', async () => {
-    console.log('SIGINT received, shutting down gracefully');
+    console.log('🛑 Received SIGINT, shutting down gracefully...');
     if (orm) {
         await orm.close();
     }
     process.exit(0);
 });
 
-startServer().catch(console.error);
+// Start the server
+startServer();
 
 module.exports = app;

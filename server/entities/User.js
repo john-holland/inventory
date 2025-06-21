@@ -2,46 +2,32 @@
 const { EntitySchema } = require("@mikro-orm/core");
 const { BaseEntity } = require("./BaseEntity");
 
-class User extends BaseEntity {
-  constructor(email, username, passwordHash, walletAddress) {
-    super();
-    this.email = email;
-    this.username = username;
-    this.passwordHash = passwordHash;
-    this.walletAddress = walletAddress;
-    this.isVerified = false;
-    this.rating = 0;
-    this.totalTransactions = 0;
-    this.availableBalance = 0;
-    this.heldBalance = 0;
-    this.location = null;
-    this.preferences = {};
-    this.useMetricUnits = false;
-  }
-}
-
-const schema = new EntitySchema({
-  class: User,
-  extends: "BaseEntity",
+const User = {
+  name: 'User',
+  tableName: 'users',
   properties: {
-    email: { type: "string", unique: true },
-    username: { type: "string", unique: true },
-    passwordHash: { type: "string" },
-    walletAddress: { type: "string", nullable: true },
-    isVerified: { type: "boolean", default: false },
-    rating: { type: "number", default: 0 },
-    totalTransactions: { type: "number", default: 0 },
-    availableBalance: { type: "number", default: 0 },
-    heldBalance: { type: "number", default: 0 },
-    location: { type: "json", nullable: true },
-    preferences: { type: "json", default: {} },
-    useMetricUnits: { type: "boolean", default: false },
+    id: { primary: true, type: 'uuid' },
+    username: { type: 'string', unique: true, length: 50 },
+    email: { type: 'string', unique: true, length: 100 },
+    password: { type: 'string', length: 255 },
+    wallet: { type: 'decimal', precision: 10, scale: 2, default: 1000.00 },
+    role: { type: 'string', length: 20, default: 'user' },
+    isActive: { type: 'boolean', default: true },
+    createdAt: { type: 'datetime', onCreate: () => new Date() },
+    updatedAt: { type: 'datetime', onUpdate: () => new Date() },
+    
+    // Relationships
+    items: { reference: '1:m', entity: 'Item', mappedBy: 'lister' },
+    holds: { reference: '1:m', entity: 'Hold', mappedBy: 'user' },
+    transactions: { reference: '1:m', entity: 'Transaction', mappedBy: 'user' },
+    investments: { reference: '1:m', entity: 'Investment', mappedBy: 'user' },
+    waterLimits: { reference: '1:m', entity: 'WaterLimit', mappedBy: 'user' }
   },
-});
+  indexes: [
+    { properties: 'username' },
+    { properties: 'email' },
+    { properties: 'role' }
+  ]
+};
 
-module.exports = {
-  User,
-  entity: User,
-  schema,
-  label: "userRepository",
-}; 
+module.exports = User; 
