@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Dashboard - Distributed Inventory System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--gray);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .user-menu {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            height: calc(100vh - 120px);
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .toggle-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: var(--gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--success);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(26px);
+        }
+
+        .chat-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .chat-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .chat-tab:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .chat-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .chat-tab .badge {
+            background: var(--danger);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-left: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-desc {
+            color: var(--gray);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .ban-level {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .ban-none {
+            background: var(--success);
+            color: white;
+        }
+
+        .ban-chat-limit {
+            background: var(--warning);
+            color: white;
+        }
+
+        .ban-no-chat {
+            background: var(--danger);
+            color: white;
+        }
+
+        .ban-banned {
+            background: var(--dark);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-boxes"></i>
+            Inventory System
+        </div>
+        
+        <div class="nav-links">
+            <a href="/" class="nav-link">
+                <i class="fas fa-home"></i>
+                Home
+            </a>
+            <a href="/map" class="nav-link">
+                <i class="fas fa-map"></i>
+                Map
+            </a>
+            <a href="/dashboard" class="nav-link active">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            <a href="/chat" class="nav-link">
+                <i class="fas fa-comments"></i>
+                Chat
+            </a>
+            <a href="/hr" class="nav-link">
+                <i class="fas fa-users-cog"></i>
+                HR
+            </a>
+        </div>
+        
+        <div class="user-menu">
+            <div class="ban-level ban-none" id="banLevel">No Ban</div>
+            <div class="user-avatar" id="userAvatar">JD</div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="grid">
+            <div class="sidebar">
+                <div class="section">
+                    <h3 class="section-title">
+                        <i class="fas fa-store"></i>
+                        Marketplaces
+                    </h3>
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <div class="toggle-label">
+                                <i class="fab fa-amazon"></i>
+                                Amazon
+                            </div>
+                            <div class="toggle-switch active" id="amazonToggle" onclick="toggleMarketplace('amazon')"></div>
+                        </div>
+                        <div class="toggle-item">
+                            <div class="toggle-label">
+                                <i class="fas fa-shopping-cart"></i>
+                                eBay
+                            </div>
+                            <div class="toggle-switch active" id="ebayToggle" onclick="toggleMarketplace('ebay')"></div>
+                        </div>
+                        <div class="toggle-item">
+                            <div class="toggle-label">
+                                <i class="fas fa-images"></i>
+                                Unsplash
+                            </div>
+                            <div class="toggle-switch active" id="unsplashToggle" onclick="toggleMarketplace('unsplash')"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">
+                        <i class="fas fa-comments"></i>
+                        Chat Tabs
+                    </h3>
+                    <div class="chat-tabs">
+                        <div class="chat-tab active" onclick="switchChatTab('herd')">
+                            <i class="fas fa-users"></i>
+                            Herd Chat
+                        </div>
+                        <div class="chat-tab" onclick="switchChatTab('corpo')" id="corpoChatTab" style="display: none;">
+                            <i class="fas fa-building"></i>
+                            Corpo Chat
+                        </div>
+                        <div class="chat-tab" onclick="switchChatTab('group1')" id="groupChatTab" style="display: none;">
+                            <i class="fas fa-user-friends"></i>
+                            Team Alpha
+                            <span class="badge">3</span>
+                        </div>
+                        <div class="chat-tab" onclick="switchChatTab('direct1')" id="directChatTab" style="display: none;">
+                            <i class="fas fa-user"></i>
+                            John Doe
+                            <span class="badge">1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </h3>
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <div class="toggle-label">
+                                <i class="fas fa-bell"></i>
+                                Notifications
+                            </div>
+                            <div class="toggle-switch active" id="notificationsToggle" onclick="toggleSetting('notifications')"></div>
+                        </div>
+                        <div class="toggle-item">
+                            <div class="toggle-label">
+                                <i class="fas fa-shield-alt"></i>
+                                Graceful Falloff
+                            </div>
+                            <div class="toggle-switch active" id="falloffToggle" onclick="toggleSetting('falloff')"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="activeHolds">0</div>
+                        <div class="stat-label">Active Holds</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalRevenue">$0</div>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="investmentRobots">0</div>
+                        <div class="stat-label">Investment Robots</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="waterLevel">0%</div>
+                        <div class="stat-label">Water Level</div>
+                    </div>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shipping-fast"></i>
+                        </div>
+                        <h3 class="feature-title">2x Shipping Hold Model</h3>
+                        <p class="feature-desc">Reserve items with 2x shipping cost hold. Unlimited holds with smart revenue generation.</p>
+                        <a href="/inventory" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Create Hold
+                        </a>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3 class="feature-title">Investment Robots</h3>
+                        <p class="feature-desc">Automated trading bots that invest user money every 6 hours for optimal returns.</p>
+                        <a href="/investments" class="btn btn-primary">
+                            <i class="fas fa-chart-line"></i>
+                            View Investments
+                        </a>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <h3 class="feature-title">Map Interface</h3>
+                        <p class="feature-desc">Visual shipping routes with eyelash-like arcs showing real-time inventory movement.</p>
+                        <a href="/map" class="btn btn-primary">
+                            <i class="fas fa-map"></i>
+                            View Map
+                        </a>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3 class="feature-title">Chat System</h3>
+                        <p class="feature-desc">Multi-tab chat with direct messages, groups, herd chat, and corpo chat.</p>
+                        <a href="/chat" class="btn btn-primary">
+                            <i class="fas fa-comment"></i>
+                            Open Chat
+                        </a>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                        <h3 class="feature-title">HR System</h3>
+                        <p class="feature-desc">Complete hiring, onboarding, and employee management with interview scheduling.</p>
+                        <a href="/hr" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i>
+                            HR Dashboard
+                        </a>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h3 class="feature-title">Calendar System</h3>
+                        <p class="feature-desc">Multi-access calendar with meeting scheduling and Google Calendar integration.</p>
+                        <a href="/calendar" class="btn btn-primary">
+                            <i class="fas fa-calendar"></i>
+                            View Calendar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Marketplace toggles
+        function toggleMarketplace(marketplace) {
+            const toggle = document.getElementById(marketplace + 'Toggle');
+            toggle.classList.toggle('active');
+            
+            // Update graceful falloff setting
+            updateGracefulFalloff(marketplace, toggle.classList.contains('active'));
+            
+            console.log(`${marketplace} ${toggle.classList.contains('active') ? 'enabled' : 'disabled'}`);
+        }
+
+        // Settings toggles
+        function toggleSetting(setting) {
+            const toggle = document.getElementById(setting + 'Toggle');
+            toggle.classList.toggle('active');
+            console.log(`${setting} ${toggle.classList.contains('active') ? 'enabled' : 'disabled'}`);
+        }
+
+        // Chat tab switching
+        function switchChatTab(tab) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.chat-tab').forEach(t => t.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            event.target.closest('.chat-tab').classList.add('active');
+            
+            console.log(`Switched to ${tab} chat`);
+        }
+
+        // Update graceful falloff
+        function updateGracefulFalloff(marketplace, enabled) {
+            const falloffToggle = document.getElementById('falloffToggle');
+            if (!enabled) {
+                falloffToggle.classList.remove('active');
+            }
+        }
+
+        // Simulate user role and ban level
+        function simulateUserRole() {
+            const roles = ['user', 'COMPANY_EMPLOYEE', 'COMPANY_HR_EMPLOYEE', 'COMPANY_HR_ADMIN'];
+            const banLevels = ['none', 'chat_limit', 'no_chat', 'banned'];
+            
+            const role = roles[Math.floor(Math.random() * roles.length)];
+            const banLevel = banLevels[Math.floor(Math.random() * banLevels.length)];
+            
+            // Show/hide chat tabs based on role and ban level
+            const corpoChatTab = document.getElementById('corpoChatTab');
+            const groupChatTab = document.getElementById('groupChatTab');
+            const directChatTab = document.getElementById('directChatTab');
+            
+            if (role.includes('EMPLOYEE')) {
+                corpoChatTab.style.display = 'flex';
+            }
+            
+            if (banLevel === 'none') {
+                groupChatTab.style.display = 'flex';
+                directChatTab.style.display = 'flex';
+            }
+            
+            // Update ban level display
+            const banLevelElement = document.getElementById('banLevel');
+            banLevelElement.textContent = banLevel.replace('_', ' ').toUpperCase();
+            banLevelElement.className = `ban-level ban-${banLevel.replace('_', '-')}`;
+            
+            return { role, banLevel };
+        }
+
+        // Update stats
+        function updateStats() {
+            const stats = {
+                activeHolds: Math.floor(Math.random() * 50) + 10,
+                totalRevenue: '$' + (Math.random() * 10000).toFixed(2),
+                investmentRobots: Math.floor(Math.random() * 20) + 5,
+                waterLevel: Math.floor(Math.random() * 100)
+            };
+            
+            document.getElementById('activeHolds').textContent = stats.activeHolds;
+            document.getElementById('totalRevenue').textContent = stats.totalRevenue;
+            document.getElementById('investmentRobots').textContent = stats.investmentRobots;
+            document.getElementById('waterLevel').textContent = stats.waterLevel + '%';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            simulateUserRole();
+            updateStats();
+            
+            // Update stats every 30 seconds
+            setInterval(updateStats, 30000);
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Dashboard - Distributed Inventory System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--gray);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hr-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .hr-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .hr-subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: var(--gray);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table th {
+            background: var(--light);
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .table tr:hover {
+            background: var(--light);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-denied {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-scheduled {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.875rem;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-close:hover {
+            color: var(--dark);
+        }
+
+        .accordion {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .accordion-header {
+            padding: 1rem;
+            background: var(--light);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .accordion-header:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-content {
+            padding: 1rem;
+            display: none;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-users-cog"></i>
+            HR System
+        </div>
+        
+        <div class="nav-links">
+            <a href="/" class="nav-link">
+                <i class="fas fa-home"></i>
+                Home
+            </a>
+            <a href="/dashboard" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            <a href="/chat" class="nav-link">
+                <i class="fas fa-comments"></i>
+                Chat
+            </a>
+            <a href="/hr" class="nav-link active">
+                <i class="fas fa-users-cog"></i>
+                HR
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="hr-header">
+            <h1 class="hr-title">HR Dashboard</h1>
+            <p class="hr-subtitle">Manage interviews, employees, and job changes</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalEmployees">0</div>
+                <div class="stat-label">Total Employees</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeInterviews">0</div>
+                <div class="stat-label">Active Interviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pendingRequests">0</div>
+                <div class="stat-label">Pending Requests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="hiringRate">0%</div>
+                <div class="stat-label">Hiring Rate</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('interviews')">
+                <i class="fas fa-user-plus"></i>
+                Interviews
+            </button>
+            <button class="tab" onclick="switchTab('employees')">
+                <i class="fas fa-users"></i>
+                Employees
+            </button>
+            <button class="tab" onclick="switchTab('job-changes')">
+                <i class="fas fa-exchange-alt"></i>
+                Job Changes
+            </button>
+            <button class="tab" onclick="switchTab('hr-changes')">
+                <i class="fas fa-user-edit"></i>
+                HR Changes
+            </button>
+        </div>
+
+        <!-- Interviews Tab -->
+        <div id="interviews" class="tab-content active">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2 class="card-title">Active Interviews</h2>
+                    <button class="btn btn-primary" onclick="showCreateInterviewModal()">
+                        <i class="fas fa-plus"></i>
+                        Create Interview
+                    </button>
+                </div>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Candidate</th>
+                            <th>Position</th>
+                            <th>Interviewer</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="interviewsTable">
+                        <tr>
+                            <td>alice@example.com</td>
+                            <td>Software Engineer</td>
+                            <td>John Doe</td>
+                            <td>Dec 15, 2024 2:00 PM</td>
+                            <td><span class="status-badge status-scheduled">Scheduled</span></td>
+                            <td>
+                                <button class="btn btn-secondary" onclick="viewInterview(1)">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>bob@example.com</td>
+                            <td>Product Manager</td>
+                            <td>Jane Smith</td>
+                            <td>Dec 16, 2024 10:00 AM</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>
+                                <button class="btn btn-secondary" onclick="viewInterview(2)">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Employees Tab -->
+        <div id="employees" class="tab-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2 class="card-title">Employee Directory</h2>
+                    <button class="btn btn-primary" onclick="showHireEmployeeModal()">
+                        <i class="fas fa-user-plus"></i>
+                        Hire Employee
+                    </button>
+                </div>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Position</th>
+                            <th>Department</th>
+                            <th>Hire Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeesTable">
+                        <tr>
+                            <td>EMP001</td>
+                            <td>John Doe</td>
+                            <td>Software Engineer</td>
+                            <td>Engineering</td>
+                            <td>Jan 15, 2024</td>
+                            <td><span class="status-badge status-approved">Active</span></td>
+                            <td>
+                                <button class="btn btn-secondary" onclick="viewEmployee(1)">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>EMP002</td>
+                            <td>Jane Smith</td>
+                            <td>Product Manager</td>
+                            <td>Product</td>
+                            <td>Feb 1, 2024</td>
+                            <td><span class="status-badge status-approved">Active</span></td>
+                            <td>
+                                <button class="btn btn-secondary" onclick="viewEmployee(2)">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Job Changes Tab -->
+        <div id="job-changes" class="tab-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2 class="card-title">Job Change Requests</h2>
+                    <button class="btn btn-primary" onclick="showJobChangeModal()">
+                        <i class="fas fa-plus"></i>
+                        Request Change
+                    </button>
+                </div>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Current Position</th>
+                            <th>Requested Change</th>
+                            <th>Requested By</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobChangesTable">
+                        <tr>
+                            <td>John Doe</td>
+                            <td>Software Engineer</td>
+                            <td>Senior Software Engineer</td>
+                            <td>John Doe</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>
+                                <button class="btn btn-secondary" onclick="viewJobChange(1)">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HR Changes Tab -->
+        <div id="hr-changes" class="tab-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2 class="card-title">HR Change Requests</h2>
+                    <button class="btn btn-primary" onclick="showHRChangeModal()">
+                        <i class="fas fa-plus"></i>
+                        Request Change
+                    </button>
+                </div>
+                
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Change Type</th>
+                            <th>Requested By</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hrChangesTable">
+                        <tr>
+                            <td>Jane Smith</td>
+                            <td>Address Update</td>
+                            <td>Jane Smith</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>
+                                <button class="btn btn-secondary" onclick="viewHRChange(1)">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Interview Modal -->
+    <div id="createInterviewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Create Interview</h3>
+                <button class="modal-close" onclick="closeModal('createInterviewModal')">&times;</button>
+            </div>
+            
+            <form id="createInterviewForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Interviewee Email</label>
+                        <input type="email" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Job Title</label>
+                        <input type="text" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Hiring Employee</label>
+                        <select class="form-select" required>
+                            <option value="">Select hiring employee</option>
+                            <option value="1">John Doe</option>
+                            <option value="2">Jane Smith</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Interview Rounds</label>
+                        <select class="form-select" required>
+                            <option value="1">1 Round</option>
+                            <option value="2">2 Rounds</option>
+                            <option value="3">3 Rounds</option>
+                            <option value="4">4 Rounds</option>
+                            <option value="5">5 Rounds</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Available Datetimes (Select 2-5)</label>
+                    <div class="form-grid">
+                        <div>
+                            <input type="datetime-local" class="form-input">
+                        </div>
+                        <div>
+                            <input type="datetime-local" class="form-input">
+                        </div>
+                        <div>
+                            <input type="datetime-local" class="form-input">
+                        </div>
+                        <div>
+                            <input type="datetime-local" class="form-input">
+                        </div>
+                        <div>
+                            <input type="datetime-local" class="form-input">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Interview Questions</label>
+                    <div class="accordion">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            Question 1
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <input type="text" class="form-input" placeholder="Question">
+                            <textarea class="form-textarea" placeholder="Known answer"></textarea>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addQuestion()">
+                        <i class="fas fa-plus"></i>
+                        Add Question
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Job Requirements (Internal)</label>
+                    <textarea class="form-textarea" placeholder="Internal requirements for the position"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Job Requirements (External)</label>
+                    <textarea class="form-textarea" placeholder="External requirements for the position"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('createInterviewModal')">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Create Interview
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            // Remove active class from all tabs and content
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Modal functions
+        function showCreateInterviewModal() {
+            document.getElementById('createInterviewModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showHireEmployeeModal() {
+            alert('Hire Employee modal would open here');
+        }
+
+        function showJobChangeModal() {
+            alert('Job Change modal would open here');
+        }
+
+        function showHRChangeModal() {
+            alert('HR Change modal would open here');
+        }
+
+        // View functions
+        function viewInterview(id) {
+            alert(`View interview ${id} details`);
+        }
+
+        function viewEmployee(id) {
+            alert(`View employee ${id} details`);
+        }
+
+        function viewJobChange(id) {
+            alert(`View job change ${id} details`);
+        }
+
+        function viewHRChange(id) {
+            alert(`View HR change ${id} details`);
+        }
+
+        // Accordion functions
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('i');
+            
+            content.classList.toggle('active');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        }
+
+        function addQuestion() {
+            const accordion = document.querySelector('.accordion');
+            const questionDiv = document.createElement('div');
+            const questionNumber = accordion.children.length + 1;
+            
+            questionDiv.innerHTML = `
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    Question ${questionNumber}
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="accordion-content">
+                    <input type="text" class="form-input" placeholder="Question">
+                    <textarea class="form-textarea" placeholder="Known answer"></textarea>
+                </div>
+            `;
+            
+            accordion.appendChild(questionDiv);
+        }
+
+        // Update stats
+        function updateStats() {
+            const stats = {
+                totalEmployees: Math.floor(Math.random() * 50) + 10,
+                activeInterviews: Math.floor(Math.random() * 10) + 2,
+                pendingRequests: Math.floor(Math.random() * 20) + 5,
+                hiringRate: Math.floor(Math.random() * 30) + 70
+            };
+            
+            document.getElementById('totalEmployees').textContent = stats.totalEmployees;
+            document.getElementById('activeInterviews').textContent = stats.activeInterviews;
+            document.getElementById('pendingRequests').textContent = stats.pendingRequests;
+            document.getElementById('hiringRate').textContent = stats.hiringRate + '%';
+        }
+
+        // Form submission
+        document.getElementById('createInterviewForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Interview created successfully!');
+            closeModal('createInterviewModal');
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            
+            // Update stats every 30 seconds
+            setInterval(updateStats, 30000);
+        });
+    </script>
+</body>
+</html> 

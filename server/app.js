@@ -191,7 +191,23 @@ function setupRoutes() {
     });
 
     app.get('/dashboard', (req, res) => {
+        res.sendFile(path.join(__dirname, '../public/dashboard-modern.html'));
+    });
+
+    app.get('/dashboard-old', (req, res) => {
         res.sendFile(path.join(__dirname, '../public/dashboard.html'));
+    });
+
+    app.get('/chat', (req, res) => {
+        res.sendFile(path.join(__dirname, '../public/chat.html'));
+    });
+
+    app.get('/hr', (req, res) => {
+        res.sendFile(path.join(__dirname, '../public/hr.html'));
+    });
+
+    app.get('/calendar', (req, res) => {
+        res.sendFile(path.join(__dirname, '../public/calendar.html'));
     });
 
     app.get('/map', (req, res) => {

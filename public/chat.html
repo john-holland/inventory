@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat System - Distributed Inventory System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --border: #e5e7eb;
+            --chat-bg: #f8fafc;
+            --message-bg: white;
+            --message-own: #667eea;
+            --message-own-text: white;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--chat-bg);
+            color: var(--dark);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--gray);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .chat-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: calc(100vh - 80px);
+        }
+
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .chat-tabs {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .chat-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-tab:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .chat-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+
+        .chat-tab-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .chat-tab-info {
+            flex: 1;
+        }
+
+        .chat-tab-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-tab-preview {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-tab-badge {
+            background: var(--danger);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            background: var(--chat-bg);
+        }
+
+        .chat-header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chat-header-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .chat-header-details h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-header-details p {
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        .chat-header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            background: var(--light);
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            max-width: 70%;
+        }
+
+        .message.own {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            background: var(--message-bg);
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .message.own .message-content {
+            background: var(--message-own);
+            color: var(--message-own-text);
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .message-text {
+            line-height: 1.5;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+
+        .message-action {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .message-action:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .chat-input {
+            background: white;
+            border-top: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            resize: none;
+            font-family: inherit;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            max-height: 120px;
+            min-height: 50px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .system-message {
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.875rem;
+            font-style: italic;
+            margin: 1rem 0;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray);
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--gray);
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0.3; }
+            30% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-comments"></i>
+            Chat System
+        </div>
+        
+        <div class="nav-links">
+            <a href="/" class="nav-link">
+                <i class="fas fa-home"></i>
+                Home
+            </a>
+            <a href="/dashboard" class="nav-link">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            <a href="/chat" class="nav-link active">
+                <i class="fas fa-comments"></i>
+                Chat
+            </a>
+            <a href="/map" class="nav-link">
+                <i class="fas fa-map"></i>
+                Map
+            </a>
+        </div>
+    </nav>
+
+    <div class="chat-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Chats</h2>
+            </div>
+            
+            <div class="chat-tabs">
+                <div class="chat-tab active" data-chat="herd" onclick="switchChat('herd')">
+                    <div class="chat-tab-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="chat-tab-info">
+                        <div class="chat-tab-name">Herd Chat</div>
+                        <div class="chat-tab-preview">Public chat for all users</div>
+                    </div>
+                    <div class="chat-tab-badge">12</div>
+                </div>
+                
+                <div class="chat-tab" data-chat="corpo" onclick="switchChat('corpo')" id="corpoChatTab" style="display: none;">
+                    <div class="chat-tab-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="chat-tab-info">
+                        <div class="chat-tab-name">Corpo Chat</div>
+                        <div class="chat-tab-preview">Company-wide chat</div>
+                    </div>
+                    <div class="chat-tab-badge">5</div>
+                </div>
+                
+                <div class="chat-tab" data-chat="group1" onclick="switchChat('group1')" id="groupChatTab" style="display: none;">
+                    <div class="chat-tab-icon">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div class="chat-tab-info">
+                        <div class="chat-tab-name">Team Alpha</div>
+                        <div class="chat-tab-preview">Project discussion</div>
+                    </div>
+                    <div class="chat-tab-badge">3</div>
+                </div>
+                
+                <div class="chat-tab" data-chat="direct1" onclick="switchChat('direct1')" id="directChatTab" style="display: none;">
+                    <div class="chat-tab-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="chat-tab-info">
+                        <div class="chat-tab-name">John Doe</div>
+                        <div class="chat-tab-preview">Hey, how's the project going?</div>
+                    </div>
+                    <div class="chat-tab-badge">1</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-main">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <div class="chat-header-icon" id="chatIcon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="chat-header-details">
+                        <h3 id="chatTitle">Herd Chat</h3>
+                        <p id="chatSubtitle">Public chat for all users • 12 online</p>
+                    </div>
+                </div>
+                
+                <div class="chat-header-actions">
+                    <button class="btn-icon" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button class="btn-icon" onclick="showChatInfo()">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button class="btn-icon" onclick="showChatSettings()">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="system-message">
+                    Welcome to Herd Chat! This is a public chat for all users.
+                </div>
+                
+                <div class="message">
+                    <div class="message-avatar">JD</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-sender">John Doe</span>
+                            <span class="message-time">2:30 PM</span>
+                        </div>
+                        <div class="message-text">
+                            Hey everyone! How's the inventory system working for you?
+                        </div>
+                        <div class="message-actions">
+                            <button class="message-action">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="message-action">
+                                <i class="fas fa-reply"></i>
+                            </button>
+                            <button class="message-action">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message own">
+                    <div class="message-avatar">ME</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-sender">You</span>
+                            <span class="message-time">2:32 PM</span>
+                        </div>
+                        <div class="message-text">
+                            It's working great! The 2x shipping hold model is really smart.
+                        </div>
+                        <div class="message-actions">
+                            <button class="message-action">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="message-action">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message">
+                    <div class="message-avatar">JS</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-sender">Jane Smith</span>
+                            <span class="message-time">2:35 PM</span>
+                        </div>
+                        <div class="message-text">
+                            I love the investment robots! They're making me money while I sleep 😴
+                        </div>
+                        <div class="message-actions">
+                            <button class="message-action">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="message-action">
+                                <i class="fas fa-reply"></i>
+                            </button>
+                            <button class="message-action">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                    <span>Alice is typing</span>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <div class="input-container">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Type your message..."
+                        onkeydown="handleKeyDown(event)"
+                    ></textarea>
+                    
+                    <div class="input-actions">
+                        <button class="btn btn-secondary" onclick="attachFile()">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button class="btn btn-secondary" onclick="addEmoji()">
+                            <i class="fas fa-smile"></i>
+                        </button>
+                        <button class="btn btn-primary" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentChat = 'herd';
+        let isTyping = false;
+        let typingTimeout;
+
+        // Chat switching
+        function switchChat(chatId) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.chat-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            event.target.closest('.chat-tab').classList.add('active');
+            
+            currentChat = chatId;
+            updateChatHeader(chatId);
+            loadChatMessages(chatId);
+            
+            console.log(`Switched to ${chatId} chat`);
+        }
+
+        // Update chat header
+        function updateChatHeader(chatId) {
+            const chatData = {
+                herd: {
+                    title: 'Herd Chat',
+                    subtitle: 'Public chat for all users • 12 online',
+                    icon: 'fas fa-users'
+                },
+                corpo: {
+                    title: 'Corpo Chat',
+                    subtitle: 'Company-wide chat • 5 online',
+                    icon: 'fas fa-building'
+                },
+                group1: {
+                    title: 'Team Alpha',
+                    subtitle: 'Project discussion • 3 online',
+                    icon: 'fas fa-user-friends'
+                },
+                direct1: {
+                    title: 'John Doe',
+                    subtitle: 'Direct message • online',
+                    icon: 'fas fa-user'
+                }
+            };
+            
+            const data = chatData[chatId];
+            document.getElementById('chatTitle').textContent = data.title;
+            document.getElementById('chatSubtitle').textContent = data.subtitle;
+            document.getElementById('chatIcon').innerHTML = `<i class="${data.icon}"></i>`;
+        }
+
+        // Load chat messages
+        function loadChatMessages(chatId) {
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            // Clear existing messages
+            messagesContainer.innerHTML = '';
+            
+            // Add system message
+            const systemMessage = document.createElement('div');
+            systemMessage.className = 'system-message';
+            systemMessage.textContent = `Switched to ${chatId} chat`;
+            messagesContainer.appendChild(systemMessage);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Send message
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addMessage(message, 'own');
+                input.value = '';
+                
+                // Simulate typing indicator
+                showTypingIndicator();
+                
+                // Simulate response after 2 seconds
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    const responses = [
+                        "That's interesting!",
+                        "I agree with you.",
+                        "Thanks for sharing!",
+                        "Great point!",
+                        "I'll look into that."
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addMessage(randomResponse, 'other');
+                }, 2000);
+            }
+        }
+
+        // Add message to chat
+        function addMessage(text, type) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const sender = type === 'own' ? 'You' : 'Alice';
+            const avatar = type === 'own' ? 'ME' : 'AL';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-sender">${sender}</span>
+                        <span class="message-time">${time}</span>
+                    </div>
+                    <div class="message-text">${text}</div>
+                    <div class="message-actions">
+                        ${type === 'own' ? `
+                            <button class="message-action">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="message-action">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        ` : `
+                            <button class="message-action">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="message-action">
+                                <i class="fas fa-reply"></i>
+                            </button>
+                            <button class="message-action">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Handle key down events
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'flex';
+            indicator.querySelector('span').textContent = 'Alice is typing';
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'none';
+        }
+
+        // Utility functions
+        function toggleNotifications() {
+            console.log('Toggle notifications');
+        }
+
+        function showChatInfo() {
+            console.log('Show chat info');
+        }
+
+        function showChatSettings() {
+            console.log('Show chat settings');
+        }
+
+        function attachFile() {
+            console.log('Attach file');
+        }
+
+        function addEmoji() {
+            console.log('Add emoji');
+        }
+
+        // Simulate user role and show appropriate chats
+        function simulateUserRole() {
+            const roles = ['user', 'COMPANY_EMPLOYEE', 'COMPANY_HR_EMPLOYEE'];
+            const role = roles[Math.floor(Math.random() * roles.length)];
+            
+            const corpoChatTab = document.getElementById('corpoChatTab');
+            const groupChatTab = document.getElementById('groupChatTab');
+            const directChatTab = document.getElementById('directChatTab');
+            
+            if (role.includes('EMPLOYEE')) {
+                corpoChatTab.style.display = 'flex';
+            }
+            
+            groupChatTab.style.display = 'flex';
+            directChatTab.style.display = 'flex';
+            
+            console.log(`User role: ${role}`);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            simulateUserRole();
+            
+            // Auto-resize textarea
+            const textarea = document.getElementById('messageInput');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+        });
+    </script>
+</body>
+</html> 
