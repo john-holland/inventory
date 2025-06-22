@@ -30,6 +30,13 @@ const { CarePhotoController, router: carePhotoRouter } = require('./controllers/
 const { DisputeController, router: disputeRouter } = require('./controllers/dispute.controller');
 const { NotificationController, router: notificationRouter } = require('./controllers/notification.controller');
 const { WatchListController, router: watchListRouter } = require('./controllers/watchList.controller');
+const UserController = require('./controllers/UserController');
+const InventoryController = require('./controllers/InventoryController');
+const InvestmentController = require('./controllers/InvestmentController');
+const WaterLimitController = require('./controllers/WaterLimitController');
+const UnleashController = require('./controllers/UnleashController');
+const HealthCheckController = require('./controllers/HealthCheckController');
+const BanRequestController = require('./controllers/BanRequestController');
 
 // Import services
 const InvestmentPoolService = require('./services/investmentPoolService');
@@ -44,12 +51,15 @@ const DisputeService = require('./services/disputeService');
 const NotificationService = require('./services/notificationService');
 const WatchListService = require('./services/watchListService');
 const ShippingService = require('./services/shippingService');
+const UnleashService = require('./services/unleashService');
+const HealthCheckService = require('./services/healthCheckService');
+const BanRequestService = require('./services/banRequestService');
 
 // Import configuration
 const { getCoefficient } = require('./config/ConstantMarketCoefficients');
 
 // Import middleware
-const authMiddleware = require('./middleware/auth');
+const AuthMiddleware = require('./middleware/auth');
 const errorHandler = require('./middleware/errorHandler');
 const uploadMiddleware = require('./middleware/upload');
 
@@ -145,11 +155,18 @@ function initializeServices() {
     global.billingService = new BillingService(em, transactionRepository, userRepository, global.userService);
     global.mappingService = new MappingService(em, shippingRouteRepository);
     global.waterLimitService = new WaterLimitService(em, waterLimitRepository, userRepository, global.userService);
+    global.unleashService = new UnleashService(em);
+    global.healthCheckService = new HealthCheckService(em);
+    global.banRequestService = new BanRequestService(em);
     global.carePhotoService = new CarePhotoService(em, carePhotoRepository, holdRepository, userRepository);
     global.disputeService = new DisputeService(em, disputeRepository, holdRepository, carePhotoRepository, userRepository, global.notificationService, global.shippingService, global.investmentService);
     global.notificationService = new NotificationService(em, notificationRepository, userRepository);
     global.watchListService = new WatchListService(em, watchListRepository, userRepository, global.notificationService);
     global.shippingService = new ShippingService(em, shippingRouteRepository, userRepository);
+    
+    // Set up service dependencies
+    global.healthCheckService.setNotificationService(global.notificationService);
+    global.banRequestService.setNotificationService(global.notificationService);
     
     console.log('✅ Services initialized');
 }
@@ -164,10 +181,17 @@ function initializeControllers() {
     global.billingController = new BillingController(global.billingService, authMiddleware);
     global.mappingController = new MappingController(global.mappingService, authMiddleware);
     global.waterLimitController = new WaterLimitController(global.waterLimitService, authMiddleware);
+    global.unleashController = new UnleashController(em);
+    global.healthCheckController = new HealthCheckController(em);
+    global.banRequestController = new BanRequestController(em);
     global.carePhotoController = new CarePhotoController(global.carePhotoService, authMiddleware);
     global.disputeController = new DisputeController(global.disputeService, authMiddleware);
     global.notificationController = new NotificationController(global.notificationService, authMiddleware);
     global.watchListController = new WatchListController(global.watchListService, authMiddleware);
+    
+    // Set up controller dependencies
+    global.healthCheckController.setHealthCheckService(global.healthCheckService);
+    global.banRequestController.setBanRequestService(global.banRequestService);
     
     console.log('✅ Controllers initialized');
 }
@@ -180,6 +204,9 @@ function setupRoutes() {
     app.use('/api/billing', global.billingController.router);
     app.use('/api/mapping', global.mappingController.router);
     app.use('/api/water-limits', global.waterLimitController.router);
+    app.use('/api/unleash', global.unleashController.router);
+    app.use('/api/health-check', global.healthCheckController.router);
+    app.use('/api/ban-requests', global.banRequestController.router);
     app.use('/api/care-photos', global.carePhotoController.router);
     app.use('/api/disputes', global.disputeController.router);
     app.use('/api/notifications', global.notificationController.router);
@@ -212,6 +239,22 @@ function setupRoutes() {
 
     app.get('/map', (req, res) => {
         res.sendFile(path.join(__dirname, '../public/map.html'));
+    });
+
+    app.get('/unleash', (req, res) => {
+        res.sendFile(path.join(__dirname, '../public/unleash.html'));
+    });
+
+    app.get('/health-monitor', (req, res) => {
+        res.sendFile(path.join(__dirname, '../public/health-monitor.html'));
+    });
+
+    app.get('/csr-ban-management', (req, res) => {
+        res.sendFile(path.join(__dirname, '../public/csr-ban-management.html'));
+    });
+
+    app.get('/admin-ban-management', (req, res) => {
+        res.sendFile(path.join(__dirname, '../public/admin-ban-management.html'));
     });
 
     // Health check
@@ -268,6 +311,28 @@ function setupCronJobs(orm) {
             console.log('✅ Water limit releases processed');
         } catch (error) {
             console.error('❌ Water limit release processing failed:', error);
+        }
+    });
+
+    // Health checks - every 5 minutes
+    cron.schedule('*/5 * * * *', async () => {
+        try {
+            console.log('🏥 Running marketplace health checks...');
+            await global.healthCheckService.runHealthChecks();
+            console.log('✅ Health checks completed');
+        } catch (error) {
+            console.error('❌ Health checks failed:', error);
+        }
+    });
+
+    // Ban request cleanup - every hour
+    cron.schedule('0 * * * *', async () => {
+        try {
+            console.log('🧹 Cleaning up expired ban requests...');
+            await global.banRequestService.cleanupExpiredRequests();
+            console.log('✅ Ban request cleanup completed');
+        } catch (error) {
+            console.error('❌ Ban request cleanup failed:', error);
         }
     });
 

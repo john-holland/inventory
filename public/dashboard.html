@@ -259,9 +259,20 @@
                         </div>
                         <div class="col-md-6">
                             <div class="stats-card">
-                                <h5>Recent Activity</h5>
-                                <div id="recentActivity">
-                                    <!-- Recent activity will be loaded here -->
+                                <h5>Integration Status</h5>
+                                <div id="integrationStatus">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Amazon Integration</span>
+                                        <span id="amazonStatus" class="badge bg-success">✅ Active</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>eBay Integration</span>
+                                        <span id="ebayStatus" class="badge bg-success">✅ Active</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>Marketplace Search</span>
+                                        <span id="searchStatus" class="badge bg-success">✅ Active</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -328,6 +339,21 @@
                                 <div id="investmentChart" class="chart-container"></div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Unleash Toggles Section (Admin Only) -->
+                <div class="section unleash-section" id="unleashSection" style="display: none;">
+                    <div class="section-header">
+                        <h2>🚀 Unleash Feature Flags</h2>
+                        <p>Admin-only feature flag management</p>
+                    </div>
+                    <div class="unleash-grid" id="unleashGrid">
+                        <!-- Unleash toggles will be populated here for admin users -->
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" onclick="openUnleashAdmin()">🔧 Open Unleash Admin</button>
+                        <button class="btn btn-secondary" onclick="refreshUnleashToggles()">🔄 Refresh</button>
                     </div>
                 </div>
 
@@ -400,9 +426,11 @@
                     currentUser = data.user;
                     document.getElementById('userName').textContent = currentUser.username;
                     
-                    // Show admin links if user is moderator
-                    if (currentUser.isModerator) {
+                    // Show admin links if user is admin
+                    if (['ADMIN', 'IT_ADMIN', 'HR_ADMIN'].includes(currentUser.role)) {
                         document.getElementById('adminLinks').style.display = 'block';
+                        document.getElementById('unleashSection').style.display = 'block';
+                        loadUnleashToggles();
                     }
                     
                     loadOverviewData();
@@ -454,7 +482,8 @@
                 loadRecentActivity(),
                 loadWaterLimitStatus(),
                 loadNotifications(),
-                loadShippingRoutes()
+                loadShippingRoutes(),
+                loadIntegrationStatus()
             ]);
         }
 
@@ -653,6 +682,164 @@
 
         function loadUserDisputes() {
             // Implementation for loading user disputes
+        }
+
+        // Unleash Toggle Functions
+        async function loadUnleashToggles() {
+            try {
+                const response = await fetch('/api/unleash/toggles', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        renderUnleashToggles(data.data);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading Unleash toggles:', error);
+            }
+        }
+
+        function renderUnleashToggles(toggles) {
+            const grid = document.getElementById('unleashGrid');
+            grid.innerHTML = '';
+
+            Object.keys(toggles).forEach(toggleKey => {
+                const toggle = toggles[toggleKey];
+                const card = createUnleashToggleCard(toggleKey, toggle);
+                grid.appendChild(card);
+            });
+        }
+
+        function createUnleashToggleCard(toggleKey, toggle) {
+            const card = document.createElement('div');
+            card.className = 'col-md-4 mb-3';
+            
+            card.innerHTML = `
+                <div class="stats-card ${toggle.enabled ? 'success' : 'danger'}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>${formatToggleName(toggleKey)}</h6>
+                            <p class="text-muted mb-2">${toggle.description || 'No description'}</p>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" 
+                                       ${toggle.enabled ? 'checked' : ''} 
+                                       onchange="toggleUnleashFeature('${toggleKey}', this.checked)">
+                                <label class="form-check-label">
+                                    ${toggle.enabled ? 'Enabled' : 'Disabled'}
+                                </label>
+                            </div>
+                        </div>
+                        <i class="fas fa-toggle-${toggle.enabled ? 'on' : 'off'} fa-2x ${toggle.enabled ? 'text-success' : 'text-danger'}"></i>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function formatToggleName(key) {
+            return key.replace(/([A-Z])/g, ' $1')
+                     .replace(/^./, str => str.toUpperCase())
+                     .replace(/([A-Z])/g, ' $1')
+                     .trim();
+        }
+
+        async function toggleUnleashFeature(toggleKey, enabled) {
+            try {
+                const response = await fetch('/api/unleash/toggles', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        toggleKey,
+                        enabled
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        showNotification(data.message, 'success');
+                        loadUnleashToggles();
+                    } else {
+                        showNotification('Failed to update toggle: ' + data.error, 'error');
+                    }
+                }
+            } catch (error) {
+                showNotification('Error updating toggle: ' + error.message, 'error');
+            }
+        }
+
+        function openUnleashAdmin() {
+            window.open('/unleash.html', '_blank');
+        }
+
+        function refreshUnleashToggles() {
+            loadUnleashToggles();
+            showNotification('Unleash toggles refreshed', 'success');
+        }
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        // Integration Status Functions
+        async function loadIntegrationStatus() {
+            try {
+                const response = await fetch('/api/unleash/toggles', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        const toggles = data.data;
+                        
+                        // Update status badges
+                        document.getElementById('amazonStatus').textContent = 
+                            toggles.amazonIntegration?.enabled ? '✅ Active' : '❌ Disabled';
+                        document.getElementById('amazonStatus').className = 
+                            toggles.amazonIntegration?.enabled ? 'badge bg-success' : 'badge bg-danger';
+                        
+                        document.getElementById('ebayStatus').textContent = 
+                            toggles.ebayIntegration?.enabled ? '✅ Active' : '❌ Disabled';
+                        document.getElementById('ebayStatus').className = 
+                            toggles.ebayIntegration?.enabled ? 'badge bg-success' : 'badge bg-danger';
+                        
+                        document.getElementById('searchStatus').textContent = 
+                            toggles.marketplaceSearch?.enabled ? '✅ Active' : '❌ Disabled';
+                        document.getElementById('searchStatus').className = 
+                            toggles.marketplaceSearch?.enabled ? 'badge bg-success' : 'badge bg-danger';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading integration status:', error);
+            }
         }
     </script>
 </body>

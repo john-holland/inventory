@@ -32,6 +32,44 @@ class eBayService {
     this.tokenExpiry = null;
   }
 
+  /**
+   * Check if eBay integration is enabled
+   */
+  async checkIntegrationEnabled(user = null) {
+    try {
+      const adminUsers = await this.DI.userRepository.find({ 
+        role: { $in: ['ADMIN', 'IT_ADMIN', 'HR_ADMIN'] } 
+      });
+
+      for (const admin of adminUsers) {
+        if (admin.unleashToggles && admin.unleashToggles.ebayIntegration?.enabled) {
+          return true;
+        }
+      }
+
+      // Check user-specific toggle if provided
+      if (user && user.unleashToggles && user.unleashToggles.ebayIntegration?.enabled) {
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Error checking eBay integration status:', error);
+      return false; // Default to disabled on error
+    }
+  }
+
+  /**
+   * Validate integration before making API calls
+   */
+  async validateIntegration(user = null) {
+    const isEnabled = await this.checkIntegrationEnabled(user);
+    if (!isEnabled) {
+      throw new Error('eBay integration is currently disabled. Please contact an administrator.');
+    }
+    return true;
+  }
+
   // Get OAuth access token
   async getAccessToken() {
     if (this.accessToken && this.tokenExpiry && new Date() < this.tokenExpiry) {
@@ -62,8 +100,11 @@ class eBayService {
   }
 
   // Search eBay items
-  async searchItems(keywords, categoryId = null, minPrice = null, maxPrice = null, sortBy = 'bestMatch') {
+  async searchItems(keywords, categoryId = null, minPrice = null, maxPrice = null, sortBy = 'bestMatch', user = null) {
     try {
+      // Check if integration is enabled
+      await this.validateIntegration(user);
+
       const token = await this.getAccessToken();
       
       const params = {
@@ -89,14 +130,20 @@ class eBayService {
 
       return this.parseSearchResults(response.data);
     } catch (error) {
+      if (error.message.includes('disabled')) {
+        throw error; // Re-throw integration disabled errors
+      }
       console.error('Error searching eBay items:', error);
       throw new Error('Failed to search eBay items');
     }
   }
 
   // Get item details by item ID
-  async getItemDetails(itemId) {
+  async getItemDetails(itemId, user = null) {
     try {
+      // Check if integration is enabled
+      await this.validateIntegration(user);
+
       const token = await this.getAccessToken();
       
       const response = await axios.get(`${this.baseUrl}/buy/browse/v1/item/${itemId}`, {
@@ -108,6 +155,9 @@ class eBayService {
 
       return this.parseItemDetails(response.data);
     } catch (error) {
+      if (error.message.includes('disabled')) {
+        throw error; // Re-throw integration disabled errors
+      }
       console.error('Error getting item details:', error);
       throw new Error('Failed to get item details');
     }

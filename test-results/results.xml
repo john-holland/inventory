@@ -1,0 +1,646 @@
+<testsuites id="" name="" tests="15" failures="12" skipped="0" errors="0" time="162.198793">
+<testsuite name="guided-tour.spec.js" timestamp="2025-06-21T23:05:30.918Z" hostname="chromium" tests="3" failures="2" skipped="0" time="100.011" errors="0">
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Complete Feature Tour" classname="guided-tour.spec.js" time="32.546">
+<failure message="guided-tour.spec.js:4:3 Complete Feature Tour" type="FAILURE">
+<![CDATA[  [chromium] › guided-tour.spec.js:4:3 › Cursor Guided Tour - Distributed Inventory System › Complete Feature Tour 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForTimeout: Test timeout of 30000ms exceeded.
+
+      44 |     await dashboardAmazonToggle.click();
+      45 |     console.log('✅ Dashboard: Toggled Amazon');
+    > 46 |     await page.waitForTimeout(3000);
+         |                ^
+      47 |     
+      48 |     await dashboardEbayToggle.click();
+      49 |     console.log('✅ Dashboard: Toggled eBay');
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:46:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🚀 Starting Cursor Guided Tour...
+📍 Landing on home page
+🛍️ Testing marketplace toggles...
+✅ Toggled Amazon
+✅ Toggled eBay
+✅ Toggled Unsplash
+📊 Navigating to dashboard...
+🎛️ Testing dashboard features...
+✅ Dashboard: Toggled Amazon
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-chromium/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Test User Authentication Flow" classname="guided-tour.spec.js" time="32.969">
+<system-out>
+<![CDATA[🔐 Testing authentication flow...
+👤 Testing role: user
+👤 Testing role: COMPANY_EMPLOYEE
+✅ COMPANY_EMPLOYEE: Corpo chat visible
+👤 Testing role: COMPANY_HR_EMPLOYEE
+✅ COMPANY_HR_EMPLOYEE: Corpo chat visible
+]]>
+</system-out>
+</testcase>
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Test Ban Level Restrictions" classname="guided-tour.spec.js" time="34.496">
+<failure message="guided-tour.spec.js:271:3 Test Ban Level Restrictions" type="FAILURE">
+<![CDATA[  [chromium] › guided-tour.spec.js:271:3 › Cursor Guided Tour - Distributed Inventory System › Test Ban Level Restrictions 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: Timed out 5000ms waiting for expect(locator).not.toBeVisible()
+
+    Locator: locator('.chat-container')
+    Expected: not visible
+    Received: visible
+    Call log:
+      - Expect "not toBeVisible" with timeout 5000ms
+      - waiting for locator('.chat-container')
+        9 × locator resolved to <div class="chat-container">…</div>
+          - unexpected value "visible"
+
+
+      291 |       if (banLevel === 'no_chat' || banLevel === 'banned') {
+      292 |         const chatContainer = page.locator('.chat-container');
+    > 293 |         await expect(chatContainer).not.toBeVisible();
+          |                                         ^
+      294 |         console.log(`✅ ${banLevel}: Chat properly restricted`);
+      295 |       } else {
+      296 |         const chatContainer = page.locator('.chat-container');
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:293:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🚫 Testing ban level restrictions...
+🚫 Testing ban level: none
+✅ none: Chat accessible
+🚫 Testing ban level: chat_limit
+✅ chat_limit: Chat accessible
+🚫 Testing ban level: no_chat
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-chromium/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="guided-tour.spec.js" timestamp="2025-06-21T23:05:30.918Z" hostname="firefox" tests="3" failures="3" skipped="0" time="85.719" errors="0">
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Complete Feature Tour" classname="guided-tour.spec.js" time="30.639">
+<failure message="guided-tour.spec.js:4:3 Complete Feature Tour" type="FAILURE">
+<![CDATA[  [firefox] › guided-tour.spec.js:4:3 › Cursor Guided Tour - Distributed Inventory System › Complete Feature Tour 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForTimeout: Test timeout of 30000ms exceeded.
+
+      44 |     await dashboardAmazonToggle.click();
+      45 |     console.log('✅ Dashboard: Toggled Amazon');
+    > 46 |     await page.waitForTimeout(3000);
+         |                ^
+      47 |     
+      48 |     await dashboardEbayToggle.click();
+      49 |     console.log('✅ Dashboard: Toggled eBay');
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:46:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-firefox/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🚀 Starting Cursor Guided Tour...
+📍 Landing on home page
+🛍️ Testing marketplace toggles...
+✅ Toggled Amazon
+✅ Toggled eBay
+✅ Toggled Unsplash
+📊 Navigating to dashboard...
+🎛️ Testing dashboard features...
+✅ Dashboard: Toggled Amazon
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-firefox/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-firefox/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Test User Authentication Flow" classname="guided-tour.spec.js" time="23.831">
+<failure message="guided-tour.spec.js:239:3 Test User Authentication Flow" type="FAILURE">
+<![CDATA[  [firefox] › guided-tour.spec.js:239:3 › Cursor Guided Tour - Distributed Inventory System › Test User Authentication Flow 
+
+    Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+    Locator: locator('#corpoChatTab')
+    Expected: visible
+    Received: hidden
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('#corpoChatTab')
+        8 × locator resolved to <div class="chat-tab" id="corpoChatTab" onclick="switchChatTab('corpo')">…</div>
+          - unexpected value "hidden"
+
+
+      261 |       if (role.includes('EMPLOYEE')) {
+      262 |         const corpoChatTab = page.locator('#corpoChatTab');
+    > 263 |         await expect(corpoChatTab).toBeVisible();
+          |                                    ^
+      264 |         console.log(`✅ ${role}: Corpo chat visible`);
+      265 |       }
+      266 |       
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:263:36
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-firefox/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🔐 Testing authentication flow...
+👤 Testing role: user
+👤 Testing role: COMPANY_EMPLOYEE
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-firefox/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-firefox/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Test Ban Level Restrictions" classname="guided-tour.spec.js" time="31.249">
+<failure message="guided-tour.spec.js:271:3 Test Ban Level Restrictions" type="FAILURE">
+<![CDATA[  [firefox] › guided-tour.spec.js:271:3 › Cursor Guided Tour - Distributed Inventory System › Test Ban Level Restrictions 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: Timed out 5000ms waiting for expect(locator).not.toBeVisible()
+
+    Locator: locator('.chat-container')
+    Expected: not visible
+    Received: visible
+    Call log:
+      - Expect "not toBeVisible" with timeout 5000ms
+      - waiting for locator('.chat-container')
+        8 × locator resolved to <div class="chat-container">…</div>
+          - unexpected value "visible"
+
+
+      291 |       if (banLevel === 'no_chat' || banLevel === 'banned') {
+      292 |         const chatContainer = page.locator('.chat-container');
+    > 293 |         await expect(chatContainer).not.toBeVisible();
+          |                                         ^
+      294 |         console.log(`✅ ${banLevel}: Chat properly restricted`);
+      295 |       } else {
+      296 |         const chatContainer = page.locator('.chat-container');
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:293:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-firefox/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-firefox/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-firefox/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🚫 Testing ban level restrictions...
+🚫 Testing ban level: none
+✅ none: Chat accessible
+🚫 Testing ban level: chat_limit
+✅ chat_limit: Chat accessible
+🚫 Testing ban level: no_chat
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-firefox/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-firefox/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-firefox/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="guided-tour.spec.js" timestamp="2025-06-21T23:05:30.918Z" hostname="webkit" tests="3" failures="3" skipped="0" time="109.139" errors="0">
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Complete Feature Tour" classname="guided-tour.spec.js" time="38.525">
+<failure message="guided-tour.spec.js:4:3 Complete Feature Tour" type="FAILURE">
+<![CDATA[  [webkit] › guided-tour.spec.js:4:3 › Cursor Guided Tour - Distributed Inventory System › Complete Feature Tour 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      31 |     console.log('📊 Navigating to dashboard...');
+      32 |     await page.click('text=Open Dashboard');
+    > 33 |     await page.waitForURL('**/dashboard');
+         |                ^
+      34 |     await page.waitForTimeout(3000);
+      35 |     
+      36 |     // Test dashboard features
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:33:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-webkit/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-webkit/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🚀 Starting Cursor Guided Tour...
+📍 Landing on home page
+🛍️ Testing marketplace toggles...
+✅ Toggled Amazon
+✅ Toggled eBay
+✅ Toggled Unsplash
+📊 Navigating to dashboard...
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-webkit/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-webkit/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-webkit/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Test User Authentication Flow" classname="guided-tour.spec.js" time="32.666">
+<failure message="guided-tour.spec.js:239:3 Test User Authentication Flow" type="FAILURE">
+<![CDATA[  [webkit] › guided-tour.spec.js:239:3 › Cursor Guided Tour - Distributed Inventory System › Test User Authentication Flow 
+
+    Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+    Locator: locator('#corpoChatTab')
+    Expected: visible
+    Received: hidden
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('#corpoChatTab')
+        9 × locator resolved to <div class="chat-tab" id="corpoChatTab" onclick="switchChatTab('corpo')">…</div>
+          - unexpected value "hidden"
+
+
+      261 |       if (role.includes('EMPLOYEE')) {
+      262 |         const corpoChatTab = page.locator('#corpoChatTab');
+    > 263 |         await expect(corpoChatTab).toBeVisible();
+          |                                    ^
+      264 |         console.log(`✅ ${role}: Corpo chat visible`);
+      265 |       }
+      266 |       
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:263:36
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-webkit/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-webkit/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🔐 Testing authentication flow...
+👤 Testing role: user
+👤 Testing role: COMPANY_EMPLOYEE
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-webkit/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-webkit/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--f0d50-st-User-Authentication-Flow-webkit/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Test Ban Level Restrictions" classname="guided-tour.spec.js" time="37.948">
+<failure message="guided-tour.spec.js:271:3 Test Ban Level Restrictions" type="FAILURE">
+<![CDATA[  [webkit] › guided-tour.spec.js:271:3 › Cursor Guided Tour - Distributed Inventory System › Test Ban Level Restrictions 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: expect(locator).not.toBeVisible()
+
+    Locator: locator('.chat-container')
+    Expected: not visible
+    Received: visible
+    Call log:
+      - Expect "not toBeVisible" with timeout 5000ms
+      - waiting for locator('.chat-container')
+        8 × locator resolved to <div class="chat-container">…</div>
+          - unexpected value "visible"
+
+
+      291 |       if (banLevel === 'no_chat' || banLevel === 'banned') {
+      292 |         const chatContainer = page.locator('.chat-container');
+    > 293 |         await expect(chatContainer).not.toBeVisible();
+          |                                         ^
+      294 |         console.log(`✅ ${banLevel}: Chat properly restricted`);
+      295 |       } else {
+      296 |         const chatContainer = page.locator('.chat-container');
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:293:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-webkit/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-webkit/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🚫 Testing ban level restrictions...
+🚫 Testing ban level: none
+✅ none: Chat accessible
+🚫 Testing ban level: chat_limit
+✅ chat_limit: Chat accessible
+🚫 Testing ban level: no_chat
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-webkit/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-webkit/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-webkit/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="guided-tour.spec.js" timestamp="2025-06-21T23:05:30.918Z" hostname="Mobile Chrome" tests="3" failures="2" skipped="0" time="85.834" errors="0">
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Complete Feature Tour" classname="guided-tour.spec.js" time="30.628">
+<failure message="guided-tour.spec.js:4:3 Complete Feature Tour" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › guided-tour.spec.js:4:3 › Cursor Guided Tour - Distributed Inventory System › Complete Feature Tour 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForTimeout: Target page, context or browser has been closed
+
+      44 |     await dashboardAmazonToggle.click();
+      45 |     console.log('✅ Dashboard: Toggled Amazon');
+    > 46 |     await page.waitForTimeout(3000);
+         |                ^
+      47 |     
+      48 |     await dashboardEbayToggle.click();
+      49 |     console.log('✅ Dashboard: Toggled eBay');
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:46:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Chrome/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🚀 Starting Cursor Guided Tour...
+📍 Landing on home page
+🛍️ Testing marketplace toggles...
+✅ Toggled Amazon
+✅ Toggled eBay
+✅ Toggled Unsplash
+📊 Navigating to dashboard...
+🎛️ Testing dashboard features...
+✅ Dashboard: Toggled Amazon
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Chrome/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Chrome/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Chrome/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Test User Authentication Flow" classname="guided-tour.spec.js" time="26.182">
+<system-out>
+<![CDATA[🔐 Testing authentication flow...
+👤 Testing role: user
+👤 Testing role: COMPANY_EMPLOYEE
+✅ COMPANY_EMPLOYEE: Corpo chat visible
+👤 Testing role: COMPANY_HR_EMPLOYEE
+✅ COMPANY_HR_EMPLOYEE: Corpo chat visible
+]]>
+</system-out>
+</testcase>
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Test Ban Level Restrictions" classname="guided-tour.spec.js" time="29.024">
+<failure message="guided-tour.spec.js:271:3 Test Ban Level Restrictions" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › guided-tour.spec.js:271:3 › Cursor Guided Tour - Distributed Inventory System › Test Ban Level Restrictions 
+
+    Error: Timed out 5000ms waiting for expect(locator).not.toBeVisible()
+
+    Locator: locator('.chat-container')
+    Expected: not visible
+    Received: visible
+    Call log:
+      - Expect "not toBeVisible" with timeout 5000ms
+      - waiting for locator('.chat-container')
+        9 × locator resolved to <div class="chat-container">…</div>
+          - unexpected value "visible"
+
+
+      291 |       if (banLevel === 'no_chat' || banLevel === 'banned') {
+      292 |         const chatContainer = page.locator('.chat-container');
+    > 293 |         await expect(chatContainer).not.toBeVisible();
+          |                                         ^
+      294 |         console.log(`✅ ${banLevel}: Chat properly restricted`);
+      295 |       } else {
+      296 |         const chatContainer = page.locator('.chat-container');
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:293:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Chrome/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🚫 Testing ban level restrictions...
+🚫 Testing ban level: none
+✅ none: Chat accessible
+🚫 Testing ban level: chat_limit
+✅ chat_limit: Chat accessible
+🚫 Testing ban level: no_chat
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Chrome/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Chrome/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Chrome/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="guided-tour.spec.js" timestamp="2025-06-21T23:05:30.918Z" hostname="Mobile Safari" tests="3" failures="2" skipped="0" time="79.833" errors="0">
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Complete Feature Tour" classname="guided-tour.spec.js" time="30.343">
+<failure message="guided-tour.spec.js:4:3 Complete Feature Tour" type="FAILURE">
+<![CDATA[  [Mobile Safari] › guided-tour.spec.js:4:3 › Cursor Guided Tour - Distributed Inventory System › Complete Feature Tour 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      31 |     console.log('📊 Navigating to dashboard...');
+      32 |     await page.click('text=Open Dashboard');
+    > 33 |     await page.waitForURL('**/dashboard');
+         |                ^
+      34 |     await page.waitForTimeout(3000);
+      35 |     
+      36 |     // Test dashboard features
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:33:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Safari/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Safari/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Safari/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🚀 Starting Cursor Guided Tour...
+📍 Landing on home page
+🛍️ Testing marketplace toggles...
+✅ Toggled Amazon
+✅ Toggled eBay
+✅ Toggled Unsplash
+📊 Navigating to dashboard...
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Safari/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Safari/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--aa47c-ystem-Complete-Feature-Tour-Mobile-Safari/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Test User Authentication Flow" classname="guided-tour.spec.js" time="23.747">
+<system-out>
+<![CDATA[🔐 Testing authentication flow...
+👤 Testing role: user
+👤 Testing role: COMPANY_EMPLOYEE
+✅ COMPANY_EMPLOYEE: Corpo chat visible
+👤 Testing role: COMPANY_HR_EMPLOYEE
+✅ COMPANY_HR_EMPLOYEE: Corpo chat visible
+]]>
+</system-out>
+</testcase>
+<testcase name="Cursor Guided Tour - Distributed Inventory System › Test Ban Level Restrictions" classname="guided-tour.spec.js" time="25.743">
+<failure message="guided-tour.spec.js:271:3 Test Ban Level Restrictions" type="FAILURE">
+<![CDATA[  [Mobile Safari] › guided-tour.spec.js:271:3 › Cursor Guided Tour - Distributed Inventory System › Test Ban Level Restrictions 
+
+    Error: Timed out 5000ms waiting for expect(locator).not.toBeVisible()
+
+    Locator: locator('.chat-container')
+    Expected: not visible
+    Received: visible
+    Call log:
+      - Expect "not toBeVisible" with timeout 5000ms
+      - waiting for locator('.chat-container')
+        9 × locator resolved to <div class="chat-container">…</div>
+          - unexpected value "visible"
+
+
+      291 |       if (banLevel === 'no_chat' || banLevel === 'banned') {
+      292 |         const chatContainer = page.locator('.chat-container');
+    > 293 |         await expect(chatContainer).not.toBeVisible();
+          |                                         ^
+      294 |         console.log(`✅ ${banLevel}: Chat properly restricted`);
+      295 |       } else {
+      296 |         const chatContainer = page.locator('.chat-container');
+        at /Users/johnholland/dev/inventory/tests/guided-tour.spec.js:293:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Safari/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Safari/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Safari/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[🚫 Testing ban level restrictions...
+🚫 Testing ban level: none
+✅ none: Chat accessible
+🚫 Testing ban level: chat_limit
+✅ chat_limit: Chat accessible
+🚫 Testing ban level: no_chat
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Safari/test-failed-1.png]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Safari/video.webm]]
+
+[[ATTACHMENT|guided-tour-Cursor-Guided--8c889-Test-Ban-Level-Restrictions-Mobile-Safari/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>

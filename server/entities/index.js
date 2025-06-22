@@ -44,6 +44,10 @@ const { Employee } = require("./Employee");
 const { JobChange } = require("./JobChange");
 const { Meeting } = require("./Meeting");
 
+// New entities for HealthCheck and BanRequest
+const { HealthCheck } = require("./HealthCheck");
+const { BanRequest } = require("./BanRequest");
+
 module.exports = [
   BaseEntity, 
   Post, 
@@ -89,5 +93,9 @@ module.exports = [
   Interview,
   Employee,
   JobChange,
-  Meeting
+  Meeting,
+  
+  // New entities for HealthCheck and BanRequest
+  HealthCheck,
+  BanRequest
 ];

@@ -30,6 +30,44 @@ class AmazonService {
     };
   }
 
+  /**
+   * Check if Amazon integration is enabled
+   */
+  async checkIntegrationEnabled(user = null) {
+    try {
+      const adminUsers = await this.DI.userRepository.find({ 
+        role: { $in: ['ADMIN', 'IT_ADMIN', 'HR_ADMIN'] } 
+      });
+
+      for (const admin of adminUsers) {
+        if (admin.unleashToggles && admin.unleashToggles.amazonIntegration?.enabled) {
+          return true;
+        }
+      }
+
+      // Check user-specific toggle if provided
+      if (user && user.unleashToggles && user.unleashToggles.amazonIntegration?.enabled) {
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Error checking Amazon integration status:', error);
+      return false; // Default to disabled on error
+    }
+  }
+
+  /**
+   * Validate integration before making API calls
+   */
+  async validateIntegration(user = null) {
+    const isEnabled = await this.checkIntegrationEnabled(user);
+    if (!isEnabled) {
+      throw new Error('Amazon integration is currently disabled. Please contact an administrator.');
+    }
+    return true;
+  }
+
   // Generate Amazon API signature
   generateSignature(stringToSign, secretKey) {
     const hmac = crypto.createHmac('sha256', secretKey);
@@ -73,8 +111,11 @@ class AmazonService {
   }
 
   // Search Amazon products
-  async searchProducts(keywords, category = null, minPrice = null, maxPrice = null, sortBy = 'relevance') {
+  async searchProducts(keywords, category = null, minPrice = null, maxPrice = null, sortBy = 'relevance', user = null) {
     try {
+      // Check if integration is enabled
+      await this.validateIntegration(user);
+
       const params = {
         Keywords: keywords,
         SearchIndex: category || 'All',
@@ -90,14 +131,20 @@ class AmazonService {
       
       return this.parseSearchResults(response.data);
     } catch (error) {
+      if (error.message.includes('disabled')) {
+        throw error; // Re-throw integration disabled errors
+      }
       console.error('Error searching Amazon products:', error);
       throw new Error('Failed to search Amazon products');
     }
   }
 
   // Get product details by ASIN
-  async getProductDetails(asin) {
+  async getProductDetails(asin, user = null) {
     try {
+      // Check if integration is enabled
+      await this.validateIntegration(user);
+
       const params = {
         ItemId: asin,
         ResponseGroup: 'Large,Offers,Images,Reviews'
@@ -108,6 +155,9 @@ class AmazonService {
       
       return this.parseProductDetails(response.data);
     } catch (error) {
+      if (error.message.includes('disabled')) {
+        throw error; // Re-throw integration disabled errors
+      }
       console.error('Error getting product details:', error);
       throw new Error('Failed to get product details');
     }

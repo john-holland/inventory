@@ -5,6 +5,7 @@
   "main": "server/app.js",
   "scripts": {
     "start": "node server/app.js",
+    "start:tour": "node server/app-simple.js",
     "dev": "nodemon server/app.js",
     "test": "jest",
     "setup": "node scripts/setup.js",

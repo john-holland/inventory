@@ -67,7 +67,7 @@ class GuidedTourRunner {
 
   async startServer() {
     return new Promise((resolve, reject) => {
-      this.serverProcess = spawn('npm', ['start'], {
+      this.serverProcess = spawn('npm', ['run', 'start:tour'], {
         stdio: 'pipe',
         shell: true
       });

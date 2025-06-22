@@ -13,7 +13,11 @@ const User = {
     wallet: { type: 'decimal', precision: 10, scale: 2, default: 1000.00 },
     role: { type: 'string', length: 20, default: 'user' },
     isActive: { type: 'boolean', default: true },
-    banLevel: { type: 'string', length: 20, default: 'none' }, // 'none', 'chat_limit', 'no_chat', 'banned'
+    banLevel: { 
+      type: 'enum', 
+      values: ['none', 'chat_limit', 'no_chat', 'list_ban', 'temporary', 'permanent'], 
+      default: 'none' 
+    },
     banReason: { type: 'text', nullable: true },
     banExpiresAt: { type: 'datetime', nullable: true },
     createdAt: { type: 'datetime', onCreate: () => new Date() },
@@ -24,8 +28,27 @@ const User = {
       type: 'json', 
       default: {
         amazon: { enabled: true, gracefulFalloff: true },
-        ebay: { enabled: true, gracefulFalloff: true },
-        unsplash: { enabled: true, gracefulFalloff: true }
+        ebay: { enabled: true, gracefulFalloff: true }
+      }
+    },
+    
+    // Unleash toggles (admin only)
+    unleashToggles: {
+      type: 'json',
+      default: {
+        newFeatures: { enabled: false, description: 'Enable new experimental features' },
+        betaFeatures: { enabled: false, description: 'Enable beta features for testing' },
+        advancedAnalytics: { enabled: false, description: 'Enable advanced analytics dashboard' },
+        aiIntegration: { enabled: false, description: 'Enable AI-powered recommendations' },
+        realTimeNotifications: { enabled: false, description: 'Enable real-time push notifications' },
+        darkMode: { enabled: false, description: 'Enable dark mode theme' },
+        mobileOptimization: { enabled: false, description: 'Enable mobile-specific optimizations' },
+        performanceMode: { enabled: false, description: 'Enable high-performance mode' },
+        amazonIntegration: { enabled: true, description: 'Enable Amazon marketplace integration (disable for security/API issues)' },
+        ebayIntegration: { enabled: true, description: 'Enable eBay marketplace integration (disable for security/API issues)' },
+        marketplaceSearch: { enabled: true, description: 'Enable cross-marketplace search functionality' },
+        autoSync: { enabled: true, description: 'Enable automatic marketplace data synchronization' },
+        autoHealthcheckHousekeeping: { enabled: true, description: 'Enable automatic health check monitoring and management' }
       }
     },
     

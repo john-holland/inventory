@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSR Ban Management - Customer Support</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .csr-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #718096;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(237, 137, 54, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            min-height: 100px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .requests-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .request-card {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .request-card.pending {
+            border-left-color: #ed8936;
+        }
+
+        .request-card.approved {
+            border-left-color: #48bb78;
+        }
+
+        .request-card.rejected {
+            border-left-color: #e53e3e;
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .request-type {
+            font-weight: 600;
+            color: #2d3748;
+            text-transform: uppercase;
+        }
+
+        .request-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .request-status.pending {
+            background: #fed7aa;
+            color: #744210;
+        }
+
+        .request-status.approved {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .request-status.rejected {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .request-details {
+            margin-bottom: 15px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .detail-value {
+            color: #718096;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .close {
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        .close:hover {
+            color: #2d3748;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .requests-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ CSR Ban Management</h1>
+            <p>Customer Support Role - Dispute Resolution & Ban Management</p>
+            <div class="csr-badge">CUSTOMER SUPPORT ROLE</div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('ban-requests')">🚫 Ban Requests</div>
+            <div class="tab" onclick="switchTab('ban-repeals')">🔄 Ban Repeals</div>
+            <div class="tab" onclick="switchTab('disputes')">⚖️ Disputes</div>
+            <div class="tab" onclick="switchTab('history')">📊 History</div>
+        </div>
+
+        <!-- Ban Requests Tab -->
+        <div id="ban-requests" class="tab-content active">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Create Ban Request</h2>
+                </div>
+                <form id="banRequestForm">
+                    <div class="form-group">
+                        <label class="form-label">Target Username</label>
+                        <input type="text" class="form-input" id="targetUsername" placeholder="Enter username to ban" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ban Level</label>
+                        <select class="form-select" id="banLevel" required>
+                            <option value="">Select ban level</option>
+                            <option value="chat_ban">Chat Ban</option>
+                            <option value="list_ban">List Ban</option>
+                            <option value="permanent">Permanent Ban</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Reason</label>
+                        <textarea class="form-textarea" id="banReason" placeholder="Provide detailed reason for the ban request..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Evidence (Optional)</label>
+                        <textarea class="form-textarea" id="banEvidence" placeholder="Screenshots, chat logs, or other evidence..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger">🚫 Submit Ban Request</button>
+                </form>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">My Ban Requests</h2>
+                    <button class="btn btn-primary" onclick="loadBanRequests()">🔄 Refresh</button>
+                </div>
+                <div id="banRequestsList" class="requests-grid">
+                    <!-- Ban requests will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Ban Repeals Tab -->
+        <div id="ban-repeals" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Create Ban Repeal</h2>
+                </div>
+                <form id="banRepealForm">
+                    <div class="form-group">
+                        <label class="form-label">Banned Username</label>
+                        <input type="text" class="form-input" id="repealUsername" placeholder="Enter username to repeal ban for" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Repeal Reason</label>
+                        <textarea class="form-textarea" id="repealReason" placeholder="Provide detailed reason for the ban repeal..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Evidence (Optional)</label>
+                        <textarea class="form-textarea" id="repealEvidence" placeholder="Supporting evidence for the repeal..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">🔄 Submit Ban Repeal</button>
+                </form>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">My Ban Repeals</h2>
+                    <button class="btn btn-primary" onclick="loadBanRepeals()">🔄 Refresh</button>
+                </div>
+                <div id="banRepealsList" class="requests-grid">
+                    <!-- Ban repeals will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Disputes Tab -->
+        <div id="disputes" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Active Disputes</h2>
+                    <button class="btn btn-primary" onclick="loadDisputes()">🔄 Refresh</button>
+                </div>
+                <div id="disputesList" class="requests-grid">
+                    <!-- Disputes will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="history" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Request History</h2>
+                    <div>
+                        <button class="btn btn-primary" onclick="loadHistory()">🔄 Refresh</button>
+                        <button class="btn btn-warning" onclick="exportHistory()">📤 Export</button>
+                    </div>
+                </div>
+                <div id="historyList" class="requests-grid">
+                    <!-- History will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for request details -->
+    <div id="requestModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Request Details</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div id="modalContent">
+                <!-- Modal content will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        let currentUser = null;
+        let currentTab = 'ban-requests';
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+        });
+
+        async function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/users/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    
+                    // Check if user has CSR access
+                    if (!['CUSTOMER_SUPPORT_ROLE_EMPLOYEE', 'ADMIN', 'IT_ADMIN', 'HR_ADMIN'].includes(currentUser.role)) {
+                        showNotification('Insufficient permissions to access CSR tools', 'error');
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 2000);
+                        return;
+                    }
+                    
+                    loadBanRequests();
+                } else {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            }
+        }
+
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to selected tab
+            event.target.classList.add('active');
+            
+            currentTab = tabName;
+            
+            // Load appropriate data
+            switch(tabName) {
+                case 'ban-requests':
+                    loadBanRequests();
+                    break;
+                case 'ban-repeals':
+                    loadBanRepeals();
+                    break;
+                case 'disputes':
+                    loadDisputes();
+                    break;
+                case 'history':
+                    loadHistory();
+                    break;
+            }
+        }
+
+        // Ban Request Form Handler
+        document.getElementById('banRequestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const targetUsername = document.getElementById('targetUsername').value;
+            const banLevel = document.getElementById('banLevel').value;
+            const reason = document.getElementById('banReason').value;
+            const evidence = document.getElementById('banEvidence').value;
+
+            try {
+                // First, get the user ID from username
+                const userResponse = await fetch(`/api/users/search?username=${targetUsername}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!userResponse.ok) {
+                    showNotification('User not found', 'error');
+                    return;
+                }
+
+                const userData = await userResponse.json();
+                const targetUserId = userData.user.id;
+
+                // Create ban request
+                const response = await fetch('/api/ban-requests/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        targetUserId,
+                        banLevel,
+                        reason,
+                        evidence: evidence ? { description: evidence } : null,
+                        type: 'ban_request'
+                    })
+                });
+
+                if (response.ok) {
+                    showNotification('Ban request submitted successfully', 'success');
+                    document.getElementById('banRequestForm').reset();
+                    loadBanRequests();
+                } else {
+                    const error = await response.json();
+                    showNotification('Failed to submit ban request: ' + error.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error submitting ban request: ' + error.message, 'error');
+            }
+        });
+
+        // Ban Repeal Form Handler
+        document.getElementById('banRepealForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('repealUsername').value;
+            const reason = document.getElementById('repealReason').value;
+            const evidence = document.getElementById('repealEvidence').value;
+
+            try {
+                // First, get the user ID from username
+                const userResponse = await fetch(`/api/users/search?username=${username}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!userResponse.ok) {
+                    showNotification('User not found', 'error');
+                    return;
+                }
+
+                const userData = await userResponse.json();
+                const targetUserId = userData.user.id;
+
+                // Create ban repeal
+                const response = await fetch('/api/ban-requests/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        targetUserId,
+                        banLevel: 'none', // Repeal to no ban
+                        reason,
+                        evidence: evidence ? { description: evidence } : null,
+                        type: 'ban_repeal'
+                    })
+                });
+
+                if (response.ok) {
+                    showNotification('Ban repeal submitted successfully', 'success');
+                    document.getElementById('banRepealForm').reset();
+                    loadBanRepeals();
+                } else {
+                    const error = await response.json();
+                    showNotification('Failed to submit ban repeal: ' + error.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Error submitting ban repeal: ' + error.message, 'error');
+            }
+        });
+
+        async function loadBanRequests() {
+            try {
+                const response = await fetch('/api/ban-requests/csr?type=ban_request', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    renderRequests(data.data, 'banRequestsList');
+                }
+            } catch (error) {
+                console.error('Error loading ban requests:', error);
+            }
+        }
+
+        async function loadBanRepeals() {
+            try {
+                const response = await fetch('/api/ban-requests/csr?type=ban_repeal', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    renderRequests(data.data, 'banRepealsList');
+                }
+            } catch (error) {
+                console.error('Error loading ban repeals:', error);
+            }
+        }
+
+        async function loadDisputes() {
+            try {
+                const response = await fetch('/api/disputes', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    renderDisputes(data.disputes || []);
+                }
+            } catch (error) {
+                console.error('Error loading disputes:', error);
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/ban-requests/csr', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    renderRequests(data.data, 'historyList');
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        function renderRequests(requests, containerId) {
+            const container = document.getElementById(containerId);
+            
+            if (requests.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #718096;">No requests found</p>';
+                return;
+            }
+
+            container.innerHTML = requests.map(request => `
+                <div class="request-card ${request.status}">
+                    <div class="request-header">
+                        <div class="request-type">${request.type.replace('_', ' ').toUpperCase()}</div>
+                        <div class="request-status ${request.status}">${request.status.toUpperCase()}</div>
+                    </div>
+                    <div class="request-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Target User:</span>
+                            <span class="detail-value">${request.targetUsername}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Ban Level:</span>
+                            <span class="detail-value">${request.banLevel.replace('_', ' ').toUpperCase()}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Created:</span>
+                            <span class="detail-value">${new Date(request.createdAt).toLocaleString()}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Reason:</span>
+                            <span class="detail-value">${request.reason.substring(0, 100)}${request.reason.length > 100 ? '...' : ''}</span>
+                        </div>
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn btn-primary" onclick="viewRequestDetails('${request.id}')">👁️ View Details</button>
+                        ${request.status === 'pending' ? `
+                            <button class="btn btn-warning" onclick="cancelRequest('${request.id}')">❌ Cancel</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderDisputes(disputes) {
+            const container = document.getElementById('disputesList');
+            
+            if (disputes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #718096;">No active disputes found</p>';
+                return;
+            }
+
+            container.innerHTML = disputes.map(dispute => `
+                <div class="request-card ${dispute.status}">
+                    <div class="request-header">
+                        <div class="request-type">DISPUTE #${dispute.id}</div>
+                        <div class="request-status ${dispute.status}">${dispute.status.toUpperCase()}</div>
+                    </div>
+                    <div class="request-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Dispute Type:</span>
+                            <span class="detail-value">${dispute.type}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Created:</span>
+                            <span class="detail-value">${new Date(dispute.createdAt).toLocaleString()}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Description:</span>
+                            <span class="detail-value">${dispute.description.substring(0, 100)}${dispute.description.length > 100 ? '...' : ''}</span>
+                        </div>
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn btn-primary" onclick="viewDisputeDetails('${dispute.id}')">👁️ View Details</button>
+                        <button class="btn btn-success" onclick="resolveDispute('${dispute.id}')">✅ Resolve</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function viewRequestDetails(requestId) {
+            try {
+                const response = await fetch(`/api/ban-requests/${requestId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const request = data.data;
+                    
+                    document.getElementById('modalContent').innerHTML = `
+                        <div class="request-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Type:</span>
+                                <span class="detail-value">${request.type.replace('_', ' ').toUpperCase()}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Target User:</span>
+                                <span class="detail-value">${request.targetUsername}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Ban Level:</span>
+                                <span class="detail-value">${request.banLevel.replace('_', ' ').toUpperCase()}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Status:</span>
+                                <span class="detail-value">${request.status.toUpperCase()}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Created:</span>
+                                <span class="detail-value">${new Date(request.createdAt).toLocaleString()}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Reason:</span>
+                                <span class="detail-value">${request.reason}</span>
+                            </div>
+                            ${request.evidence ? `
+                                <div class="detail-row">
+                                    <span class="detail-label">Evidence:</span>
+                                    <span class="detail-value">${JSON.stringify(request.evidence)}</span>
+                                </div>
+                            ` : ''}
+                            ${request.status === 'approved' ? `
+                                <div class="detail-row">
+                                    <span class="detail-label">Approved By:</span>
+                                    <span class="detail-value">${request.approvedBy}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Approved At:</span>
+                                    <span class="detail-value">${new Date(request.approvedAt).toLocaleString()}</span>
+                                </div>
+                            ` : ''}
+                            ${request.status === 'rejected' ? `
+                                <div class="detail-row">
+                                    <span class="detail-label">Rejected By:</span>
+                                    <span class="detail-value">${request.rejectedBy}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Rejected At:</span>
+                                    <span class="detail-value">${new Date(request.rejectedAt).toLocaleString()}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Rejection Reason:</span>
+                                    <span class="detail-value">${request.rejectionReason || 'No reason provided'}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    document.getElementById('requestModal').style.display = 'block';
+                }
+            } catch (error) {
+                showNotification('Error loading request details: ' + error.message, 'error');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('requestModal').style.display = 'none';
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('requestModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -407,6 +407,14 @@
                 <i class="fas fa-users-cog"></i>
                 HR
             </a>
+            <a href="/csr-ban-management" class="nav-link" id="csrBanLink" style="display: none;">
+                <i class="fas fa-ban"></i>
+                CSR Ban Management
+            </a>
+            <a href="/admin-ban-management" class="nav-link" id="adminBanLink" style="display: none;">
+                <i class="fas fa-gavel"></i>
+                Admin Ban Management
+            </a>
         </div>
         
         <div class="user-menu">
@@ -636,8 +644,8 @@
 
         // Simulate user role and ban level
         function simulateUserRole() {
-            const roles = ['user', 'COMPANY_EMPLOYEE', 'COMPANY_HR_EMPLOYEE', 'COMPANY_HR_ADMIN'];
-            const banLevels = ['none', 'chat_limit', 'no_chat', 'banned'];
+            const roles = ['user', 'COMPANY_EMPLOYEE', 'COMPANY_HR_EMPLOYEE', 'COMPANY_HR_ADMIN', 'ADMIN', 'IT_ADMIN', 'HR_ADMIN', 'CSR_ADMIN', 'CUSTOMER_SUPPORT_ROLE_EMPLOYEE'];
+            const banLevels = ['none', 'chat_limit', 'no_chat', 'list_ban', 'banned'];
             
             const role = roles[Math.floor(Math.random() * roles.length)];
             const banLevel = banLevels[Math.floor(Math.random() * banLevels.length)];
@@ -646,6 +654,8 @@
             const corpoChatTab = document.getElementById('corpoChatTab');
             const groupChatTab = document.getElementById('groupChatTab');
             const directChatTab = document.getElementById('directChatTab');
+            const csrBanLink = document.getElementById('csrBanLink');
+            const adminBanLink = document.getElementById('adminBanLink');
             
             if (role.includes('EMPLOYEE')) {
                 corpoChatTab.style.display = 'flex';
@@ -654,6 +664,15 @@
             if (banLevel === 'none') {
                 groupChatTab.style.display = 'flex';
                 directChatTab.style.display = 'flex';
+            }
+            
+            // Show ban management links based on role
+            if (role === 'CUSTOMER_SUPPORT_ROLE_EMPLOYEE' || role === 'CSR_ADMIN') {
+                csrBanLink.style.display = 'flex';
+            }
+            
+            if (role === 'ADMIN' || role === 'IT_ADMIN' || role === 'HR_ADMIN' || role === 'CSR_ADMIN' || role === 'CUSTOMER_SUPPORT_ROLE_EMPLOYEE') {
+                adminBanLink.style.display = 'flex';
             }
             
             // Update ban level display
