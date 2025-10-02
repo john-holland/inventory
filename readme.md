@@ -115,3 +115,6 @@ The contract ensures:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+**Credits:**
+This project benefited from AI code assistance by [Cursor](https://www.cursor.com/).

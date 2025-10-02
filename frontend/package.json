@@ -1,27 +1,42 @@
 {
   "name": "inventory-frontend",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
-    "@mui/material": "^5.14.5",
-    "@mui/icons-material": "^5.14.5",
-    "@types/node": "^20.5.0",
-    "@types/react": "^18.2.20",
-    "@types/react-dom": "^18.2.7",
-    "ethers": "^6.7.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.15.0",
-    "typescript": "^5.1.6",
-    "web3": "^4.1.1"
-  },
+  "version": "1.0.0",
+  "description": "Frontend for distributed inventory sharing network",
+  "main": "index.js",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "pact:test": "node scripts/run-pact-tests.js",
+    "pact:publish": "node scripts/run-pact-tests.js --publish",
+    "pact:charity": "node scripts/run-charity-pact-tests.js",
+    "pact:charity:publish": "node scripts/run-charity-pact-tests.js --publish-only",
+    "pact:cabin": "node scripts/run-cabin-pact-tests.js",
+    "pact:cabin:publish": "node scripts/run-cabin-pact-tests.js --publish"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.13.0",
+    "@pact-foundation/pact": "^10.4.0",
+    "@pact-foundation/pact-node": "^10.17.6",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/react-router-dom": "^5.3.3",
+    "ethers": "^5.7.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.7.0",
+    "react-scripts": "5.0.1",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4"
   },
   "eslintConfig": {
     "extends": [
@@ -41,12 +56,18 @@
       "last 1 safari version"
     ]
   },
+  "pact": {
+    "consumer": {
+      "name": "inventory-frontend"
+    },
+    "provider": {
+      "name": "inventory-backend"
+    },
+    "pactDir": "./pacts",
+    "logDir": "./logs",
+    "logLevel": "info"
+  },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.4.0",
-    "@typescript-eslint/parser": "^6.4.0",
-    "eslint": "^8.47.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "react-scripts": "5.0.1"
+    "node-fetch": "^3.3.2"
   }
-} 
+}

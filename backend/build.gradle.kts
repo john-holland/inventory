@@ -1,8 +1,8 @@
 plugins {
     kotlin("jvm") version "1.9.0"
     kotlin("plugin.serialization") version "1.9.0"
-    id("org.gretty") version "4.0.3"
-    war
+    id("org.springframework.boot") version "3.1.0"
+    id("io.spring.dependency-management") version "1.1.0"
 }
 
 repositories {
@@ -11,19 +11,27 @@ repositories {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(20))
     }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "20"
     }
+}
+
+tasks.withType<JavaCompile> {
+    options.release.set(20)
 }
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    
+    // Spring Boot
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     
     // Jersey
     implementation("org.glassfish.jersey.containers:jersey-container-servlet:3.1.1")
@@ -46,9 +54,5 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.glassfish.jersey.test-framework:jersey-test-framework-core:3.1.1")
     testImplementation("org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:3.1.1")
-}
-
-gretty {
-    servletContainer = "tomcat10"
-    contextPath = "/api"
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 } 

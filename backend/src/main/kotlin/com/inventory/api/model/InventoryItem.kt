@@ -1,6 +1,7 @@
 package com.inventory.api.model
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Contextual
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -12,10 +13,10 @@ data class InventoryItem(
     val ownerId: String,
     val currentHolderId: String?,
     val status: ItemStatus,
-    val shippingCost: BigDecimal,
-    val buyoutPrice: BigDecimal?,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime,
+    @Contextual val shippingCost: BigDecimal,
+    @Contextual val buyoutPrice: BigDecimal?,
+    @Contextual val createdAt: LocalDateTime,
+    @Contextual val updatedAt: LocalDateTime,
     val contractAddress: String?,
     val location: Location
 )
