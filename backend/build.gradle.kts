@@ -46,6 +46,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-dao:0.44.0")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.44.0")
     implementation("org.postgresql:postgresql:42.6.0")
+    implementation("com.h2database:h2")
     
     // Logging
     implementation("ch.qos.logback:logback-classic:1.4.11")

@@ -276,7 +276,8 @@ export class CabinService {
       
     } catch (error) {
       console.error('Failed to create cabin:', error);
-      throw new Error('Failed to create cabin');
+      console.error('Error details:', error.message, error.stack);
+      throw new Error(`Failed to create cabin: ${error.message}`);
     }
   }
 
@@ -395,7 +396,6 @@ export class CabinService {
     try {
       const chatRoom = await this.chatService.createChannel(
         `Cabin: ${cabin.name}`,
-        'channel',
         cabin.users.map(u => u.id)
       );
       

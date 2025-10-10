@@ -20,11 +20,12 @@ global.window = {
 
 // Import services (we'll mock them for now)
 const mockApiBridge = {
-  isCharityFeaturesEnabled: () => true,
+  _enabled: true,
+  isCharityFeaturesEnabled: () => mockApiBridge._enabled,
   setCharityFeaturesEnabled: (enabled) => {
     mockApiBridge._enabled = enabled;
   },
-  connect: async () => true,
+  connect: async () => mockApiBridge._enabled,
   getItemInfo: async (platform, itemId) => ({
     platform,
     itemId,
@@ -44,11 +45,11 @@ const mockApiBridge = {
     charityAddress
   }),
   getComplianceReport: async () => ({
-    charityFeaturesEnabled: true,
-    amazon: { connected: true, compliant: true },
-    ebay: { connected: true, compliant: true },
-    walmart: { connected: true, compliant: true },
-    overall: { compliant: true, noInterference: true }
+    charityFeaturesEnabled: mockApiBridge._enabled,
+    amazon: { connected: mockApiBridge._enabled, compliant: mockApiBridge._enabled },
+    ebay: { connected: mockApiBridge._enabled, compliant: mockApiBridge._enabled },
+    walmart: { connected: mockApiBridge._enabled, compliant: mockApiBridge._enabled },
+    overall: { compliant: mockApiBridge._enabled, noInterference: mockApiBridge._enabled }
   }),
   getAPITestResults: async () => [
     { platform: 'amazon', success: true, responseTime: 200 },

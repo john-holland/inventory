@@ -76,7 +76,7 @@ export const CabinCalendarIntegration: React.FC = () => {
 
   const loadCabins = async () => {
     try {
-      const allCabins = cabinService.getAllCabins();
+      const allCabins = cabinService.getCabins();
       setCabins(allCabins);
       if (allCabins.length > 0) {
         setSelectedCabin(allCabins[0]);

@@ -89,7 +89,23 @@ const SERVICE_CREATION_BAN_DURATION = 10;
 export class PermissionService {
   private static instance: PermissionService;
   private users: Map<string, UserWithPermissions> = new Map();
-  private accessRequirements: CabinAccessRequirements;
+  private accessRequirements: CabinAccessRequirements = {
+    createCabin: {
+      minReputation: 3.0,
+      minTransactions: 5,
+      premiumTier: 'Active User'
+    },
+    takeItems: {
+      minReputation: 2.5,
+      maxConcurrentTakeouts: 3,
+      depositMultiplier: 1.0
+    },
+    moderateCabin: {
+      minReputation: 4.0,
+      role: UserRole.MODERATOR,
+      trainingCompleted: true
+    }
+  };
 
   static getInstance(): PermissionService {
     if (!PermissionService.instance) {

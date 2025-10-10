@@ -206,7 +206,6 @@ export class ReviewService {
       // Create chat room for CSR
       const chatRoom = await this.chatService.createChannel(
         `Review Ticket - ${review.id}`,
-        'channel',
         [] // Will be populated when CSR is assigned
       );
 

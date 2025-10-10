@@ -1,5 +1,6 @@
 // Warehousing Service - Handles cabin reservations and meeting log integration
-import { CabinService, Cabin } from './CabinService';
+// Removed circular dependency - will use dependency injection instead
+import { Cabin } from './CabinService';
 import { OnboardingService } from './OnboardingService';
 
 export interface CabinReservation {
@@ -52,7 +53,6 @@ export class WarehousingService {
   private reservations: Map<string, CabinReservation> = new Map();
   private meetingLogs: Map<string, MeetingLog> = new Map();
   private warehouseLocations: Map<string, WarehouseLocation> = new Map();
-  private cabinService: CabinService;
   private onboardingService: OnboardingService;
 
   static getInstance(): WarehousingService {
@@ -63,7 +63,6 @@ export class WarehousingService {
   }
 
   constructor() {
-    this.cabinService = CabinService.getInstance();
     this.onboardingService = OnboardingService.getInstance();
     this.initializeWarehouseLocations();
   }

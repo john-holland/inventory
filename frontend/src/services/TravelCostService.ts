@@ -99,6 +99,14 @@ export class TravelCostService {
     const dLat = this.deg2rad(destination.latitude - origin.latitude);
     const dLon = this.deg2rad(destination.longitude - origin.longitude);
     
+    // the formula for the haversine distance
+    // a = sin²(Δlat/2) + cos(lat1) * cos(lat2) * sin²(Δlon/2)
+    // c = 2 * atan2(√a, √(1-a))
+    // d = R * c
+    // where R is the earth's radius in miles
+    // and Δlat and Δlon are the differences in latitude and longitude
+    // and lat1 and lat2 are the latitudes of the two points
+    // and lon1 and lon2 are the longitudes of the two points
     const a = 
       Math.sin(dLat/2) * Math.sin(dLat/2) +
       Math.cos(this.deg2rad(origin.latitude)) * Math.cos(this.deg2rad(destination.latitude)) * 
@@ -142,8 +150,10 @@ export class TravelCostService {
     // Calculate distance
     const distance = this.calculateDistance(origin, destination);
     
-    // Get gas price for origin location
-    const gasPrice = this.getGasPrice(origin.city, origin.state, vehicleInfo.fuelType);
+    // Get gas price for origin location (only for gasoline/diesel)
+    const gasPrice = vehicleInfo.fuelType === 'electric' 
+      ? 0 
+      : this.getGasPrice(origin.city, origin.state, vehicleInfo.fuelType as 'gasoline' | 'diesel');
     
     // Calculate fuel cost for one way
     const gallonsNeeded = distance / vehicleInfo.mpg;

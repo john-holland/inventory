@@ -72,7 +72,19 @@ export const CabinPage: React.FC = () => {
     airbnbListingId: '',
     checkIn: new Date().toISOString().split('T')[0],
     checkOut: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    estimatedTravelCost: 0
+    originAddress: {
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'USA',
+      latitude: 0,
+      longitude: 0
+    },
+    vehicleInfo: {
+      mpg: 25,
+      fuelType: 'gasoline'
+    }
   });
 
   const [selectedItemForTakeout, setSelectedItemForTakeout] = useState<string | null>(null);
@@ -124,7 +136,19 @@ export const CabinPage: React.FC = () => {
         airbnbListingId: '',
         checkIn: new Date().toISOString().split('T')[0],
         checkOut: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        estimatedTravelCost: 0
+        originAddress: {
+          street: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: 'USA',
+          latitude: 0,
+          longitude: 0
+        },
+        vehicleInfo: {
+          mpg: 25,
+          fuelType: 'gasoline'
+        }
       });
 
     } catch (error) {
@@ -321,21 +345,8 @@ export const CabinPage: React.FC = () => {
                 />
               </Grid>
             </Grid>
-            <TextField
-              margin="dense"
-              label="Estimated Travel Cost (one way)"
-              type="number"
-              fullWidth
-              variant="outlined"
-              value={newCabin.estimatedTravelCost}
-              onChange={(e) => setNewCabin({ ...newCabin, estimatedTravelCost: parseFloat(e.target.value) || 0 })}
-              InputProps={{
-                startAdornment: <Typography variant="body2" sx={{ mr: 1 }}>$</Typography>
-              }}
-              sx={{ mt: 2 }}
-            />
             <Alert severity="info" sx={{ mt: 2 }}>
-              Travel cost hold: ${(newCabin.estimatedTravelCost * 2).toFixed(2)} (2x for round trip)
+              Travel cost will be calculated automatically based on origin address, destination, and vehicle information.
             </Alert>
           </Box>
         );
@@ -345,7 +356,7 @@ export const CabinPage: React.FC = () => {
         const checkOutDate = new Date(newCabin.checkOut);
         const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
         const estimatedAirbnbCost = nights * 150;
-        const travelHold = newCabin.estimatedTravelCost * 2;
+        const travelHold = 0; // Will be calculated automatically
         
         return (
           <Box>
