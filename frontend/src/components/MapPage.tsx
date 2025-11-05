@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -31,95 +32,25 @@ import {
   FilterList as FilterIcon,
   PriceCheck as PriceIcon,
   Star as StarIcon,
-  Directions as DirectionsIcon
+  Directions as DirectionsIcon,
+  Visibility as VisibilityIcon
 } from '@mui/icons-material';
+import { mockInventoryItems, type InventoryItem } from '../data/mockInventoryItems';
+import { getItemTypeChip, getPriceLabel } from '../utils/itemTypeHelpers';
 
-interface MapItem {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  latitude: number;
-  longitude: number;
-  distance: number;
-  price: number;
-  rating: number;
-  available: boolean;
-  owner: string;
-  imageUrl?: string;
-  tags: string[];
-}
+type MapItem = InventoryItem;
 
-const mockMapItems: MapItem[] = [
-  {
-    id: '1',
-    name: 'Professional Camera Lens',
-    description: 'Canon EF 24-70mm f/2.8L II USM lens',
-    category: 'Electronics',
-    latitude: 37.7749,
-    longitude: -122.4194,
-    distance: 2.3,
-    price: 15,
-    rating: 4.8,
-    available: true,
-    owner: '0x1234...5678',
-    imageUrl: 'https://via.placeholder.com/60x60/4caf50/ffffff?text=Camera',
-    tags: ['photography', 'professional']
-  },
-  {
-    id: '2',
-    name: 'Mountain Bike',
-    description: 'Trek Marlin 7 mountain bike',
-    category: 'Sports',
-    latitude: 37.8044,
-    longitude: -122.2711,
-    distance: 5.1,
-    price: 8,
-    rating: 4.6,
-    available: true,
-    owner: '0x8765...4321',
-    imageUrl: 'https://via.placeholder.com/60x60/2196f3/ffffff?text=Bike',
-    tags: ['cycling', 'outdoor']
-  },
-  {
-    id: '3',
-    name: 'Power Tools Set',
-    description: 'Complete DeWalt power tools set',
-    category: 'Tools',
-    latitude: 37.8716,
-    longitude: -122.2727,
-    distance: 3.7,
-    price: 12,
-    rating: 4.9,
-    available: false,
-    owner: '0x9876...5432',
-    imageUrl: 'https://via.placeholder.com/60x60/ff9800/ffffff?text=Tools',
-    tags: ['construction', 'professional']
-  },
-  {
-    id: '4',
-    name: 'Guitar',
-    description: 'Acoustic guitar in excellent condition',
-    category: 'Music',
-    latitude: 37.7858,
-    longitude: -122.4064,
-    distance: 1.2,
-    price: 6,
-    rating: 4.7,
-    available: true,
-    owner: '0x5432...8765',
-    imageUrl: 'https://via.placeholder.com/60x60/9c27b0/ffffff?text=Guitar',
-    tags: ['music', 'acoustic']
-  }
-];
+// Use centralized mock data from schema migration document
+const mockMapItems = mockInventoryItems;
 
 export const MapPage: React.FC = () => {
+  const navigate = useNavigate();
   const [selectedRadius, setSelectedRadius] = useState(10);
   const [filters, setFilters] = useState({
     showAvailableOnly: true,
-    maxPrice: 50,
+    maxPrice: 10000,
     minRating: 0,
-    categories: ['Electronics', 'Sports', 'Tools', 'Music']
+    categories: ['Electronics', 'Sports', 'Tools', 'Music', 'Agreements', 'Investments']
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<MapItem | null>(null);
@@ -136,6 +67,8 @@ export const MapPage: React.FC = () => {
 
     return matchesQuery && matchesDistance && matchesAvailability && matchesPrice && matchesRating && matchesCategory;
   });
+
+  // Helper functions now imported from utils
 
   return (
     <Box sx={{ p: 3, backgroundColor: '#121212', minHeight: '100vh', color: '#fff' }}>
@@ -177,14 +110,14 @@ export const MapPage: React.FC = () => {
                 />
 
                 {/* Map Items as Dots */}
-                {filteredItems.map((item) => (
+                {filteredItems.filter(item => item.latitude && item.longitude).map((item) => (
                   <Box
                     key={item.id}
                     onClick={() => setSelectedItem(item)}
                     sx={{
                       position: 'absolute',
-                      left: `${(item.longitude + 122.5) * 200}px`,
-                      top: `${(37.9 - item.latitude) * 200}px`,
+                      left: `${((item.longitude || 0) + 122.5) * 200}px`,
+                      top: `${(37.9 - (item.latitude || 0)) * 200}px`,
                       width: 12,
                       height: 12,
                       borderRadius: '50%',
@@ -364,7 +297,17 @@ export const MapPage: React.FC = () => {
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
                   <Chip
-                    label={`$${selectedItem.price}/day`}
+                    label={getItemTypeChip(selectedItem.itemType).label}
+                    size="small"
+                    sx={{ 
+                      backgroundColor: getItemTypeChip(selectedItem.itemType).color, 
+                      color: '#fff',
+                      fontWeight: 'normal',
+                      border: '1px solid #555'
+                    }}
+                  />
+                  <Chip
+                    label={getPriceLabel(selectedItem)}
                     size="small"
                     sx={{ backgroundColor: '#333', color: '#ccc' }}
                   />
@@ -384,19 +327,37 @@ export const MapPage: React.FC = () => {
                     }}
                   />
                 </Box>
-                <Button
-                  variant="contained"
-                  startIcon={<DirectionsIcon />}
-                  fullWidth
-                  disabled={!selectedItem.available}
-                  sx={{
-                    backgroundColor: '#4caf50',
-                    '&:hover': { backgroundColor: '#45a049' },
-                    '&:disabled': { backgroundColor: '#666' }
-                  }}
-                >
-                  Get Directions
-                </Button>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<VisibilityIcon />}
+                    fullWidth
+                    onClick={() => navigate(`/item/${selectedItem.id}`)}
+                    sx={{
+                      borderColor: '#4caf50',
+                      color: '#4caf50',
+                      '&:hover': {
+                        borderColor: '#66bb6a',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)'
+                      }
+                    }}
+                  >
+                    Details
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<DirectionsIcon />}
+                    fullWidth
+                    disabled={!selectedItem.available}
+                    sx={{
+                      backgroundColor: '#4caf50',
+                      '&:hover': { backgroundColor: '#45a049' },
+                      '&:disabled': { backgroundColor: '#666' }
+                    }}
+                  >
+                    Get Directions
+                  </Button>
+                </Box>
               </CardContent>
             </Card>
           )}
@@ -433,7 +394,7 @@ export const MapPage: React.FC = () => {
                       }
                       secondary={
                         <Typography variant="caption" sx={{ color: '#ccc' }}>
-                          {item.distance} miles • ${item.price}/day
+                          {item.distance} miles • {getPriceLabel(item)}
                         </Typography>
                       }
                     />

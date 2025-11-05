@@ -39,6 +39,15 @@ contract EnhancedInventoryContract is ReentrancyGuard, Ownable {
         uint256 maxLendingDuration; // in seconds
         string metadata; // IPFS hash for additional data
         bool hasDispute; // Track if there's an active dispute
+        // New investment-related fields for Plan #3
+        uint256 shippingHold2x; // Non-investable 2x shipping hold
+        uint256 additionalHold; // Investable 3rd x hold
+        uint256 insuranceHold; // Investable insurance hold
+        bool riskyModeEnabled; // Risky investment mode flag
+        uint256 riskyModePercentage; // % of 2x to invest
+        uint256 antiCollateral; // Required collateral amount
+        bool insuranceHoldInvested; // Insurance investment flag
+        address[] investmentRobots; // Active monitoring robots
     }
     
     struct User {
@@ -104,6 +113,11 @@ contract EnhancedInventoryContract is ReentrancyGuard, Ownable {
     event DisputeResolved(uint256 indexed itemId, address indexed resolver, bool inFavorOfOwner);
     event AutoReturnPreferenceSet(address indexed user, bool enabled, uint256 threshold);
     event AutoReturnTriggered(uint256 indexed itemId, address indexed borrower, string reason);
+    // New investment-related events for Plan #3
+    event RiskyModeEnabled(uint256 indexed itemId, uint256 riskPercentage, uint256 antiCollateral);
+    event InsuranceHoldInvested(uint256 indexed itemId, uint256 amount);
+    event FalloutTriggered(uint256 indexed itemId, uint256 totalLoss, uint256 borrowerShare, uint256 ownerShare);
+    event InvestmentRobotActivated(uint256 indexed itemId, address robotAddress);
     
     // Constants
     uint256 public constant MIN_REPUTATION_FOR_LENDING = 50;
@@ -172,7 +186,16 @@ contract EnhancedInventoryContract is ReentrancyGuard, Ownable {
             lendingStartTime: 0,
             maxLendingDuration: maxLendingDuration,
             metadata: metadata,
-            hasDispute: false
+            hasDispute: false,
+            // Initialize new investment fields for Plan #3
+            shippingHold2x: 0,
+            additionalHold: 0,
+            insuranceHold: 0,
+            riskyModeEnabled: false,
+            riskyModePercentage: 0,
+            antiCollateral: 0,
+            insuranceHoldInvested: false,
+            investmentRobots: new address[](0)
         });
         
         userOwnedItems[msg.sender].push(itemId);
@@ -203,14 +226,18 @@ contract EnhancedInventoryContract is ReentrancyGuard, Ownable {
         uint256 basePayment = item.shippingCost * 2; // 2x for basic lending
         uint256 additionalPayment = msg.value > basePayment ? msg.value - basePayment : 0;
         
+        // Set shipping hold 2x (non-investable)
+        item.shippingHold2x = item.shippingCost * 2;
+        
         // 1x shipping cost goes to shipping fund for return shipping
         item.shippingFund = item.shippingCost;
         
         // 1x shipping cost held as security deposit
         userDeposits[msg.sender] += item.shippingCost;
         
-        // Additional payment (if 3x) goes to additional protection
+        // Additional payment (if 3x) goes to additional hold (investable)
         if (additionalPayment > 0) {
+            item.additionalHold = additionalPayment;
             item.additionalProtection = additionalPayment;
             userAdditionalProtection[msg.sender] += additionalPayment;
         }
@@ -834,5 +861,156 @@ contract EnhancedInventoryContract is ReentrancyGuard, Ownable {
         if (additionalProtection > 0) {
             emit ProtectionDepositReleased(borrower, additionalProtection);
         }
+    }
+
+    // Investment-related functions for Plan #3
+
+    /**
+     * Enable risky investment mode for an item
+     * Allows investment of shipping holds with additional collateral requirement
+     */
+    function enableRiskyInvestmentMode(
+        uint256 itemId,
+        uint256 riskPercentage,
+        uint256 antiCollateral
+    ) public payable nonReentrant itemExists(itemId) onlyCurrentHolder(itemId) {
+        Item storage item = items[itemId];
+        ward(!item.riskyModeEnabled, "Risky investment already enabled");
+        ward(riskPercentage > 0 && riskPercentage <= 100, "Invalid risk percentage");
+        ward(msg.value >= antiCollateral, "Insufficient anti-collateral");
+        ward(antiCollateral >= item.shippingCost / 5, "Anti-collateral too low"); // At least 20% of shipping cost
+
+        item.riskyModeEnabled = true;
+        item.riskyModePercentage = riskPercentage;
+        item.antiCollateral = antiCollateral;
+
+        emit RiskyModeEnabled(itemId, riskPercentage, antiCollateral);
+    }
+
+    /**
+     * Create additional investment hold (3rd x payment)
+     * This hold is immediately investable
+     */
+    function createAdditionalInvestmentHold(uint256 itemId) public payable nonReentrant itemExists(itemId) onlyCurrentHolder(itemId) {
+        Item storage item = items[itemId];
+        ward(msg.value > 0, "Investment hold amount must be greater than 0");
+
+        item.additionalHold += msg.value;
+        userAdditionalProtection[msg.sender] += msg.value;
+    }
+
+    /**
+     * Create insurance hold
+     * This hold becomes investable after item ships
+     */
+    function createInsuranceHold(uint256 itemId) public payable nonReentrant itemExists(itemId) onlyCurrentHolder(itemId) {
+        Item storage item = items[itemId];
+        ward(msg.value > 0, "Insurance hold amount must be greater than 0");
+
+        item.insuranceHold += msg.value;
+    }
+
+    /**
+     * Trigger insurance hold investment eligibility
+     * Called when item ships to make insurance holds investable
+     */
+    function triggerInsuranceHoldInvestment(uint256 itemId) public nonReentrant itemExists(itemId) {
+        Item storage item = items[itemId];
+        ward(msg.sender == item.owner || msg.sender == item.currentHolder, "Not authorized to trigger insurance investment");
+
+        item.insuranceHoldInvested = true;
+
+        emit InsuranceHoldInvested(itemId, item.insuranceHold);
+    }
+
+    /**
+     * Handle fallout scenario when risky investment fails
+     * Implements 50/50 split between borrower and owner
+     */
+    function handleFalloutScenario(
+        uint256 itemId,
+        uint256 totalLoss
+    ) public nonReentrant itemExists(itemId) {
+        Item storage item = items[itemId];
+        ward(item.riskyModeEnabled, "Risky investment not enabled");
+        ward(msg.sender == item.owner || msg.sender == item.currentHolder, "Not authorized to handle fallout");
+
+        uint256 shippingCost = item.shippingCost;
+        uint256 insuranceCost = item.insuranceHold;
+        uint256 totalCosts = shippingCost + insuranceCost;
+        uint256 borrowerShare = totalCosts / 2;
+        uint256 ownerShare = totalCosts / 2;
+
+        // Deduct from borrower's deposits
+        ward(userDeposits[item.currentHolder] >= borrowerShare, "Insufficient borrower funds");
+        userDeposits[item.currentHolder] -= borrowerShare;
+
+        emit FalloutTriggered(itemId, totalLoss, borrowerShare, ownerShare);
+    }
+
+    /**
+     * Activate investment robot for monitoring
+     * Sets up automated monitoring for risky investments
+     */
+    function activateInvestmentRobot(
+        uint256 itemId,
+        address robotAddress
+    ) public nonReentrant itemExists(itemId) onlyCurrentHolder(itemId) {
+        Item storage item = items[itemId];
+        ward(item.riskyModeEnabled, "Risky investment not enabled");
+
+        item.investmentRobots.push(robotAddress);
+
+        emit InvestmentRobotActivated(itemId, robotAddress);
+    }
+
+    /**
+     * Get investment status for an item
+     */
+    function getInvestmentStatus(uint256 itemId) public view itemExists(itemId) returns (
+        uint256 shippingHold2x,
+        uint256 additionalHold,
+        uint256 insuranceHold,
+        bool riskyModeEnabled,
+        uint256 riskyModePercentage,
+        uint256 antiCollateral,
+        bool insuranceHoldInvested,
+        uint256 robotCount
+    ) {
+        Item storage item = items[itemId];
+        return (
+            item.shippingHold2x,
+            item.additionalHold,
+            item.insuranceHold,
+            item.riskyModeEnabled,
+            item.riskyModePercentage,
+            item.antiCollateral,
+            item.insuranceHoldInvested,
+            item.investmentRobots.length
+        );
+    }
+
+    /**
+     * Check if shipping holds are investable
+     * Returns false unless risky mode is enabled
+     */
+    function areShippingHoldsInvestable(uint256 itemId) public view itemExists(itemId) returns (bool) {
+        return items[itemId].riskyModeEnabled;
+    }
+
+    /**
+     * Check if additional holds are investable
+     * Returns true if additional hold > 0
+     */
+    function areAdditionalHoldsInvestable(uint256 itemId) public view itemExists(itemId) returns (bool) {
+        return items[itemId].additionalHold > 0;
+    }
+
+    /**
+     * Check if insurance holds are investable
+     * Returns true if item has shipped (insuranceHoldInvested = true)
+     */
+    function areInsuranceHoldsInvestable(uint256 itemId) public view itemExists(itemId) returns (bool) {
+        return items[itemId].insuranceHoldInvested;
     }
 } 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom';
 import { Box, Container, ThemeProvider, createTheme } from '@mui/material';
 
 // Import our new components
@@ -8,6 +9,9 @@ import { SearchPage } from './components/SearchPage';
 import { MapPage } from './components/MapPage';
 import { InventoryList } from './components/InventoryList';
 import { CabinPage } from './components/CabinPage';
+import { PersistentChatWindow } from './components/PersistentChatWindow';
+import { ItemDetailsPage } from './components/ItemDetailsPage';
+import { SettingsPage } from './components/SettingsPage';
 
 // Create dark theme
 const darkTheme = createTheme({
@@ -47,64 +51,61 @@ const darkTheme = createTheme({
   },
 });
 
-function TabPanel({ children, value, index, ...other }) {
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tabpanel-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 0 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-}
-
 function App() {
-  const [tabValue, setTabValue] = useState(0);
   const [charityFeaturesEnabled, setCharityFeaturesEnabled] = useState(true);
-
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <Box sx={{ flexGrow: 1, backgroundColor: '#121212', minHeight: '100vh' }}>
-        {/* Shared Header */}
-        <SharedHeader
-          currentTab={tabValue}
-          onTabChange={handleTabChange}
-          charityFeaturesEnabled={charityFeaturesEnabled}
-        />
-
-        {/* Tab Content */}
-        <TabPanel value={tabValue} index={0}>
-          <DarkDashboard />
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={1}>
-          <SearchPage />
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={2}>
-          <MapPage />
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={3}>
-          <InventoryList />
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={4}>
-          <CabinPage />
-        </TabPanel>
-      </Box>
+      <BrowserRouter>
+        <AppContent charityFeaturesEnabled={charityFeaturesEnabled} />
+      </BrowserRouter>
     </ThemeProvider>
+  );
+}
+
+function AppContent({ charityFeaturesEnabled }) {
+  const [searchParams] = useSearchParams();
+
+  return (
+    <Box sx={{ flexGrow: 1, backgroundColor: '#121212', minHeight: '100vh' }}>
+      {/* Shared Header */}
+      <SharedHeader charityFeaturesEnabled={charityFeaturesEnabled} />
+
+      {/* Routes */}
+      <Routes>
+        <Route path="/" element={<DarkDashboard />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/map" element={<MapPage />} />
+        <Route path="/inventory" element={<InventoryList />} />
+        <Route path="/cabins" element={<CabinPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/item/:id" element={<ItemDetailsPage />} />
+      </Routes>
+
+      {/* Item Modal - shown when ?item=id query param exists */}
+      {searchParams.get('item') && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1300,
+          }}
+        >
+          {/* ItemModal component will be added in Phase 7 */}
+          <Box sx={{ color: '#fff' }}>Item Modal Placeholder (ID: {searchParams.get('item')})</Box>
+        </Box>
+      )}
+
+      {/* PersistentChatWindow - Always visible on all pages */}
+      <PersistentChatWindow />
+    </Box>
   );
 }
 

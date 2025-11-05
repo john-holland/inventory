@@ -156,10 +156,95 @@ graph TB
 - **Item owner credits**: Full buyout amount
 - **Existing borrower debits**: Refund of any deposits
 
-### 8. Investment Returns
+### 8. Investment Returns (Updated with Hold Type Classification)
 - **Shipping Fund investments**: Generate returns distributed to item owners
 - **Protection Fund investments**: Generate returns for platform development
 - **Dividend payments**: Monthly distributions based on activity and reputation
+
+### 9. New Investment Hold Types & Rules
+
+#### 9.1 Shipping Hold Investment Rules
+- **First 2x shipping holds**: NON-INVESTABLE (reserved for round-trip shipping)
+- **Investment blocking**: Prevents crypto investment until 2x threshold secured
+- **Risky mode exception**: Optional investment with anti-collateral requirement
+- **Rationale**: First 2x needed for outbound + return shipping
+
+#### 9.2 Additional Investment Hold (3rd x Payment)
+- **Immediately investable**: Can be invested in crypto/yield immediately
+- **Separate tracking**: Tracked independently from shipping reserves
+- **Pure investment**: No shipping restrictions, purely for yield generation
+
+#### 9.3 Insurance Hold Investment Rules
+- **Investable after shipping**: Becomes investable when item ships successfully
+- **Ship-triggered**: Investment eligibility occurs during shipping phase
+- **No hold-back**: Insurance is for protection, not shipping reserve
+
+#### 9.4 Risky Investment Mode (Optional)
+- **Anti-investment collateral**: Required additional deposit (opposite of risk boundary error)
+- **Investment robot monitoring**: Automated stop-loss triggers
+- **50/50 fallout**: If crypto plummets, borrower and owner split shipping/insurance costs
+- **Custom risk control**: User chooses percentage of 2x to invest (0-100% slider)
+
+### 10. ShipStation Label Optimization
+
+#### 10.1 Label Optimization Process
+- **Rate comparison**: Compare current label vs. ShipStation negotiated rates
+- **Refund-free verification**: Only optimize if label refund is free
+- **Conservative approach**: Only optimize when savings > minimum threshold
+- **Automatic by default**: User setting enables/disables auto-optimization
+
+#### 10.2 Optimization Workflow
+- **Check rates**: Get ShipStation rates for comparison
+- **Validate refund**: Ensure current label can be refunded for free
+- **Calculate savings**: Determine potential savings from optimization
+- **Apply optimization**: Refund old label, purchase new label
+- **Reinvest savings**: Automatically reinvest difference in investment pool
+
+#### 10.3 Risk Management
+- **Minimum savings threshold**: Only optimize if savings > $2 (configurable)
+- **Risk tolerance**: Conservative, moderate, or aggressive settings
+- **Provider restrictions**: Limit optimization to trusted providers
+- **Fallback handling**: Revert to original label if optimization fails
+
+### 11. Investment Robots & Automated Monitoring
+
+#### 11.1 Robot Activation
+- **Automatic activation**: Robots activate when risky investment mode enabled
+- **Stop-loss monitoring**: Continuous monitoring for descent detection
+- **Risk boundary calculation**: Dynamic calculation based on market conditions
+- **Pull-out period analysis**: Calculate time window for safe withdrawal
+
+#### 11.2 Monitoring & Alerts
+- **Market volatility detection**: Monitor for significant market movements
+- **Descent detection**: Identify when investment is at risk
+- **Emergency protocols**: Coordinate with market monitoring systems
+- **ML warehouse integration**: Share data for optimization
+
+#### 11.3 Emergency Withdrawal
+- **Withdrawal window checking**: Verify if withdrawal is possible
+- **Emergency execution**: Attempt immediate withdrawal if conditions met
+- **Fallout triggering**: If withdrawal fails, trigger 50/50 loss sharing
+- **Robot deactivation**: Deactivate monitoring after resolution
+
+### 12. Fallout Scenarios & Loss Sharing
+
+#### 12.1 Fallout Triggers
+- **Investment failure**: When crypto investment loses significant value
+- **Withdrawal failure**: When emergency withdrawal cannot be executed
+- **Market crash**: When market conditions prevent safe withdrawal
+- **Robot timeout**: When monitoring systems detect critical risk
+
+#### 12.2 Loss Calculation
+- **Shipping cost split**: 50% borrower, 50% owner for shipping costs
+- **Insurance cost split**: 50% borrower, 50% owner for insurance costs
+- **Investment loss**: Separate from shipping/insurance (capital loss for both)
+- **Tax implications**: Both parties can report capital losses
+
+#### 12.3 Recovery Process
+- **Automatic refunds**: Process 50/50 refunds automatically
+- **Capital loss records**: Generate tax documents for both parties
+- **Chat room creation**: Create dispute resolution chat room
+- **Robot deactivation**: Deactivate risky investment mode
 
 ### 9. Penalties & Forfeitures
 - **Item loss**: Security + protection deposits forfeited to item owner

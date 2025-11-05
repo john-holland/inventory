@@ -33,6 +33,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     
+    // Servlet API
+    implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    
     // Jersey
     implementation("org.glassfish.jersey.containers:jersey-container-servlet:3.1.1")
     implementation("org.glassfish.jersey.inject:jersey-hk2:3.1.1")

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -16,32 +17,40 @@ import {
   Search as SearchIcon,
   Map as MapIcon,
   Dashboard as DashboardIcon,
-  Menu as MenuIcon
+  Menu as MenuIcon,
+  Settings as SettingsIcon
 } from '@mui/icons-material';
 
 interface SharedHeaderProps {
-  currentTab: number;
-  onTabChange: (event: React.SyntheticEvent, newValue: number) => void;
   charityFeaturesEnabled: boolean;
   onMenuClick?: () => void;
 }
 
 export const SharedHeader: React.FC<SharedHeaderProps> = ({
-  currentTab,
-  onTabChange,
   charityFeaturesEnabled,
   onMenuClick
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const tabs = [
-    { label: 'Dashboard', icon: <DashboardIcon />, index: 0 },
-    { label: 'Search', icon: <SearchIcon />, index: 1 },
-    { label: 'Map', icon: <MapIcon />, index: 2 },
-    { label: 'Inventory', icon: <InventoryIcon />, index: 3 },
-    { label: 'Cabin', icon: <MenuIcon />, index: 4 }
+    { label: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    { label: 'Search', icon: <SearchIcon />, path: '/search' },
+    { label: 'Map', icon: <MapIcon />, path: '/map' },
+    { label: 'Inventory', icon: <InventoryIcon />, path: '/inventory' },
+    { label: 'Cabins', icon: <MenuIcon />, path: '/cabins' },
+    { label: 'Settings', icon: <SettingsIcon />, path: '/settings' }
   ];
+
+  // Determine current tab based on pathname
+  const currentTab = tabs.findIndex(tab => tab.path === location.pathname);
+  const selectedTab = currentTab === -1 ? 0 : currentTab;
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    navigate(tabs[newValue].path);
+  };
 
   return (
     <AppBar 
@@ -91,8 +100,8 @@ export const SharedHeader: React.FC<SharedHeaderProps> = ({
       </Toolbar>
       
       <Tabs
-        value={currentTab}
-        onChange={onTabChange}
+        value={selectedTab}
+        onChange={handleTabChange}
         aria-label="dashboard navigation tabs"
         variant={isMobile ? "scrollable" : "fullWidth"}
         scrollButtons="auto"
@@ -119,14 +128,14 @@ export const SharedHeader: React.FC<SharedHeaderProps> = ({
           }
         }}
       >
-        {tabs.map((tab) => (
+        {tabs.map((tab, index) => (
           <Tab
-            key={tab.index}
+            key={index}
             icon={tab.icon}
             label={tab.label}
             iconPosition="start"
             sx={{ 
-              minWidth: isMobile ? 'auto' : '120px',
+              minWidth: isMobile ? 'auto' : '100px',
               fontSize: { xs: '0.75rem', md: '0.875rem' }
             }}
           />

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Box,
   TextField,
@@ -34,64 +35,16 @@ import {
   LocationOn as LocationIcon,
   Category as CategoryIcon,
   PriceCheck as PriceIcon,
-  Clear as ClearIcon
+  Clear as ClearIcon,
+  Visibility as VisibilityIcon
 } from '@mui/icons-material';
+import { mockInventoryItems, type InventoryItem } from '../data/mockInventoryItems';
+import { getItemTypeChip, getPriceLabel } from '../utils/itemTypeHelpers';
 
-interface SearchResult {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  location: string;
-  distance: number;
-  price: number;
-  rating: number;
-  available: boolean;
-  owner: string;
-  tags: string[];
-}
+type SearchResult = InventoryItem;
 
-const mockSearchResults: SearchResult[] = [
-  {
-    id: '1',
-    name: 'Professional Camera Lens',
-    description: 'Canon EF 24-70mm f/2.8L II USM lens in excellent condition',
-    category: 'Electronics',
-    location: 'San Francisco, CA',
-    distance: 2.3,
-    price: 15,
-    rating: 4.8,
-    available: true,
-    owner: '0x1234...5678',
-    tags: ['photography', 'professional', 'camera']
-  },
-  {
-    id: '2',
-    name: 'Mountain Bike',
-    description: 'Trek Marlin 7 mountain bike, perfect for trails',
-    category: 'Sports',
-    location: 'Oakland, CA',
-    distance: 5.1,
-    price: 8,
-    rating: 4.6,
-    available: true,
-    owner: '0x8765...4321',
-    tags: ['cycling', 'outdoor', 'trail']
-  },
-  {
-    id: '3',
-    name: 'Power Tools Set',
-    description: 'Complete DeWalt power tools set with carrying case',
-    category: 'Tools',
-    location: 'Berkeley, CA',
-    distance: 3.7,
-    price: 12,
-    rating: 4.9,
-    available: false,
-    owner: '0x9876...5432',
-    tags: ['construction', 'professional', 'home-improvement']
-  }
-];
+// Use centralized mock data from schema migration document
+const mockSearchResults = mockInventoryItems;
 
 export const SearchPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -99,7 +52,7 @@ export const SearchPage: React.FC = () => {
   const [filters, setFilters] = useState({
     category: 'all',
     maxDistance: 10,
-    maxPrice: 50,
+    maxPrice: 10000,
     availableOnly: true,
     minRating: 0
   });
@@ -127,12 +80,14 @@ export const SearchPage: React.FC = () => {
     setFilters({
       category: 'all',
       maxDistance: 10,
-      maxPrice: 50,
+      maxPrice: 10000,
       availableOnly: true,
       minRating: 0
     });
     setSearchResults(mockSearchResults);
   };
+
+  // Helper functions now imported from utils
 
   return (
     <Box sx={{ p: 3, backgroundColor: '#121212', minHeight: '100vh', color: '#fff' }}>
@@ -242,6 +197,8 @@ export const SearchPage: React.FC = () => {
                       <MenuItem value="Tools">Tools</MenuItem>
                       <MenuItem value="Books">Books</MenuItem>
                       <MenuItem value="Clothing">Clothing</MenuItem>
+                      <MenuItem value="Agreements">User Agreements</MenuItem>
+                      <MenuItem value="Investments">Investments</MenuItem>
                     </Select>
                   </FormControl>
                 </AccordionDetails>
@@ -284,7 +241,8 @@ export const SearchPage: React.FC = () => {
                     value={filters.maxPrice}
                     onChange={(e, value) => setFilters({ ...filters, maxPrice: value as number })}
                     min={1}
-                    max={100}
+                    max={10000}
+                    step={filters.maxPrice > 1000 ? 100 : 10}
                     sx={{
                       color: '#4caf50',
                       '& .MuiSlider-thumb': {
@@ -369,6 +327,16 @@ export const SearchPage: React.FC = () => {
                           </Typography>
                           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                             <Chip
+                              label={getItemTypeChip(item.itemType).label}
+                              size="small"
+                              sx={{ 
+                                backgroundColor: getItemTypeChip(item.itemType).color, 
+                                color: '#fff',
+                                fontWeight: 'normal',
+                                border: '1px solid #555'
+                              }}
+                            />
+                            <Chip
                               icon={<LocationIcon />}
                               label={`${item.distance} miles`}
                               size="small"
@@ -376,7 +344,7 @@ export const SearchPage: React.FC = () => {
                             />
                             <Chip
                               icon={<PriceIcon />}
-                              label={`$${item.price}/day`}
+                              label={getPriceLabel(item)}
                               size="small"
                               sx={{ backgroundColor: '#333', color: '#ccc' }}
                             />
@@ -398,24 +366,42 @@ export const SearchPage: React.FC = () => {
                       }
                     />
                     <ListItemSecondaryAction>
-                      <Button
-                        variant="outlined"
-                        disabled={!item.available}
-                        sx={{
-                          borderColor: '#4caf50',
-                          color: '#4caf50',
-                          '&:hover': {
-                            borderColor: '#45a049',
-                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                          },
-                          '&:disabled': {
-                            borderColor: '#666',
-                            color: '#666',
-                          },
-                        }}
-                      >
-                        {item.available ? 'Request Item' : 'Unavailable'}
-                      </Button>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button
+                          component={Link}
+                          to={`/item/${item.id}`}
+                          variant="outlined"
+                          size="small"
+                          startIcon={<VisibilityIcon />}
+                          sx={{
+                            borderColor: '#4caf50',
+                            color: '#4caf50',
+                            '&:hover': {
+                              borderColor: '#66bb6a',
+                              backgroundColor: 'rgba(76, 175, 80, 0.1)'
+                            }
+                          }}
+                        >
+                          Details
+                        </Button>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={!item.available}
+                          sx={{
+                            backgroundColor: '#4caf50',
+                            '&:hover': {
+                              backgroundColor: '#45a049',
+                            },
+                            '&:disabled': {
+                              backgroundColor: '#666',
+                              color: '#999',
+                            },
+                          }}
+                        >
+                          {item.available ? 'Request' : 'Unavailable'}
+                        </Button>
+                      </Box>
                     </ListItemSecondaryAction>
                   </ListItem>
                 </React.Fragment>

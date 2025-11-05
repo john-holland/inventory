@@ -276,8 +276,10 @@ export class CabinService {
       
     } catch (error) {
       console.error('Failed to create cabin:', error);
-      console.error('Error details:', error.message, error.stack);
-      throw new Error(`Failed to create cabin: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      console.error('Error details:', errorMessage, errorStack);
+      throw new Error(`Failed to create cabin: ${errorMessage}`);
     }
   }
 
