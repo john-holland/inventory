@@ -63,7 +63,7 @@ describe('Plan #3 ShipStation → Plan #3 Investment Integration', () => {
       );
       
       expect(reinvestmentTx).toBeDefined();
-      expect(reinvestmentTx.amount).toBe(optimizationResult.reinvestmentAmount);
+      expect(reinvestmentTx?.amount).toBe(optimizationResult.reinvestmentAmount);
       
       console.log('✅ ShipStation → Investment Integration Test Passed');
       

@@ -72,7 +72,7 @@ export interface ShippingPreferences {
 
 export class ShippingService {
   private static instance: ShippingService;
-  private investmentService: InvestmentService;
+  private investmentService?: InvestmentService;
   private shipStationService: ShipStationService;
 
   static getInstance(): ShippingService {
@@ -83,9 +83,19 @@ export class ShippingService {
   }
 
   constructor() {
-    this.investmentService = InvestmentService.getInstance();
     this.shipStationService = ShipStationService.getInstance();
     console.log('📦 Shipping Service initialized');
+  }
+
+  setInvestmentService(service: InvestmentService) {
+    this.investmentService = service;
+  }
+
+  private getInvestmentService(): InvestmentService {
+    if (!this.investmentService) {
+      throw new Error('InvestmentService not initialized for ShippingService');
+    }
+    return this.investmentService;
   }
 
   // Calculate distance between two zip codes (simplified)
@@ -372,7 +382,7 @@ export class ShippingService {
       const basicStatus = this.getBasicShippingStatus(itemId);
 
       // Get investment status
-      const investmentStatus = await this.investmentService.getInvestmentStatus(itemId);
+      const investmentStatus = await this.getInvestmentService().getInvestmentStatus(itemId);
 
       // Check optimization opportunities
       const optimizationCheck = await this.checkLabelOptimization(`ship_${itemId}`);

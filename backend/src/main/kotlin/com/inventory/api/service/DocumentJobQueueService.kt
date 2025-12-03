@@ -175,8 +175,7 @@ class DocumentJobQueueService(
         val job = DocumentJob(
             jobId = jobId,
             sessionId = sessionId,
-            userId = userId,
-            documentType = "service-performance-requirements",
+            type = "service-performance-requirements",
             status = "queued",
             progress = 0,
             message = "Queued for generation",

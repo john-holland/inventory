@@ -3,9 +3,9 @@
  * Tests hold tracking, eligibility checks, risky mode, and anti-collateral calculation
  */
 
-import { InvestmentService } from '../services/InvestmentService';
-import { WalletService } from '../services/WalletService';
-import { ShippingService } from '../services/ShippingService';
+import { InvestmentService } from '../../services/InvestmentService';
+import { WalletService } from '../../services/WalletService';
+import { ShippingService } from '../../services/ShippingService';
 
 describe('InvestmentService Integration Tests', () => {
   let investmentService: InvestmentService;
@@ -104,7 +104,7 @@ describe('InvestmentService Integration Tests', () => {
       
       const antiCollateral = await investmentService.calculateAntiCollateral(20.00, riskPercentage);
       
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
+      await walletService.enableRiskyInvestmentMode('wallet_001', itemId, riskPercentage, antiCollateral);
 
       const investmentStatus = await investmentService.getInvestmentStatus(itemId);
       
@@ -134,7 +134,7 @@ describe('InvestmentService Integration Tests', () => {
       await walletService.processShippingHold(itemId, 25.00);
       
       const antiCollateral = await investmentService.calculateAntiCollateral(15.00, riskPercentage);
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
+      await walletService.enableRiskyInvestmentMode('wallet_001', itemId, riskPercentage, antiCollateral);
 
       const eligibility = await investmentService.checkInvestmentEligibility(itemId, 'shipping_2x');
       
@@ -195,7 +195,7 @@ describe('InvestmentService Integration Tests', () => {
       await walletService.processShippingHold(itemId, 25.00);
       
       const antiCollateral = await investmentService.calculateAntiCollateral(10.00, riskPercentage);
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
+      await walletService.enableRiskyInvestmentMode('wallet_001', itemId, riskPercentage, antiCollateral);
 
       const investmentStatus = await investmentService.getInvestmentStatus(itemId);
 
@@ -216,7 +216,7 @@ describe('InvestmentService Integration Tests', () => {
       
       const riskPercentage = 50;
       const antiCollateral = await investmentService.calculateAntiCollateral(10.00, riskPercentage);
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
+      await walletService.enableRiskyInvestmentMode('wallet_001', itemId, riskPercentage, antiCollateral);
 
       await investmentService.handleFalloutScenario(itemId, investmentLoss);
 
@@ -242,7 +242,7 @@ describe('InvestmentService Integration Tests', () => {
         investmentLoss: 55.00 // 100 - 45
       };
 
-      await walletService.handleFalloutScenario(itemId, falloutData);
+      await walletService.handleFalloutScenario(itemId, 'wallet_001', 'wallet_002', falloutData.totalLoss, falloutData.shippingRefund, falloutData.insuranceRefund);
 
       // Verify fallout was processed
       expect(falloutData.borrowerShare).toBe(22.50);

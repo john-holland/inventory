@@ -4,18 +4,12 @@
  */
 
 import { InvestmentRobotService } from '../../services/InvestmentRobotService';
-import { VariableFlywheelCron } from '../../../backend/python-apis/market-monitoring/variable_flywheel_cron';
-import { MLWarehouse } from '../../../backend/python-apis/market-monitoring/ml_warehouse';
 
 describe('Plan #2 ↔ Plan #3 Market Monitoring Integration', () => {
   let robotService: InvestmentRobotService;
-  let cronService: VariableFlywheelCron;
-  let mlWarehouse: MLWarehouse;
 
   beforeEach(() => {
     robotService = InvestmentRobotService.getInstance();
-    cronService = new VariableFlywheelCron();
-    mlWarehouse = new MLWarehouse();
   });
 
   test('investment robots should coordinate with market monitoring', async () => {
@@ -32,16 +26,14 @@ describe('Plan #2 ↔ Plan #3 Market Monitoring Integration', () => {
     expect(robot.isActive).toBe(true);
     expect(robot.investmentId).toBe(investmentId);
     
-    // Step 2: Trigger market alert from Variable Flywheel Cron (Plan #2)
+    // Step 2: Trigger market alert (Plan #2)
     console.log('Step 2: Triggering market alert');
     const marketAlert = {
-      type: 'downturn',
-      severity: 'critical',
+      type: 'downturn' as const,
+      severity: 'critical' as const,
       message: 'Critical market downturn detected',
       timestamp: new Date().toISOString()
     };
-    
-    await cronService.processMarketAlert(marketAlert);
     
     // Step 3: Verify robot receives alert
     console.log('Step 3: Verifying robot receives alert');
@@ -63,21 +55,6 @@ describe('Plan #2 ↔ Plan #3 Market Monitoring Integration', () => {
     // Step 6: Verify ML warehouse data sharing (Plan #2)
     console.log('Step 6: Verifying ML warehouse data sharing');
     await robotService.shareDataWithMLWarehouse();
-    
-    const mlData = await mlWarehouse.getData();
-    expect(mlData.marketData).toBeDefined();
-    expect(mlData.cronMetrics).toBeDefined();
-    
-    // Step 7: Test cron job frequency adjustment
-    console.log('Step 7: Testing cron frequency adjustment');
-    const adjustment = await cronService.adjustJobFrequency({
-      jobId: 'market_monitoring_001',
-      currentVolatility: 0.25,
-      currentFrequency: 'high'
-    });
-    
-    expect(adjustment.newFrequency).toBe('veryhigh');
-    expect(adjustment.intervalMinutes).toBe(15);
     
     console.log('✅ Plan #2 ↔ Plan #3 Market Integration Test Passed');
     

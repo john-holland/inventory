@@ -60,7 +60,9 @@ export class InvestmentService {
 
   constructor() {
     this.walletService = WalletService.getInstance();
+    this.walletService.setInvestmentService(this);
     this.shippingService = ShippingService.getInstance();
+    this.shippingService.setInvestmentService(this);
     console.log('💰 Investment Service initialized');
   }
 

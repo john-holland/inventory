@@ -48,7 +48,7 @@ export class WalletService {
   private static instance: WalletService;
   private wallets: Map<string, DropshippingWallet> = new Map();
   private transactions: Map<string, WalletTransaction> = new Map();
-  private investmentService: InvestmentService;
+  private investmentService?: InvestmentService;
 
   static getInstance(): WalletService {
     if (!WalletService.instance) {
@@ -58,9 +58,19 @@ export class WalletService {
   }
 
   constructor() {
-    this.investmentService = InvestmentService.getInstance();
     console.log('💳 Wallet Service initialized');
     this.initializeMockWallets();
+  }
+
+  setInvestmentService(service: InvestmentService) {
+    this.investmentService = service;
+  }
+
+  private getInvestmentService(): InvestmentService {
+    if (!this.investmentService) {
+      throw new Error('InvestmentService not initialized for WalletService');
+    }
+    return this.investmentService;
   }
 
   private initializeMockWallets(): void {
@@ -341,7 +351,7 @@ export class WalletService {
       `Anti-investment collateral for risky mode (${riskPercentage}%)`, itemId, 'non_investable');
 
     // Enable risky mode in InvestmentService
-    const riskConfig = await this.investmentService.enableRiskyInvestmentMode(itemId, riskPercentage, antiInvestmentCollateral);
+    const riskConfig = await this.getInvestmentService().enableRiskyInvestmentMode(itemId, riskPercentage, antiInvestmentCollateral);
     
     if (riskConfig) {
       console.log(`⚠️ Risky investment mode enabled for item ${itemId} at ${riskPercentage}% risk`);
@@ -403,7 +413,7 @@ export class WalletService {
       `Capital loss from investment failure for item ${itemId}`, itemId);
 
     // Handle fallout in InvestmentService
-    await this.investmentService.handleFalloutScenario(itemId, totalLoss);
+    await this.getInvestmentService().handleFalloutScenario(itemId, totalLoss);
 
     console.log(`💥 Fallout scenario handled for item ${itemId}: Borrower $${borrowerShare}, Owner $${ownerShare}`);
     return true;
@@ -417,7 +427,7 @@ export class WalletService {
 
   // Get Investment Status for Item
   getInvestmentStatus(itemId: string) {
-    return this.investmentService.getInvestmentStatus(itemId);
+    return this.getInvestmentService().getInvestmentStatus(itemId);
   }
 
   // Helper Methods
