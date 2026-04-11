@@ -40,3 +40,4 @@ See `scripts/mock_cave_server.py` in this repository.
 ## Anti-patterns
 
 Unstructured topics; SQL or filesystem paths embedded in routes; Tome transitions without corresponding LVM append for the same `trace_id` (on Cave server side).
+

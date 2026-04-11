@@ -15,3 +15,4 @@ This repository hosts **reference artifacts** until `john-holland/resaurce` is c
 | inventory   | future inventory Cave |
 
 Implement the authoritative Cave process, Tomes, and CaveRobits in the **resaurce** repo; inventory only ships adapters and this reference.
+

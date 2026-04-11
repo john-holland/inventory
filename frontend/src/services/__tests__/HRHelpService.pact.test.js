@@ -38,3 +38,4 @@ describe('HR Help Service PACT Tests', () => {
     expect(chat.type).toBe('hr_help_1on1');
   });
 });
+

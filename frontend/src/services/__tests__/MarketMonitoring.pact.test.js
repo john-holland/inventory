@@ -24,3 +24,4 @@ describe('Market Monitoring PACT Tests', () => {
     expect(alerts.length).toBeGreaterThan(0);
   });
 });
+

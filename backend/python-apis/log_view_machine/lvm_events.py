@@ -77,3 +77,4 @@ def append_events_via_client(client: CaveClient, events: List[Dict[str, Any]]) -
     if not events:
         return {"ok": True, "skipped": True}
     return client.append_lvm(events)
+

@@ -38,3 +38,4 @@ export function presenceHeaders(token: string | null): Record<string, string> {
   if (!token) return {};
   return { [PRESENCE_HEADER]: token };
 }
+

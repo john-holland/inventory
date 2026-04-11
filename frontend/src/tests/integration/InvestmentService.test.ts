@@ -266,3 +266,4 @@ describe('InvestmentService Integration Tests', () => {
     });
   });
 });
+

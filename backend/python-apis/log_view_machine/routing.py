@@ -79,3 +79,4 @@ def parse_routed_subject(subject: str) -> ParsedRoute:
 def default_registry_entry(service_name: str) -> Optional[str]:
     """Placeholder: map service name to base URL from env in CaveClient."""
     return None  # CaveClient reads os.environ instead
+

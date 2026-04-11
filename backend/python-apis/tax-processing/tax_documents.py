@@ -326,3 +326,4 @@ if __name__ == "__main__":
         print(json.dumps({"error": "unknown command", "command": ns.command}))
         sys.exit(2)
     sys.exit(_run_cli(ns))
+

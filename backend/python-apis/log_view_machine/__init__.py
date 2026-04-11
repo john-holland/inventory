@@ -23,3 +23,4 @@ __all__ = [
     "tax_document_lifecycle_events",
     "append_events_via_client",
 ]
+

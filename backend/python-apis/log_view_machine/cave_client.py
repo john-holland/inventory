@@ -91,3 +91,4 @@ class PresenceAwareCaveClient(CaveClient):
     def send_route(self, envelope: MessageEnvelope) -> Dict[str, Any]:
         merged = replace(envelope, presence=self._presence or envelope.presence)
         return super().send_route(merged)
+

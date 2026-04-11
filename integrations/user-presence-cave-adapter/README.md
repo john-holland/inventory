@@ -19,3 +19,4 @@ Inventory ships the reference implementation under:
 
 - `REACT_APP_CAVE_BASE_URL` — browser → Cave (inventory frontend).
 - `CAVE_BASE_URL` — Python workers (`log_view_machine.cave_client`).
+
