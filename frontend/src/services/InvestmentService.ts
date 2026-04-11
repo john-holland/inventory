@@ -66,6 +66,12 @@ export class InvestmentService {
     console.log('💰 Investment Service initialized');
   }
 
+  /** Jest: clear per-item risk and status maps (singleton). */
+  resetMockStateForTests(): void {
+    this.riskConfigs.clear();
+    this.investmentStatuses.clear();
+  }
+
   /**
    * Track per-item holds (shipping 2x, additional, insurance)
    */
@@ -184,9 +190,8 @@ export class InvestmentService {
     // Store risk configuration
     this.riskConfigs.set(itemId, riskConfig);
 
-    // Enable risky mode in wallet service
-    const walletId = 'wallet_001'; // Default wallet
-    await this.walletService.enableRiskyInvestmentMode(walletId, itemId, riskPercentage, antiCollateral);
+    // Wallet funds + anti-collateral deduction are handled by WalletService.enableRiskyInvestmentMode
+    // before it calls this method; do not call back into Wallet here (would recurse and double-charge).
 
     // Activate investment robots
     await this.activateInvestmentRobots(itemId);
@@ -196,11 +201,13 @@ export class InvestmentService {
   }
 
   /**
-   * Calculate required anti-collateral for risky investment
+   * Anti-collateral in dollars for a given **amount at risk** (already includes risk % of 2× shipping hold).
+   * Same formula as `enableRiskyInvestmentMode`: `amountAtRisk * riskBoundaryError`.
+   * The `riskPercentage` argument is unused (callers pass it for readability); use `trackPerItemHolds` to derive amount at risk.
    */
-  async calculateAntiCollateral(investmentAmount: number, riskPercentage: number): Promise<number> {
+  async calculateAntiCollateral(amountAtRisk: number, riskPercentage: number): Promise<number> {
     const riskBoundaryError = await this.getRiskBoundaryError();
-    return investmentAmount * riskBoundaryError;
+    return amountAtRisk * riskBoundaryError;
   }
 
   /**

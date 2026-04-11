@@ -3,12 +3,40 @@ Tax Document Generation System
 Generates W2, 1099-C, investment documents, and capital loss reports
 """
 
-import numpy as np
-import pandas as pd
+import argparse
+import json
+import os
+import sys
 from datetime import datetime, date
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-import json
+
+import numpy as np
+import pandas as pd
+
+# log_view_machine lives alongside this package under python-apis/
+_SYS_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _SYS_ROOT not in sys.path:
+    sys.path.insert(0, _SYS_ROOT)
+
+try:
+    from log_view_machine import (
+        CaveClient,
+        build_envelope,
+        tax_document_lifecycle_events,
+        append_events_via_client,
+    )
+except ImportError:
+    CaveClient = None  # type: ignore
+
+    def build_envelope(*args, **kwargs):  # type: ignore
+        return None
+
+    def tax_document_lifecycle_events(*args, **kwargs):  # type: ignore
+        return []
+
+    def append_events_via_client(*args, **kwargs):  # type: ignore
+        return {"ok": False, "skipped": True}
 
 @dataclass
 class TaxDocumentData:
@@ -196,5 +224,105 @@ class TaxDocumentGenerator:
             'cancelled_debt': base_wages * 0.02,  # 2% cancelled debt
         }
 
+def _emit_tax_lvm(
+    phase: str,
+    *,
+    trace_id: str,
+    session_id: str,
+    user_id: str,
+    document_type: str,
+    lvm_route: Optional[str],
+    extra: Optional[Dict[str, Any]] = None,
+) -> None:
+    if CaveClient is None:
+        return
+    client = CaveClient()
+    events = tax_document_lifecycle_events(
+        trace_id,
+        phase,
+        session_id=session_id,
+        user_id=user_id,
+        document_type=document_type,
+        lvm_route=lvm_route,
+        extra=extra,
+    )
+    append_events_via_client(client, events)
+
+
+def _run_cli(args: argparse.Namespace) -> int:
+    trace_id = args.trace_id or os.environ.get("LVM_TRACE_ID") or f"tax-{args.user_id}-{args.year}"
+    session_id = args.session_id or os.environ.get("LVM_SESSION_ID") or trace_id
+    lvm_route = args.lvm_route or os.environ.get("LVM_ROUTE")
+
+    gen = TaxDocumentGenerator()
+    try:
+        _emit_tax_lvm(
+            "queued",
+            trace_id=trace_id,
+            session_id=session_id,
+            user_id=args.user_id,
+            document_type=args.document_type,
+            lvm_route=lvm_route,
+        )
+        _emit_tax_lvm(
+            "running",
+            trace_id=trace_id,
+            session_id=session_id,
+            user_id=args.user_id,
+            document_type=args.document_type,
+            lvm_route=lvm_route,
+        )
+
+        dt = (args.document_type or "").lower()
+        if dt in ("w2", "w-2"):
+            doc = gen.generate_w2_form(args.user_id, args.year)
+        elif "1099" in dt:
+            doc = gen.generate_1099c_form(args.user_id, args.year)
+        elif "investment" in dt:
+            doc = gen.generate_investment_documents(args.user_id, args.year)
+        else:
+            doc = gen.generate_w2_form(args.user_id, args.year)
+
+        _emit_tax_lvm(
+            "completed",
+            trace_id=trace_id,
+            session_id=session_id,
+            user_id=args.user_id,
+            document_type=args.document_type,
+            lvm_route=lvm_route,
+        )
+
+        print(json.dumps(doc, default=str))
+        return 0
+    except Exception as e:  # noqa: BLE001
+        _emit_tax_lvm(
+            "failed",
+            trace_id=trace_id,
+            session_id=session_id,
+            user_id=args.user_id,
+            document_type=args.document_type,
+            lvm_route=lvm_route,
+            extra={"error": str(e), "phase": "failed"},
+        )
+        print(json.dumps({"error": str(e)}))
+        return 1
+
+
 # Export the main class
-__all__ = ['TaxDocumentGenerator', 'TaxDocumentData']
+__all__ = ["TaxDocumentGenerator", "TaxDocumentData"]
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Tax document generation (inventory worker)")
+    parser.add_argument("command", nargs="?", default="generate_tax_document")
+    parser.add_argument("--user-id", dest="user_id", required=True)
+    parser.add_argument("--year", type=int, required=True)
+    parser.add_argument("--document-type", dest="document_type", default="W2")
+    parser.add_argument("--trace-id", dest="trace_id", default=None)
+    parser.add_argument("--session-id", dest="session_id", default=None)
+    parser.add_argument("--lvm-route", dest="lvm_route", default=None)
+    ns = parser.parse_args()
+    if ns.command != "generate_tax_document":
+        print(json.dumps({"error": "unknown command", "command": ns.command}))
+        sys.exit(2)
+    sys.exit(_run_cli(ns))

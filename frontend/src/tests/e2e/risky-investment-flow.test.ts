@@ -17,8 +17,10 @@ describe('Risky Investment Flow E2E Test', () => {
   let robotService: InvestmentRobotService;
 
   beforeEach(() => {
-    investmentService = InvestmentService.getInstance();
     walletService = WalletService.getInstance();
+    walletService.resetMockStateForTests();
+    InvestmentService.getInstance().resetMockStateForTests();
+    investmentService = InvestmentService.getInstance();
     shipStationService = ShipStationService.getInstance();
     shippingService = ShippingService.getInstance();
     robotService = InvestmentRobotService.getInstance();

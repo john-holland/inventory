@@ -59,7 +59,16 @@ export class WalletService {
 
   constructor() {
     console.log('💳 Wallet Service initialized');
-    this.initializeMockWallets();
+    this.seedDefaultWallets();
+  }
+
+  /**
+   * Jest / integration: restore mock wallets and transactions (singleton otherwise drains balance).
+   */
+  resetMockStateForTests(): void {
+    this.transactions.clear();
+    this.wallets.clear();
+    this.seedDefaultWallets();
   }
 
   setInvestmentService(service: InvestmentService) {
@@ -73,12 +82,12 @@ export class WalletService {
     return this.investmentService;
   }
 
-  private initializeMockWallets(): void {
+  private seedDefaultWallets(): void {
     // Create a sample wallet for demonstration
     const mockWallet: DropshippingWallet = {
       id: 'wallet_001',
       name: 'Main Amazon Business Wallet',
-      balance: 5000.00,
+      balance: 1_000_000.0,
       linkedAccount: 'partner@business.amazon.com',
       accountType: 'amazon_business',
       currency: 'USD',
@@ -88,6 +97,19 @@ export class WalletService {
     };
 
     this.wallets.set(mockWallet.id, mockWallet);
+
+    const ownerWallet: DropshippingWallet = {
+      id: 'wallet_002',
+      name: 'Owner Partner Wallet',
+      balance: 1_000_000.0,
+      linkedAccount: 'owner@business.amazon.com',
+      accountType: 'amazon_business',
+      currency: 'USD',
+      lastUpdated: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      isActive: true,
+    };
+    this.wallets.set(ownerWallet.id, ownerWallet);
 
     // Add some sample transactions
     this.addMockTransaction('wallet_001', 'deposit', 1000, 'Initial deposit');
@@ -553,11 +575,17 @@ export class WalletService {
    * Get hold balance for specific item and hold type
    */
   async getHoldBalance(itemId: string, holdType: 'shipping_hold_2x' | 'additional_hold' | 'insurance_hold'): Promise<number> {
-    const transactions = Array.from(this.transactions.values())
-      .filter(tx => tx.itemId === itemId && tx.type === holdType)
-      .reduce((sum, tx) => sum + tx.amount, 0);
-    
-    return transactions;
+    const txs = Array.from(this.transactions.values()).filter(tx => tx.itemId === itemId);
+    const match = (types: WalletTransaction['type'][]) =>
+      txs.filter(tx => types.includes(tx.type)).reduce((sum, tx) => sum + tx.amount, 0);
+
+    if (holdType === 'shipping_hold_2x') {
+      return match(['shipping_hold_2x', 'shipping_hold_deposit']);
+    }
+    if (holdType === 'additional_hold') {
+      return match(['additional_hold', 'additional_investment_hold']);
+    }
+    return match(['insurance_hold', 'insurance_hold_deposit']);
   }
 
   /**

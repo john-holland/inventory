@@ -13,8 +13,10 @@ describe('InvestmentService Integration Tests', () => {
   let shippingService: ShippingService;
 
   beforeEach(() => {
-    investmentService = InvestmentService.getInstance();
     walletService = WalletService.getInstance();
+    walletService.resetMockStateForTests();
+    investmentService = InvestmentService.getInstance();
+    investmentService.resetMockStateForTests();
     shippingService = ShippingService.getInstance();
   });
 
@@ -118,8 +120,8 @@ describe('InvestmentService Integration Tests', () => {
       const riskPercentage = 75;
       
       await walletService.processShippingHold(itemId, 20.00);
-      
-      const correctAntiCollateral = await investmentService.calculateAntiCollateral(15.00, riskPercentage);
+      const amountAtRisk = (40 * riskPercentage) / 100;
+      const correctAntiCollateral = await investmentService.calculateAntiCollateral(amountAtRisk, riskPercentage);
       const incorrectAntiCollateral = correctAntiCollateral + 5.00; // Too high
 
       await expect(
@@ -132,8 +134,8 @@ describe('InvestmentService Integration Tests', () => {
       const riskPercentage = 60;
       
       await walletService.processShippingHold(itemId, 25.00);
-      
-      const antiCollateral = await investmentService.calculateAntiCollateral(15.00, riskPercentage);
+      const amountAtRisk008 = (50 * riskPercentage) / 100;
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRisk008, riskPercentage);
       await walletService.enableRiskyInvestmentMode('wallet_001', itemId, riskPercentage, antiCollateral);
 
       const eligibility = await investmentService.checkInvestmentEligibility(itemId, 'shipping_2x');
@@ -145,26 +147,23 @@ describe('InvestmentService Integration Tests', () => {
 
   describe('Anti-Collateral Calculation', () => {
     test('should calculate anti-collateral correctly', async () => {
-      const investmentAmount = 100.00;
+      const amountAtRisk = 100.0;
       const riskPercentage = 50;
-      
-      const antiCollateral = investmentService.calculateAntiCollateral(investmentAmount, riskPercentage);
-      
-      // Should be investment amount * risk boundary error
+
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRisk, riskPercentage);
+
       const riskBoundaryError = await investmentService.getRiskBoundaryError();
-      const expectedAntiCollateral = investmentAmount * riskBoundaryError;
-      
+      const expectedAntiCollateral = amountAtRisk * riskBoundaryError;
+
       expect(antiCollateral).toBe(expectedAntiCollateral);
     });
 
-    test('should handle different risk percentages', async () => {
-      const investmentAmount = 200.00;
-      
-      const antiCollateral25 = investmentService.calculateAntiCollateral(investmentAmount, 25);
-      const antiCollateral75 = investmentService.calculateAntiCollateral(investmentAmount, 75);
-      
-      // Higher risk percentage should require more anti-collateral
-      expect(antiCollateral75).toBeGreaterThan(antiCollateral25);
+    test('should scale with amount at risk (risk boundary is per dollar at risk)', async () => {
+      const riskBoundaryError = await investmentService.getRiskBoundaryError();
+      const low = await investmentService.calculateAntiCollateral(100.0, 25);
+      const high = await investmentService.calculateAntiCollateral(200.0, 75);
+      expect(high).toBe(200 * riskBoundaryError);
+      expect(high).toBeGreaterThan(low);
     });
   });
 
@@ -193,8 +192,8 @@ describe('InvestmentService Integration Tests', () => {
       const riskPercentage = 40;
       
       await walletService.processShippingHold(itemId, 25.00);
-      
-      const antiCollateral = await investmentService.calculateAntiCollateral(10.00, riskPercentage);
+      const amountAtRisk010 = (50 * riskPercentage) / 100;
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRisk010, riskPercentage);
       await walletService.enableRiskyInvestmentMode('wallet_001', itemId, riskPercentage, antiCollateral);
 
       const investmentStatus = await investmentService.getInvestmentStatus(itemId);
@@ -215,7 +214,8 @@ describe('InvestmentService Integration Tests', () => {
       await walletService.createInsuranceHold(itemId, 10.00);
       
       const riskPercentage = 50;
-      const antiCollateral = await investmentService.calculateAntiCollateral(10.00, riskPercentage);
+      const amountAtRisk011 = (40 * riskPercentage) / 100;
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRisk011, riskPercentage);
       await walletService.enableRiskyInvestmentMode('wallet_001', itemId, riskPercentage, antiCollateral);
 
       await investmentService.handleFalloutScenario(itemId, investmentLoss);

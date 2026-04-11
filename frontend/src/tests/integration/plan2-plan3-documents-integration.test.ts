@@ -5,14 +5,18 @@
 
 import { InvestmentService } from '../../services/InvestmentService';
 import { HRHelpService } from '../../services/HRHelpService';
+import { WalletService } from '../../services/WalletService';
 
 describe('Plan #2 ↔ Plan #3 Documents Integration', () => {
   let investmentService: InvestmentService;
   let hrService: HRHelpService;
 
   beforeEach(() => {
+    WalletService.getInstance().resetMockStateForTests();
     investmentService = InvestmentService.getInstance();
+    investmentService.resetMockStateForTests();
     hrService = HRHelpService.getInstance();
+    hrService.resetMockStateForTests();
   });
 
   test('documents page should display investment-related documents', async () => {

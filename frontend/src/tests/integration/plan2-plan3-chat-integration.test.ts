@@ -15,8 +15,10 @@ describe('Plan #2 ↔ Plan #3 Chat Integration', () => {
   let slackService: SlackIntegrationService;
 
   beforeEach(() => {
-    investmentService = InvestmentService.getInstance();
     walletService = WalletService.getInstance();
+    walletService.resetMockStateForTests();
+    investmentService = InvestmentService.getInstance();
+    investmentService.resetMockStateForTests();
     chatService = ChatRoomAutomationService.getInstance();
     slackService = SlackIntegrationService.getInstance();
   });
@@ -36,7 +38,9 @@ describe('Plan #2 ↔ Plan #3 Chat Integration', () => {
     const borrowerWalletId = 'wallet_001';
     const ownerWalletId = 'wallet_002';
     const riskPercentage = 60;
-    const antiCollateral = await investmentService.calculateAntiCollateral(24.00, riskPercentage);
+    const holdBalance = await investmentService.trackPerItemHolds(itemId);
+    const amountAtRisk = (holdBalance.shippingHold2x * riskPercentage) / 100;
+    const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRisk, riskPercentage);
     await walletService.enableRiskyInvestmentMode(walletId, itemId, riskPercentage, antiCollateral);
     
     // Step 2: Simulate fallout scenario (Plan #3)

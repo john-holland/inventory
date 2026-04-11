@@ -130,11 +130,10 @@ export const ItemDetailsPage: React.FC = () => {
     try {
       setProcessing(true);
       
-      // Calculate anti-collateral
-      const antiCollateral = await investmentService.calculateAntiCollateral(
-        investmentStatus?.holdBalance?.shippingHold2x || 0,
-        riskPercentage
-      );
+      // Anti-collateral matches InvestmentService.enableRiskyInvestmentMode: (2x shipping × risk%) × risk boundary
+      const shipping2x = investmentStatus?.holdBalance?.shippingHold2x || 0;
+      const amountAtRisk = (shipping2x * riskPercentage) / 100;
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRisk, riskPercentage);
       
       // Enable risky mode
       const walletId = 'wallet_001'; // Default wallet

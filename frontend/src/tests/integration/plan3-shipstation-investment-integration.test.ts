@@ -13,9 +13,11 @@ describe('Plan #3 ShipStation → Plan #3 Investment Integration', () => {
   let walletService: WalletService;
 
   beforeEach(() => {
-    shipStationService = ShipStationService.getInstance();
-    investmentService = InvestmentService.getInstance();
     walletService = WalletService.getInstance();
+    walletService.resetMockStateForTests();
+    investmentService = InvestmentService.getInstance();
+    investmentService.resetMockStateForTests();
+    shipStationService = ShipStationService.getInstance();
   });
 
   test('shipping optimization should trigger investment reinvestment', async () => {

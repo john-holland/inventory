@@ -6,6 +6,11 @@ yarn-debug.log*
 yarn-error.log*
 
 backend/build
+backend/.gradle/
+backend/bin/
+**/__pycache__/
+*.pyc
+.pytest_cache/
 
 # Runtime data
 pids

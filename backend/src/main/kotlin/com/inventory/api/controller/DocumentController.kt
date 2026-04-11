@@ -25,7 +25,8 @@ class DocumentController(
     @PostMapping("/tax/generate")
     fun generateTaxDocument(
         @RequestBody request: TaxDocumentRequest,
-        session: HttpSession
+        session: HttpSession,
+        @RequestHeader(value = "X-LVM-Route", required = false) lvmRoute: String?
     ): ResponseEntity<DocumentJobResponse> {
         
         // Create session ID for tracking
@@ -37,7 +38,8 @@ class DocumentController(
             userId = request.userId,
             year = request.year,
             documentType = request.documentType,
-            sessionId = sessionId
+            sessionId = sessionId,
+            lvmRoute = lvmRoute ?: request.lvmRoute
         )
         
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
@@ -226,7 +228,8 @@ class DocumentController(
 data class TaxDocumentRequest(
     val userId: String,
     val year: Int,
-    val documentType: String // "w2", "1099c", "investment_gains_losses"
+    val documentType: String, // "w2", "1099c", "investment_gains_losses"
+    val lvmRoute: String? = null // e.g. inventory:documents/tax/generate (optional; header X-LVM-Route overrides if set)
 )
 
 data class LegalDocumentRequest(

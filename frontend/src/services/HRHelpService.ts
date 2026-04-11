@@ -5,6 +5,21 @@
 
 import { ChatService, ChatRoom } from './ChatService';
 import SlackIntegrationService from './SlackIntegrationService';
+import { sendCaveRoute, isCaveConfigured } from './resaurceClient';
+import { readPresenceFromWindow, verifyUserPresence } from '../adapters/userPresenceCaveAdapter';
+
+/** Integration / documents-page style HR help response (resaurce-routed or local). */
+export interface HRHelpDeskResult {
+  success: boolean;
+  hrEmployeeId: string;
+  chatRoomId: string;
+}
+
+export interface HRDocumentHelpContext {
+  page: string;
+  issues: string[];
+  documentContext: string;
+}
 
 export interface HREmployee {
   id: string;
@@ -64,6 +79,13 @@ export class HRHelpService {
     console.log('🆘 HR Help Service initialized');
   }
 
+  /** Jest: reset singleton HR mock state (loads, sessions) between tests. */
+  resetMockStateForTests(): void {
+    this.activeSessions.clear();
+    this.hrEmployees.clear();
+    this.initializeMockHREmployees();
+  }
+
   /**
    * Initialize mock HR employees (in production, load from database)
    */
@@ -73,7 +95,7 @@ export class HRHelpService {
         id: 'hr_001',
         name: 'Sarah Johnson',
         email: 'sarah.johnson@company.com',
-        skills: ['onboarding', 'benefits', 'payroll'],
+        skills: ['onboarding', 'benefits', 'payroll', 'documents', 'capital_loss_question', 'investment_help'],
         availability: this.generateMockAvailability(),
         currentLoad: 2,
         maxLoad: 5,
@@ -116,15 +138,16 @@ export class HRHelpService {
     for (let day = 0; day < 7; day++) {
       const date = new Date(now);
       date.setDate(date.getDate() + day);
-      date.setHours(9, 0, 0, 0);
-      
+      date.setHours(0, 0, 0, 0);
+
       const endDate = new Date(date);
-      endDate.setHours(17, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
       
       slots.push({
         start: date.toISOString(),
         end: endDate.toISOString(),
-        status: Math.random() > 0.3 ? 'available' : 'busy'
+        // Deterministic mock: flaky tests and CI fail when "now" falls outside all available windows.
+        status: 'available',
       });
     }
     
@@ -132,10 +155,68 @@ export class HRHelpService {
   }
 
   /**
-   * Main function to get HR help
+   * Main function to get HR help (routes to resaurce Cave when `REACT_APP_CAVE_BASE_URL` is set).
    */
-  async getHRHelp(helpRequest: HelpRequest): Promise<HRHelpSession> {
+  async getHRHelp(helpRequest: HelpRequest): Promise<HRHelpSession>;
+  async getHRHelp(userId: string, documentCtx: HRDocumentHelpContext): Promise<HRHelpDeskResult>;
+  async getHRHelp(
+    helpRequestOrUserId: HelpRequest | string,
+    documentCtx?: HRDocumentHelpContext
+  ): Promise<HRHelpSession | HRHelpDeskResult> {
+    if (typeof helpRequestOrUserId === 'string') {
+      const userId = helpRequestOrUserId;
+      const ctx = documentCtx!;
+      const presence = await verifyUserPresence(readPresenceFromWindow());
+      if (!presence.ok) {
+        return { success: false, hrEmployeeId: '', chatRoomId: '' };
+      }
+      const session = await this.getHRHelpInternal({
+        userId,
+        context: ctx.documentContext,
+        skillsRequired: ctx.issues,
+        urgency: 'medium',
+      });
+      return {
+        success: true,
+        hrEmployeeId: session.hrEmployeeId,
+        chatRoomId: session.chatRoomId,
+      };
+    }
+    return this.getHRHelpInternal(helpRequestOrUserId);
+  }
+
+  private async getHRHelpInternal(helpRequest: HelpRequest): Promise<HRHelpSession> {
     console.log(`🆘 Processing HR help request from user: ${helpRequest.userId}`);
+
+    if (isCaveConfigured()) {
+      const presence = await verifyUserPresence(readPresenceFromWindow());
+      const caveRes = await sendCaveRoute(
+        'resaurce:hr/help/request',
+        {
+          userId: helpRequest.userId,
+          context: helpRequest.context,
+          skillsRequired: helpRequest.skillsRequired,
+          urgency: helpRequest.urgency,
+        },
+        { presence: presence.ok ? readPresenceFromWindow() : null }
+      );
+      if (caveRes.ok && caveRes.hrEmployeeId && caveRes.chatRoomId) {
+        const session: HRHelpSession = {
+          id: (caveRes.sessionId as string) || `hr_session_${Date.now()}`,
+          requesterId: helpRequest.userId,
+          hrEmployeeId: caveRes.hrEmployeeId as string,
+          chatRoomId: caveRes.chatRoomId as string,
+          context: helpRequest.context,
+          startTime: new Date().toISOString(),
+          status: 'active',
+        };
+        this.activeSessions.set(session.id, session);
+        return session;
+      }
+      if (!caveRes.skipped) {
+        console.warn('Cave HR route returned non-ok; falling back to local mock', caveRes);
+      }
+    }
 
     // Find available HR employees
     const availableEmployees = await this.findAvailableHREmployees(
@@ -255,9 +336,34 @@ export class HRHelpService {
   }
 
   /**
-   * Create 1:1 HR help chat
+   * Create 1:1 HR help chat (HREmployee) or legacy integration shape when second arg is an employee id string.
    */
-  async createHRHelpChat(requesterId: string, hrEmployee: HREmployee, context: string): Promise<ChatRoom> {
+  async createHRHelpChat(requesterId: string, hrEmployee: HREmployee, context: string): Promise<ChatRoom>;
+  async createHRHelpChat(
+    requesterId: string,
+    hrEmployeeId: string
+  ): Promise<{ chat_room_id: string; type: string; participants: string[] }>;
+  async createHRHelpChat(
+    requesterId: string,
+    hrEmployeeOrId: HREmployee | string,
+    context?: string
+  ): Promise<ChatRoom | { chat_room_id: string; type: string; participants: string[] }> {
+    if (typeof hrEmployeeOrId === 'string') {
+      const emp = this.getHREmployee(hrEmployeeOrId);
+      if (!emp) {
+        throw new Error(`HR employee not found: ${hrEmployeeOrId}`);
+      }
+      const room = await this.createHRHelpChatRoom(requesterId, emp, context || 'Assistance');
+      return {
+        chat_room_id: room.id,
+        type: 'hr_help_1on1',
+        participants: [...room.participants],
+      };
+    }
+    return this.createHRHelpChatRoom(requesterId, hrEmployeeOrId, context!);
+  }
+
+  private async createHRHelpChatRoom(requesterId: string, hrEmployee: HREmployee, context: string): Promise<ChatRoom> {
     const chatRoom = this.chatService.createChatRoom(
       `HR Help - ${hrEmployee.name}`,
       [requesterId, hrEmployee.id]

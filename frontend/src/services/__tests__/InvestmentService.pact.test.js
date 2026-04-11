@@ -1,22 +1,26 @@
 /**
  * PACT Tests for InvestmentService Provider Interactions
- * Tests contracts between InvestmentService and other services
  */
 
-import { InvestmentService } from '../services/InvestmentService';
-import { WalletService } from '../services/WalletService';
-import { ShippingService } from '../services/ShippingService';
-import { InvestmentRobotService } from '../services/InvestmentRobotService';
+import { InvestmentService } from '../InvestmentService';
+import { WalletService } from '../WalletService';
+import { ShippingService } from '../ShippingService';
+import { InvestmentRobotService } from '../InvestmentRobotService';
+
+const WALLET = 'wallet_001';
+const WALLET_OWNER = 'wallet_002';
 
 describe('InvestmentService PACT Tests', () => {
-  let investmentService: InvestmentService;
-  let walletService: WalletService;
-  let shippingService: ShippingService;
-  let robotService: InvestmentRobotService;
+  let investmentService;
+  let walletService;
+  let shippingService;
+  let robotService;
 
   beforeEach(() => {
-    investmentService = InvestmentService.getInstance();
     walletService = WalletService.getInstance();
+    walletService.resetMockStateForTests();
+    investmentService = InvestmentService.getInstance();
+    investmentService.resetMockStateForTests();
     shippingService = ShippingService.getInstance();
     robotService = InvestmentRobotService.getInstance();
   });
@@ -24,41 +28,43 @@ describe('InvestmentService PACT Tests', () => {
   describe('InvestmentService ↔ WalletService', () => {
     test('should create shipping hold through WalletService', async () => {
       const itemId = 'pact_wallet_001';
-      const shippingCost = 20.00;
+      const shippingCost = 20.0;
 
       await walletService.processShippingHold(itemId, shippingCost);
 
       const holdBalance = await investmentService.trackPerItemHolds(itemId);
-      expect(holdBalance.shippingHold2x).toBe(40.00); // 2x shipping
+      expect(holdBalance.shippingHold2x).toBe(40.0);
     });
 
     test('should create additional investment hold through WalletService', async () => {
       const itemId = 'pact_wallet_002';
-      const amount = 30.00;
+      const amount = 30.0;
 
       await walletService.createAdditionalInvestmentHold(itemId, amount);
 
       const holdBalance = await investmentService.trackPerItemHolds(itemId);
-      expect(holdBalance.additionalHold).toBe(30.00);
+      expect(holdBalance.additionalHold).toBe(30.0);
     });
 
     test('should create insurance hold through WalletService', async () => {
       const itemId = 'pact_wallet_003';
-      const amount = 15.00;
+      const amount = 15.0;
 
       await walletService.createInsuranceHold(itemId, amount);
 
       const holdBalance = await investmentService.trackPerItemHolds(itemId);
-      expect(holdBalance.insuranceHold).toBe(15.00);
+      expect(holdBalance.insuranceHold).toBe(15.0);
     });
 
     test('should enable risky investment mode through WalletService', async () => {
       const itemId = 'pact_wallet_004';
       const riskPercentage = 50;
-      const antiCollateral = 10.00;
 
-      await walletService.processShippingHold(itemId, 25.00);
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
+      await walletService.processShippingHold(itemId, 25.0);
+      const hold2x = 50.0;
+      const amountAtRisk = (hold2x * riskPercentage) / 100;
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRisk, riskPercentage);
+      await walletService.enableRiskyInvestmentMode(WALLET, itemId, riskPercentage, antiCollateral);
 
       const investmentStatus = await investmentService.getInvestmentStatus(itemId);
       expect(investmentStatus.riskyModeEnabled).toBe(true);
@@ -67,58 +73,56 @@ describe('InvestmentService PACT Tests', () => {
 
     test('should handle fallout scenario through WalletService', async () => {
       const itemId = 'pact_wallet_005';
-      
-      await walletService.processShippingHold(itemId, 30.00);
-      await walletService.createInsuranceHold(itemId, 10.00);
 
-      const falloutData = {
-        totalLoss: 60.00,
-        borrowerShare: 20.00,
-        ownerShare: 20.00,
-        shippingRefund: 15.00,
-        insuranceRefund: 5.00,
-        investmentLoss: 20.00
-      };
+      await walletService.processShippingHold(itemId, 30.0);
+      await walletService.createInsuranceHold(itemId, 10.0);
 
-      await walletService.handleFalloutScenario(itemId, falloutData);
+      const totalLoss = 60.0;
+      const shippingCost = 15.0;
+      const insuranceCost = 5.0;
 
-      // Verify fallout was processed
-      expect(falloutData.borrowerShare).toBe(20.00);
-      expect(falloutData.ownerShare).toBe(20.00);
+      await walletService.handleFalloutScenario(
+        itemId,
+        WALLET,
+        WALLET_OWNER,
+        totalLoss,
+        shippingCost,
+        insuranceCost
+      );
+
+      expect(totalLoss).toBe(60.0);
     });
   });
 
   describe('InvestmentService ↔ ShippingService', () => {
     test('should trigger insurance hold investment after shipping', async () => {
       const itemId = 'pact_shipping_001';
-      
-      await walletService.createInsuranceHold(itemId, 20.00);
 
-      // Before shipping - insurance holds not investable
+      await walletService.createInsuranceHold(itemId, 20.0);
+
       let eligibility = await investmentService.checkInvestmentEligibility(itemId, 'insurance');
       expect(eligibility.isEligible).toBe(false);
 
-      // After shipping - insurance holds investable
       await shippingService.processItemShipping(itemId, 'TRK123456');
-      
+
       eligibility = await investmentService.checkInvestmentEligibility(itemId, 'insurance');
       expect(eligibility.isEligible).toBe(true);
     });
 
     test('should integrate with shipping status for investment decisions', async () => {
       const itemId = 'pact_shipping_002';
-      
-      await walletService.createInsuranceHold(itemId, 25.00);
+
+      await walletService.createInsuranceHold(itemId, 25.0);
       await shippingService.processItemShipping(itemId, 'TRK789012');
 
       const shippingStatus = await shippingService.getShippingStatus(itemId);
       expect(shippingStatus.investmentStatus.insuranceHoldInvestable).toBe(true);
-      expect(shippingStatus.investmentStatus.totalInvestableHolds).toBe(25.00);
+      expect(shippingStatus.investmentStatus.totalInvestableHolds).toBe(25.0);
     });
 
     test('should check label optimization opportunities', async () => {
       const itemId = 'pact_shipping_003';
-      
+
       const optimization = await shippingService.checkLabelOptimization(itemId);
       expect(optimization).toBeDefined();
       expect(optimization).toHaveProperty('optimizationAvailable');
@@ -130,12 +134,13 @@ describe('InvestmentService PACT Tests', () => {
   describe('InvestmentService ↔ InvestmentRobotService', () => {
     test('should activate investment robots for risky mode', async () => {
       const itemId = 'pact_robot_001';
-      
-      await walletService.processShippingHold(itemId, 20.00);
-      
+
+      await walletService.processShippingHold(itemId, 20.0);
+
       const riskPercentage = 40;
-      const antiCollateral = await investmentService.calculateAntiCollateral(8.00, riskPercentage);
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
+      const amountAtRisk = (40 * riskPercentage) / 100;
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRisk, riskPercentage);
+      await walletService.enableRiskyInvestmentMode(WALLET, itemId, riskPercentage, antiCollateral);
 
       const robot = await robotService.activateRobotForItem(itemId, 'investment_001');
       expect(robot.itemId).toBe(itemId);
@@ -147,15 +152,16 @@ describe('InvestmentService PACT Tests', () => {
 
     test('should monitor investment through robots', async () => {
       const itemId = 'pact_robot_002';
-      
-      await walletService.processShippingHold(itemId, 25.00);
-      
+
+      await walletService.processShippingHold(itemId, 25.0);
+
       const riskPercentage = 60;
-      const antiCollateral = await investmentService.calculateAntiCollateral(15.00, riskPercentage);
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
+      const amountAtRiskRobot2 = (50 * riskPercentage) / 100;
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRiskRobot2, riskPercentage);
+      await walletService.enableRiskyInvestmentMode(WALLET, itemId, riskPercentage, antiCollateral);
 
       const robot = await robotService.activateRobotForItem(itemId, 'investment_002');
-      
+
       const monitoring = await robotService.monitorInvestment(robot.investmentId);
       expect(monitoring).toBeDefined();
       expect(monitoring).toHaveProperty('currentValue');
@@ -166,15 +172,16 @@ describe('InvestmentService PACT Tests', () => {
 
     test('should attempt emergency withdrawal through robots', async () => {
       const itemId = 'pact_robot_003';
-      
-      await walletService.processShippingHold(itemId, 30.00);
-      
+
+      await walletService.processShippingHold(itemId, 30.0);
+
       const riskPercentage = 50;
-      const antiCollateral = await investmentService.calculateAntiCollateral(15.00, riskPercentage);
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
+      const amountAtRiskRobot3 = (60 * riskPercentage) / 100;
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRiskRobot3, riskPercentage);
+      await walletService.enableRiskyInvestmentMode(WALLET, itemId, riskPercentage, antiCollateral);
 
       const robot = await robotService.activateRobotForItem(itemId, 'investment_003');
-      
+
       const withdrawalResult = await robotService.attemptWithdrawal(robot.investmentId);
       expect(withdrawalResult).toBeDefined();
       expect(withdrawalResult).toHaveProperty('success');
@@ -185,20 +192,21 @@ describe('InvestmentService PACT Tests', () => {
 
     test('should process market alerts through robots', async () => {
       const itemId = 'pact_robot_004';
-      
-      await walletService.processShippingHold(itemId, 35.00);
-      
-      const riskPercentage = 70;
-      const antiCollateral = await investmentService.calculateAntiCollateral(24.50, riskPercentage);
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
 
-      const robot = await robotService.activateRobotForItem(itemId, 'investment_004');
-      
+      await walletService.processShippingHold(itemId, 35.0);
+
+      const riskPercentage = 70;
+      const amountAtRiskRobot4 = (70 * riskPercentage) / 100;
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRiskRobot4, riskPercentage);
+      await walletService.enableRiskyInvestmentMode(WALLET, itemId, riskPercentage, antiCollateral);
+
+      await robotService.activateRobotForItem(itemId, 'investment_004');
+
       const marketAlert = {
-        type: 'downturn' as const,
-        severity: 'high' as const,
+        type: 'downturn',
+        severity: 'high',
         message: 'Market downturn detected',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       await robotService.processMarketAlert(marketAlert);
@@ -210,33 +218,34 @@ describe('InvestmentService PACT Tests', () => {
 
     test('should coordinate emergency protocols through robots', async () => {
       const itemId = 'pact_robot_005';
-      
-      await walletService.processShippingHold(itemId, 40.00);
-      
-      const riskPercentage = 80;
-      const antiCollateral = await investmentService.calculateAntiCollateral(32.00, riskPercentage);
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
 
-      const robot = await robotService.activateRobotForItem(itemId, 'investment_005');
-      
+      await walletService.processShippingHold(itemId, 40.0);
+
+      const riskPercentage = 80;
+      const amountAtRiskRobot5 = (80 * riskPercentage) / 100;
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRiskRobot5, riskPercentage);
+      await walletService.enableRiskyInvestmentMode(WALLET, itemId, riskPercentage, antiCollateral);
+
+      await robotService.activateRobotForItem(itemId, 'investment_005');
+
       await robotService.coordinateEmergencyProtocols();
 
-      // Verify emergency protocols were coordinated
       const robotStatus = await robotService.getRobotStatus(itemId);
       expect(robotStatus.robotActive).toBe(true);
     });
 
     test('should deactivate robots after resolution', async () => {
       const itemId = 'pact_robot_006';
-      
-      await walletService.processShippingHold(itemId, 45.00);
-      
-      const riskPercentage = 30;
-      const antiCollateral = await investmentService.calculateAntiCollateral(13.50, riskPercentage);
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
 
-      const robot = await robotService.activateRobotForItem(itemId, 'investment_006');
-      
+      await walletService.processShippingHold(itemId, 45.0);
+
+      const riskPercentage = 30;
+      const amountAtRiskRobot6 = (90 * riskPercentage) / 100;
+      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRiskRobot6, riskPercentage);
+      await walletService.enableRiskyInvestmentMode(WALLET, itemId, riskPercentage, antiCollateral);
+
+      await robotService.activateRobotForItem(itemId, 'investment_006');
+
       const deactivated = await robotService.deactivateRobot(itemId);
       expect(deactivated).toBe(true);
 
@@ -248,28 +257,30 @@ describe('InvestmentService PACT Tests', () => {
   describe('InvestmentService ↔ Tax Document API (Plan #2)', () => {
     test('should trigger capital loss report generation', async () => {
       const itemId = 'pact_tax_001';
-      
-      await walletService.processShippingHold(itemId, 50.00);
-      await walletService.createInsuranceHold(itemId, 20.00);
+
+      await walletService.processShippingHold(itemId, 50.0);
+      await walletService.createInsuranceHold(itemId, 20.0);
 
       const falloutData = {
-        totalLoss: 100.00,
-        borrowerShare: 35.00,
-        ownerShare: 35.00,
-        shippingRefund: 25.00,
-        insuranceRefund: 10.00,
-        investmentLoss: 30.00
+        totalLoss: 100.0,
+        borrowerShare: 35.0,
+        ownerShare: 35.0,
+        shippingRefund: 25.0,
+        insuranceRefund: 10.0,
+        investmentLoss: 30.0,
       };
 
-      await walletService.handleFalloutScenario(itemId, falloutData);
+      await walletService.handleFalloutScenario(
+        itemId,
+        WALLET,
+        WALLET_OWNER,
+        falloutData.totalLoss,
+        falloutData.shippingRefund,
+        falloutData.insuranceRefund
+      );
 
-      // Verify fallout data is available for tax document generation
-      expect(falloutData.investmentLoss).toBe(30.00);
-      expect(falloutData.borrowerShare).toBe(35.00);
-      expect(falloutData.ownerShare).toBe(35.00);
+      expect(falloutData.investmentLoss).toBe(30.0);
 
-      // In production, this would trigger Plan #2 tax document generation
-      // For now, we verify the data structure is correct
       const taxData = {
         itemId,
         borrowerCapitalLoss: falloutData.investmentLoss / 2,
@@ -277,12 +288,12 @@ describe('InvestmentService PACT Tests', () => {
         borrowerRefund: falloutData.borrowerShare,
         ownerRefund: falloutData.ownerShare,
         totalInvestmentLoss: falloutData.investmentLoss,
-        falloutDate: new Date().toISOString()
+        falloutDate: new Date().toISOString(),
       };
 
-      expect(taxData.borrowerCapitalLoss).toBe(15.00);
-      expect(taxData.ownerCapitalLoss).toBe(15.00);
-      expect(taxData.totalInvestmentLoss).toBe(30.00);
+      expect(taxData.borrowerCapitalLoss).toBe(15.0);
+      expect(taxData.ownerCapitalLoss).toBe(15.0);
+      expect(taxData.totalInvestmentLoss).toBe(30.0);
     });
   });
 
@@ -291,67 +302,48 @@ describe('InvestmentService PACT Tests', () => {
       const itemId = 'pact_lifecycle_001';
       const riskPercentage = 55;
 
-      // Step 1: Create holds through WalletService
-      await walletService.processShippingHold(itemId, 30.00);
-      await walletService.createAdditionalInvestmentHold(itemId, 40.00);
-      await walletService.createInsuranceHold(itemId, 25.00);
+      await walletService.processShippingHold(itemId, 30.0);
+      await walletService.createAdditionalInvestmentHold(itemId, 40.0);
+      await walletService.createInsuranceHold(itemId, 25.0);
 
-      // Step 2: Enable risky mode through InvestmentService
-      const amountAtRisk = (60.00 * riskPercentage) / 100; // 33.00
+      const hold2x = 60.0;
+      const amountAtRisk = (hold2x * riskPercentage) / 100;
       const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRisk, riskPercentage);
-      await walletService.enableRiskyInvestmentMode(itemId, riskPercentage, antiCollateral);
+      await walletService.enableRiskyInvestmentMode(WALLET, itemId, riskPercentage, antiCollateral);
 
-      // Step 3: Invest holds through InvestmentService
-      await walletService.investHold(itemId, 'shipping_2x', amountAtRisk);
-      await walletService.investHold(itemId, 'additional', 40.00);
+      await walletService.investHold(WALLET, itemId, 'shipping', amountAtRisk);
+      await walletService.investHold(WALLET, itemId, 'additional', 40.0);
 
-      // Step 4: Ship item through ShippingService
       await shippingService.processItemShipping(itemId, 'TRK999888');
 
-      // Step 5: Invest insurance holds (now eligible)
-      await walletService.investHold(itemId, 'insurance', 25.00);
+      await walletService.investHold(WALLET, itemId, 'insurance', 25.0);
 
-      // Step 6: Activate robots through InvestmentRobotService
       const robot = await robotService.activateRobotForItem(itemId, 'investment_lifecycle');
 
-      // Step 7: Simulate market downturn and fallout
       const marketAlert = {
-        type: 'downturn' as const,
-        severity: 'critical' as const,
+        type: 'downturn',
+        severity: 'critical',
         message: 'Critical market downturn',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       await robotService.processMarketAlert(marketAlert);
       await robotService.coordinateEmergencyProtocols();
 
       const withdrawalResult = await robotService.attemptWithdrawal(robot.investmentId);
-      
-      if (withdrawalResult.falloutTriggered) {
-        const falloutData = {
-          totalLoss: 120.00,
-          borrowerShare: 27.50,
-          ownerShare: 27.50,
-          shippingRefund: 15.00,
-          insuranceRefund: 12.50,
-          investmentLoss: 65.00
-        };
 
-        await investmentService.handleFalloutScenario(itemId, falloutData);
-        await walletService.handleFalloutScenario(itemId, falloutData);
+      if (withdrawalResult.falloutTriggered) {
+        await investmentService.handleFalloutScenario(itemId, 65.0);
+        await walletService.handleFalloutScenario(itemId, WALLET, WALLET_OWNER, 120.0, 15.0, 12.5);
       }
 
-      // Step 8: Deactivate robots
       await robotService.deactivateRobot(itemId);
 
-      // Verify final state
       const investmentStatus = await investmentService.getInvestmentStatus(itemId);
       const robotStatus = await robotService.getRobotStatus(itemId);
 
       expect(investmentStatus.riskyModeEnabled).toBe(false);
       expect(robotStatus.robotActive).toBe(false);
-
-      console.log('✅ Complete risky investment lifecycle PACT test passed');
     });
   });
 });

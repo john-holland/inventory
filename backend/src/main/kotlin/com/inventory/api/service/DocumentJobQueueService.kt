@@ -28,7 +28,8 @@ class DocumentJobQueueService(
         userId: String,
         year: Int,
         documentType: String,
-        sessionId: String
+        sessionId: String,
+        lvmRoute: String? = null
     ): String {
         val jobId = UUID.randomUUID().toString()
         
@@ -38,14 +39,15 @@ class DocumentJobQueueService(
             type = "tax_document",
             status = "queued",
             progress = 0,
-            createdAt = LocalDateTime.now()
+            createdAt = LocalDateTime.now(),
+            lvmRoute = lvmRoute
         )
         
         jobQueue[sessionId] = job
         
         // Execute Python script asynchronously
         CompletableFuture.runAsync {
-            executeTaxDocumentGeneration(sessionId, userId, year, documentType)
+            executeTaxDocumentGeneration(sessionId, userId, year, documentType, lvmRoute)
         }
         
         println("📋 Queued tax document generation: jobId=$jobId, sessionId=$sessionId")
@@ -233,25 +235,31 @@ class DocumentJobQueueService(
         sessionId: String,
         userId: String,
         year: Int,
-        documentType: String
+        documentType: String,
+        lvmRoute: String? = null
     ) {
         try {
             // Update status to processing
             updateJobStatus(sessionId, "processing", "Generating tax document...", 10)
             
             // Build Python script arguments
-            val args = listOf(
+            val args = mutableListOf(
                 "generate_tax_document",
                 "--user-id", userId,
                 "--year", year.toString(),
-                "--document-type", documentType
+                "--document-type", documentType,
+                "--trace-id", sessionId,
+                "--session-id", sessionId
             )
+            if (!lvmRoute.isNullOrBlank()) {
+                args.addAll(listOf("--lvm-route", lvmRoute))
+            }
             
             // Execute Python script
             updateJobStatus(sessionId, "processing", "Executing Python script...", 30)
             val result = pythonScriptExecutor.executePythonScript(
                 scriptPath = "backend/python-apis/tax-processing/tax_documents.py",
-                args = args
+                args = args.toList()
             )
             
             // Process result
@@ -386,7 +394,8 @@ data class DocumentJob(
     var message: String? = null,
     var progress: Int,
     val createdAt: LocalDateTime,
-    var updatedAt: LocalDateTime? = null
+    var updatedAt: LocalDateTime? = null,
+    val lvmRoute: String? = null
 )
 
 data class JobStatus(
