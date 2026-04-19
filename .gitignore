@@ -11,6 +11,7 @@ backend/bin/
 **/__pycache__/
 *.pyc
 .pytest_cache/
+backend/python-apis/wallet-ledger/.pytest_cache/
 
 # Runtime data
 pids
