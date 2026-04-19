@@ -1,0 +1,9 @@
+{
+  "name": "@inventory/cave-federation-host",
+  "version": "0.1.0",
+  "description": "Default structural Cave HTTP client + module federation helpers for UI Tomes",
+  "type": "module",
+  "main": "src/index.js",
+  "license": "MIT",
+  "files": ["src", "README.md"]
+}

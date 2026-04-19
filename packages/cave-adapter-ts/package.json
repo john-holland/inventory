@@ -1,0 +1,12 @@
+{
+  "name": "@inventory/cave-adapter",
+  "version": "0.2.0",
+  "description": "Abstract Cave transport + default HTTP + circuit breaker + retries + usage limits + optional OTel hooks",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "files": ["index.js", "index.d.ts", "README.md", "test"],
+  "scripts": {
+    "test": "node --test test/cave-adapter.test.js"
+  }
+}

@@ -5,6 +5,8 @@
 
 import { WalletService } from './WalletService';
 import { ShippingService } from './ShippingService';
+import { isServiceConfigured, isSaurceBridgeEnabled, isSoaStrictMode } from './soaRegistry';
+import { evaluateSaurceInvestmentEligibility, fetchCryptoPortfolioSnapshot } from './saurceBridge';
 
 export interface HoldBalance {
   itemId: string;
@@ -27,6 +29,8 @@ export interface InvestmentStatus {
   investmentReturnPercentage: number;
   robotsActive: boolean;
   lastUpdated: string;
+  /** Present when ``REACT_APP_SAURCE_BRIDGE_ENABLED=true`` and saurce Cave returns data. */
+  saurcePortfolioSnapshot?: Record<string, unknown>;
 }
 
 export interface RiskConfig {
@@ -108,6 +112,33 @@ export class InvestmentService {
     const shippingStatus = await this.shippingService.getShippingStatus(itemId);
     const riskyModeEnabled = this.isRiskyModeEnabled(itemId);
 
+    if (isServiceConfigured('saurce')) {
+      try {
+        const statusStr = String((shippingStatus as { status?: string }).status || '');
+        const holdParam = holdType === 'shipping_2x' ? 'shipping_2x' : holdType;
+        const snap = await evaluateSaurceInvestmentEligibility({
+          item_id: itemId,
+          hold_type: holdParam,
+          shipping_item_status: statusStr,
+          risky_mode_enabled: riskyModeEnabled,
+        });
+        if (snap && snap.ok !== false && !snap.skipped) {
+          const reqs = (snap as { requirements?: unknown }).requirements;
+          return {
+            holdType,
+            isEligible: Boolean((snap as { is_eligible?: unknown }).is_eligible),
+            reason: String((snap as { reason?: unknown }).reason || ''),
+            requirements: Array.isArray(reqs) ? reqs.map((r) => String(r)) : [],
+          };
+        }
+        if (isSoaStrictMode()) {
+          throw new Error(`saurce investment eligibility unavailable: ${JSON.stringify(snap)}`);
+        }
+      } catch (e) {
+        if (isSoaStrictMode()) throw e;
+      }
+    }
+
     switch (holdType) {
       case 'shipping_2x':
         return {
@@ -155,6 +186,22 @@ export class InvestmentService {
   /**
    * Enable risky investment mode with anti-collateral
    */
+  /**
+   * Apply server-side risky mode result from ``saurce:investment/mode/enable`` (wallet debit already applied there).
+   */
+  async applySaurceRiskModePayload(itemId: string, res: Record<string, unknown>): Promise<RiskConfig> {
+    const riskConfig: RiskConfig = {
+      itemId,
+      riskPercentage: Number(res.risk_percentage ?? 0),
+      antiCollateral: Number(res.anti_collateral ?? 0),
+      amountAtRisk: Number(res.amount_at_risk ?? 0),
+      riskBoundaryError: Number(res.risk_boundary_error ?? 0),
+    };
+    this.riskConfigs.set(itemId, riskConfig);
+    await this.activateInvestmentRobots(itemId);
+    return riskConfig;
+  }
+
   async enableRiskyInvestmentMode(itemId: string, riskPercentage: number, antiCollateral: number): Promise<RiskConfig> {
     console.log(`⚠️ Enabling risky investment mode for item: ${itemId}`);
 
@@ -243,8 +290,29 @@ export class InvestmentService {
       investmentReturn,
       investmentReturnPercentage,
       robotsActive,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
+
+    if (isSaurceBridgeEnabled() && isServiceConfigured('saurce')) {
+      try {
+        const snap = await fetchCryptoPortfolioSnapshot({
+          userId: `item_owner_${itemId}`,
+          walletId: undefined,
+        });
+        if (snap && snap.ok !== false && !snap.skipped) {
+          investmentStatus.saurcePortfolioSnapshot = snap as Record<string, unknown>;
+        } else if (isSoaStrictMode()) {
+          throw new Error(
+            `saurce portfolio snapshot unavailable in strict mode: ${JSON.stringify(snap)}`
+          );
+        }
+      } catch (e) {
+        if (isSoaStrictMode()) {
+          throw e;
+        }
+        /* keep local-only status */
+      }
+    }
 
     // Cache the status
     this.investmentStatuses.set(itemId, investmentStatus);

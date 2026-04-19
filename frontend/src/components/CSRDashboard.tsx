@@ -84,6 +84,7 @@ export const CSRDashboard: React.FC = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
+      await reviewService.refreshQueueFromSaurceIfConfigured();
       const allTickets = reviewService.getAllTickets();
       const queue = reviewService.getPriorityQueue();
       const myTickets = reviewService.getTicketsForCsr(currentUser);

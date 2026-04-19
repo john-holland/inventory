@@ -116,6 +116,28 @@ class DocumentJobQueueService(
     }
 
     /**
+     * Record a tax document job that was completed synchronously via resaurce Cave
+     * (so existing GET /api/documents/status and /download keep working).
+     */
+    fun recordTaxJobCompletedFromResaurce(sessionId: String, jobId: String, documentJson: ByteArray) {
+        val now = LocalDateTime.now()
+        val job = DocumentJob(
+            jobId = jobId,
+            sessionId = sessionId,
+            type = "tax_document",
+            status = "completed",
+            message = "Tax document generated via resaurce Cave",
+            progress = 100,
+            createdAt = now,
+            updatedAt = now,
+            lvmRoute = null
+        )
+        jobQueue[sessionId] = job
+        documentParking[sessionId] = documentJson
+        println("✅ Tax document from resaurce Cave for session: $sessionId")
+    }
+
+    /**
      * Get job status
      */
     fun getJobStatus(sessionId: String): JobStatus {
@@ -395,7 +417,7 @@ data class DocumentJob(
     var progress: Int,
     val createdAt: LocalDateTime,
     var updatedAt: LocalDateTime? = null,
-    val lvmRoute: String? = null
+    val lvmRoute: String? = null,
 )
 
 data class JobStatus(

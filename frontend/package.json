@@ -4,20 +4,24 @@
   "description": "Frontend for distributed inventory sharing network",
   "main": "index.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
     "eject": "react-scripts eject",
     "pact:test": "node scripts/run-pact-tests.js",
     "pact:publish": "node scripts/run-pact-tests.js --publish",
     "pact:charity": "node scripts/run-charity-pact-tests.js",
     "pact:charity:publish": "node scripts/run-charity-pact-tests.js --publish-only",
     "pact:cabin": "node scripts/run-cabin-pact-tests.js",
-    "pact:cabin:publish": "node scripts/run-cabin-pact-tests.js --publish"
+    "pact:cabin:publish": "node scripts/run-cabin-pact-tests.js --publish",
+    "pact:cross-cave": "CI=true npm test -- --watchAll=false src/pacts/inventory-resaurce-cave.pact.test.js src/pacts/inventory-saurce-cave.pact.test.js"
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
+    "@inventory/cave-adapter": "file:../packages/cave-adapter-ts",
+    "@inventory/cave-federation-host": "file:../packages/cave-federation-host",
+    "log-view-machine": "file:../../log-view-machine/log-view-machine",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.0",
     "@pact-foundation/pact": "^10.4.0",
@@ -68,6 +72,7 @@
     "logLevel": "info"
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "node-fetch": "^3.3.2"
   }
 }

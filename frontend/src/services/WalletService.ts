@@ -11,6 +11,14 @@
  */
 
 import { InvestmentService } from './InvestmentService';
+import { isServiceConfigured, isSaurceBridgeEnabled, isSoaStrictMode } from './soaRegistry';
+import {
+  applySaurceWalletHold,
+  enableSaurceInvestmentMode,
+  fetchCommerceWalletBalance,
+  fetchSaurceWalletList,
+  fetchSaurceWalletTransactions,
+} from './saurceBridge';
 
 export interface DropshippingWallet {
   id: string;
@@ -80,6 +88,102 @@ export class WalletService {
       throw new Error('InvestmentService not initialized for WalletService');
     }
     return this.investmentService;
+  }
+
+  private isSaurceWalletLedger(): boolean {
+    return isServiceConfigured('saurce');
+  }
+
+  /** Sync authoritative wallets + transactions from saurce when SOA URL is set (no-op otherwise). */
+  async syncLedgerFromSaurce(): Promise<void> {
+    if (!this.isSaurceWalletLedger()) return;
+    try {
+      const res = await fetchSaurceWalletList();
+      if (res && res.ok !== false && !res.skipped && Array.isArray((res as { wallets?: unknown }).wallets)) {
+        const list = (res as { wallets: DropshippingWallet[] }).wallets;
+        for (const w of list) {
+          if (w && w.id) this.wallets.set(w.id, { ...w });
+        }
+      }
+      for (const wid of [...this.wallets.keys()]) {
+        await this.refreshTransactionsFromSaurceIfConfigured(wid);
+      }
+    } catch {
+      /* keep local cache */
+    }
+  }
+
+  private mapRemoteTx(row: Record<string, unknown>, walletId: string): WalletTransaction {
+    const t = String(row.type || 'deposit');
+    const allowed = new Set([
+      'deposit',
+      'withdrawal',
+      'purchase',
+      'refund',
+      'shipping_hold_2x',
+      'additional_hold',
+      'insurance_hold',
+      'risky_investment',
+      'anti_collateral',
+      'fallout_refund',
+      'shipping_label_refund',
+      'shipping_label_reinvestment',
+      'shipping_hold_deposit',
+      'additional_investment_hold',
+      'insurance_hold_deposit',
+      'shipping_hold_investment',
+      'additional_hold_investment',
+      'insurance_hold_investment',
+      'anti_investment_collateral',
+      'fallout_borrower_share',
+      'fallout_owner_share',
+      'capital_loss',
+    ]);
+    const type = (allowed.has(t) ? t : 'deposit') as WalletTransaction['type'];
+    return {
+      id: String(row.id || `tx_${Date.now()}`),
+      walletId: String(row.walletId || row.wallet_id || walletId),
+      type,
+      amount: Number(row.amount || 0),
+      description: String(row.description || ''),
+      itemId: row.itemId != null ? String(row.itemId) : row.item_id != null ? String(row.item_id) : undefined,
+      timestamp: String(row.timestamp || new Date().toISOString()),
+      status: (row.status === 'pending' || row.status === 'failed' ? row.status : 'completed') as WalletTransaction['status'],
+      fundType:
+        row.fundType === 'investable' || row.fundType === 'non_investable'
+          ? row.fundType
+          : row.fund_type === 'investable' || row.fund_type === 'non_investable'
+            ? row.fund_type
+            : undefined,
+      holdType:
+        row.holdType === 'shipping' || row.holdType === 'additional' || row.holdType === 'insurance'
+          ? row.holdType
+          : row.hold_type === 'shipping' || row.hold_type === 'additional' || row.hold_type === 'insurance'
+            ? row.hold_type
+            : undefined,
+    };
+  }
+
+  private async refreshTransactionsFromSaurceIfConfigured(walletId: string): Promise<void> {
+    if (!this.isSaurceWalletLedger()) return;
+    const res = await fetchSaurceWalletTransactions(walletId);
+    if (!res || res.ok === false || res.skipped) {
+      if (isSoaStrictMode()) {
+        throw new Error(`saurce wallet transactions unavailable (walletId=${walletId})`);
+      }
+      return;
+    }
+    const list = (res as { transactions?: unknown }).transactions;
+    if (!Array.isArray(list)) return;
+    for (const [k, v] of [...this.transactions.entries()]) {
+      if (v.walletId === walletId) this.transactions.delete(k);
+    }
+    for (const row of list) {
+      if (row && typeof row === 'object') {
+        const tx = this.mapRemoteTx(row as Record<string, unknown>, walletId);
+        this.transactions.set(tx.id, tx);
+      }
+    }
   }
 
   private seedDefaultWallets(): void {
@@ -152,7 +256,28 @@ export class WalletService {
   // Get wallet balance
   async getWalletBalance(walletId: string): Promise<number> {
     const wallet = this.wallets.get(walletId);
-    return wallet ? wallet.balance : 0;
+    const local = wallet ? wallet.balance : 0;
+    if (!isSaurceBridgeEnabled() || !isServiceConfigured('saurce')) {
+      return local;
+    }
+    const res = await fetchCommerceWalletBalance(walletId);
+    if (res && res.ok !== false && !res.skipped) {
+      const remote =
+        typeof (res as { advertised_balance?: unknown }).advertised_balance === 'number'
+          ? (res as { advertised_balance: number }).advertised_balance
+          : typeof (res as { balance?: unknown }).balance === 'number'
+            ? (res as { balance: number }).balance
+            : null;
+      if (remote != null) {
+        return remote;
+      }
+    }
+    if (isSoaStrictMode()) {
+      throw new Error(
+        `saurce Cave wallet balance unavailable in strict mode (walletId=${walletId})`
+      );
+    }
+    return local;
   }
 
   // Add funds to wallet
@@ -285,42 +410,104 @@ export class WalletService {
 
   // Shipping Hold Management - simplified signature for backwards compatibility
   async processShippingHold(itemIdOrWalletId: string, shippingCost: number, additionalHold: number = 0, insuranceHold: number = 0): Promise<boolean> {
-    // Default wallet for simplified signature
     const walletId = 'wallet_001';
     const itemId = itemIdOrWalletId;
-    
+
+    if (this.isSaurceWalletLedger()) {
+      const lines: Array<{
+        type: string;
+        amount_usd: number;
+        description: string;
+        fund_type?: string;
+        hold_type?: string;
+      }> = [
+        {
+          type: 'shipping_hold_deposit',
+          amount_usd: shippingCost * 2,
+          description: `Shipping hold deposit for item ${itemId}`,
+          fund_type: 'non_investable',
+          hold_type: 'shipping',
+        },
+      ];
+      if (additionalHold > 0) {
+        lines.push({
+          type: 'additional_investment_hold',
+          amount_usd: additionalHold,
+          description: `Additional investment hold for item ${itemId}`,
+          fund_type: 'investable',
+          hold_type: 'additional',
+        });
+      }
+      if (insuranceHold > 0) {
+        lines.push({
+          type: 'insurance_hold_deposit',
+          amount_usd: insuranceHold,
+          description: `Insurance hold for item ${itemId}`,
+          fund_type: 'investable',
+          hold_type: 'insurance',
+        });
+      }
+      const res = await applySaurceWalletHold({ wallet_id: walletId, item_id: itemId, lines });
+      if (!res || res.ok === false || res.skipped) {
+        if (isSoaStrictMode()) {
+          throw new Error(`saurce wallet hold apply failed: ${JSON.stringify(res)}`);
+        }
+        throw new Error('Unable to post shipping hold to saurce ledger');
+      }
+      const wr = (res as { wallet?: DropshippingWallet }).wallet;
+      if (wr && wr.id) this.wallets.set(walletId, { ...wr });
+      await this.refreshTransactionsFromSaurceIfConfigured(walletId);
+      console.log(`💰 Processed shipping hold via saurce for item ${itemId}`);
+      return true;
+    }
+
     const wallet = this.wallets.get(walletId);
     if (!wallet) {
       throw new Error('Wallet not found');
     }
 
-    const totalAmount = (shippingCost * 2) + additionalHold + insuranceHold;
-    
+    const totalAmount = shippingCost * 2 + additionalHold + insuranceHold;
+
     if (wallet.balance < totalAmount) {
       throw new Error(`Insufficient funds. Required: $${totalAmount}, Available: $${wallet.balance}`);
     }
 
-    // Deduct from wallet
     wallet.balance -= totalAmount;
     wallet.lastUpdated = new Date().toISOString();
     this.wallets.set(walletId, wallet);
 
-    // Investment service will track holds automatically when queried
+    this.recordTransaction(
+      walletId,
+      'shipping_hold_deposit',
+      shippingCost * 2,
+      `Shipping hold deposit for item ${itemId}`,
+      itemId,
+      'non_investable',
+      'shipping'
+    );
 
-    // Record shipping hold deposit (non-investable)
-    this.recordTransaction(walletId, 'shipping_hold_deposit', shippingCost * 2, 
-      `Shipping hold deposit for item ${itemId}`, itemId, 'non_investable', 'shipping');
-
-    // Record additional investment hold (investable)
     if (additionalHold > 0) {
-      this.recordTransaction(walletId, 'additional_investment_hold', additionalHold,
-        `Additional investment hold for item ${itemId}`, itemId, 'investable', 'additional');
+      this.recordTransaction(
+        walletId,
+        'additional_investment_hold',
+        additionalHold,
+        `Additional investment hold for item ${itemId}`,
+        itemId,
+        'investable',
+        'additional'
+      );
     }
 
-    // Record insurance hold (investable after shipping)
     if (insuranceHold > 0) {
-      this.recordTransaction(walletId, 'insurance_hold_deposit', insuranceHold,
-        `Insurance hold for item ${itemId}`, itemId, 'investable', 'insurance');
+      this.recordTransaction(
+        walletId,
+        'insurance_hold_deposit',
+        insuranceHold,
+        `Insurance hold for item ${itemId}`,
+        itemId,
+        'investable',
+        'insurance'
+      );
     }
 
     console.log(`💰 Processed shipping hold for item ${itemId}: $${totalAmount}`);
@@ -354,6 +541,32 @@ export class WalletService {
     riskPercentage: number,
     antiInvestmentCollateral: number
   ): Promise<boolean> {
+    if (this.isSaurceWalletLedger()) {
+      await this.refreshTransactionsFromSaurceIfConfigured(walletId);
+      const shippingHold2x = await this.getHoldBalance(itemId, 'shipping_hold_2x');
+      const rb = await this.getInvestmentService().getRiskBoundaryError();
+      const res = await enableSaurceInvestmentMode({
+        item_id: itemId,
+        wallet_id: walletId,
+        risk_percentage: riskPercentage,
+        anti_collateral: antiInvestmentCollateral,
+        shipping_hold_2x_hint: shippingHold2x,
+        risk_boundary_error: rb,
+      });
+      if (!res || res.ok === false || res.skipped) {
+        if (isSoaStrictMode()) {
+          throw new Error(`saurce investment/mode/enable failed: ${JSON.stringify(res)}`);
+        }
+        return false;
+      }
+      const wr = (res as { wallet?: DropshippingWallet }).wallet;
+      if (wr && wr.id) this.wallets.set(walletId, { ...wr });
+      await this.refreshTransactionsFromSaurceIfConfigured(walletId);
+      await this.getInvestmentService().applySaurceRiskModePayload(itemId, res as Record<string, unknown>);
+      console.log(`⚠️ Risky investment mode enabled via saurce for item ${itemId} at ${riskPercentage}% risk`);
+      return true;
+    }
+
     const wallet = this.wallets.get(walletId);
     if (!wallet) {
       throw new Error('Wallet not found');
@@ -363,18 +576,25 @@ export class WalletService {
       throw new Error(`Insufficient funds for anti-investment collateral. Required: $${antiInvestmentCollateral}`);
     }
 
-    // Deduct anti-investment collateral
     wallet.balance -= antiInvestmentCollateral;
     wallet.lastUpdated = new Date().toISOString();
     this.wallets.set(walletId, wallet);
 
-    // Record anti-investment collateral transaction
-    this.recordTransaction(walletId, 'anti_investment_collateral', antiInvestmentCollateral,
-      `Anti-investment collateral for risky mode (${riskPercentage}%)`, itemId, 'non_investable');
+    this.recordTransaction(
+      walletId,
+      'anti_investment_collateral',
+      antiInvestmentCollateral,
+      `Anti-investment collateral for risky mode (${riskPercentage}%)`,
+      itemId,
+      'non_investable'
+    );
 
-    // Enable risky mode in InvestmentService
-    const riskConfig = await this.getInvestmentService().enableRiskyInvestmentMode(itemId, riskPercentage, antiInvestmentCollateral);
-    
+    const riskConfig = await this.getInvestmentService().enableRiskyInvestmentMode(
+      itemId,
+      riskPercentage,
+      antiInvestmentCollateral
+    );
+
     if (riskConfig) {
       console.log(`⚠️ Risky investment mode enabled for item ${itemId} at ${riskPercentage}% risk`);
     }
@@ -575,6 +795,9 @@ export class WalletService {
    * Get hold balance for specific item and hold type
    */
   async getHoldBalance(itemId: string, holdType: 'shipping_hold_2x' | 'additional_hold' | 'insurance_hold'): Promise<number> {
+    if (this.isSaurceWalletLedger()) {
+      await this.refreshTransactionsFromSaurceIfConfigured('wallet_001');
+    }
     const txs = Array.from(this.transactions.values()).filter(tx => tx.itemId === itemId);
     const match = (types: WalletTransaction['type'][]) =>
       txs.filter(tx => types.includes(tx.type)).reduce((sum, tx) => sum + tx.amount, 0);

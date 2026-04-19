@@ -54,10 +54,11 @@ export const PartnerDashboard: React.FC = () => {
   const walletService = WalletService.getInstance();
 
   useEffect(() => {
-    loadWallets();
+    void loadWallets();
   }, []);
 
-  const loadWallets = () => {
+  const loadWallets = async () => {
+    await walletService.syncLedgerFromSaurce();
     const allWallets = walletService.getAllWallets();
     setWallets(allWallets);
     

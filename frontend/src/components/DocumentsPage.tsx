@@ -4,7 +4,7 @@
  * Includes "Get HR Help" button for HR assistance
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import {
   Box,
   Button,
@@ -39,6 +39,17 @@ import {
   Refresh as RefreshIcon
 } from '@mui/icons-material';
 import HRHelpService, { HREmployee, HelpRequest } from '../services/HRHelpService';
+import { isServiceConfigured } from '../services/soaRegistry';
+import { loadResaurceInventoryCave, type ResaurceInventoryCave } from '../cave/resaurceInventoryCave';
+
+const HrChatRemote = lazy(() => import('resaurce_hr/HrChatApp'));
+
+const hrRemoteModuleEnabled =
+  (typeof process !== 'undefined' && process.env.REACT_APP_RESAURCE_HR_REMOTE === 'true') || false;
+
+/** When true, Documents HR entry is Resaurce-only (RobotCopy + federated UI); legacy in-memory HR dialog is hidden. */
+const useResaurceHrPrimary = (remoteFlag: boolean, resaurceConfigured: boolean) =>
+  remoteFlag && resaurceConfigured;
 
 interface Document {
   id: string;
@@ -57,30 +68,65 @@ const DocumentsPage: React.FC = () => {
   const [selectedHREmployee, setSelectedHREmployee] = useState<HREmployee | null>(null);
   const [helpContext, setHelpContext] = useState('');
   const [generatingDocType, setGeneratingDocType] = useState<string | null>(null);
+  const [hrRemoteDialogOpen, setHrRemoteDialogOpen] = useState(false);
+  const [resaurceCave, setResaurceCave] = useState<ResaurceInventoryCave | null>(null);
+  const [hrCaveError, setHrCaveError] = useState<string | null>(null);
 
+  const resaurceHrPrimary = useResaurceHrPrimary(hrRemoteModuleEnabled, isServiceConfigured('resaurce'));
   const hrHelpService = HRHelpService.getInstance();
 
-  useEffect(() => {
-    loadDocuments();
-  }, []);
+  const tenantId =
+    (typeof process !== 'undefined' && process.env.REACT_APP_SOA_TENANT) || undefined;
+  const inventoryUserId =
+    (typeof process !== 'undefined' && process.env.REACT_APP_INVENTORY_USER_ID) || 'current_user_id';
 
-  const loadDocuments = () => {
-    // Mock documents - in production, load from API
-    const mockDocuments: Document[] = [
+  useEffect(() => {
+    if (!hrRemoteDialogOpen || !hrRemoteModuleEnabled) return;
+    let cancelled = false;
+    setResaurceCave(null);
+    setHrCaveError(null);
+    loadResaurceInventoryCave({ forceRefresh: true }).then((c) => {
+      if (cancelled) return;
+      if (!c) setHrCaveError('Could not load Resaurce UI Tome (check REACT_APP_SOA_RES_AURCE_URL).');
+      else setResaurceCave(c);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [hrRemoteDialogOpen, hrRemoteModuleEnabled]);
+
+  const executeRobotCopyFlow = useCallback(
+    (name: string, vars: Record<string, unknown>, opts?: { traceId?: string; tenant?: string | null }) => {
+      if (!resaurceCave?.robotCopy) {
+        return Promise.resolve({ ok: false, error: 'cave_not_loaded' });
+      }
+      return resaurceCave.robotCopy.executeFlow(name, vars, {
+        ...opts,
+        tenant: opts?.tenant ?? tenantId ?? null,
+      });
+    },
+    [resaurceCave, tenantId]
+  );
+
+  const loadDocuments = useCallback(async () => {
+    const mockTax: Document[] = [
       {
         id: 'doc_001',
         type: 'tax',
         name: 'W2 Form - 2024',
         description: 'Annual wage and tax statement',
-        status: 'available'
+        status: 'available',
       },
       {
         id: 'doc_002',
         type: 'tax',
         name: 'Investment Gains/Losses - 2024',
         description: 'Summary of investment activity',
-        status: 'available'
+        status: 'available',
       },
+    ];
+    const mockDocuments: Document[] = [
+      ...mockTax,
       {
         id: 'doc_003',
         type: 'legal',
@@ -121,28 +167,106 @@ const DocumentsPage: React.FC = () => {
       }
     ];
 
+    if (!isServiceConfigured('resaurce')) {
+      setDocuments(mockDocuments);
+      return;
+    }
+
+    const cave = await loadResaurceInventoryCave({ forceRefresh: true });
+    if (!cave) {
+      setDocuments(mockDocuments);
+      return;
+    }
+
+    const listRes = await cave.robotCopy.executeFlow(
+      'tax_documents_list',
+      {},
+      { traceId: `tax-list-${Date.now()}`, tenant: tenantId ?? null }
+    );
+    const remote = listRes as { ok?: boolean; documents?: unknown[] };
+    if (remote.ok && Array.isArray(remote.documents)) {
+      const mapped: Document[] = remote.documents.map((row: unknown) => {
+        const r = row as Record<string, unknown>;
+        const st = String(r.status || 'available');
+        const status: Document['status'] =
+          st === 'ready' ? 'ready' : st === 'generating' ? 'generating' : 'available';
+        return {
+          id: String(r.id ?? `doc_${Math.random()}`),
+          type: 'tax',
+          name: String(r.name ?? 'Tax document'),
+          description: String(r.description ?? ''),
+          status,
+          generatedAt: r.generated_at != null ? String(r.generated_at) : undefined,
+        };
+      });
+      const nonTax = mockDocuments.filter((d) => d.type !== 'tax');
+      setDocuments([...mapped, ...nonTax]);
+      return;
+    }
+
     setDocuments(mockDocuments);
+  }, [tenantId]);
+
+  useEffect(() => {
+    void loadDocuments();
+  }, [loadDocuments]);
+
+  const inferTaxDocumentType = (name: string): string => {
+    const n = name.toLowerCase();
+    if (n.includes('1099')) return '1099-C';
+    if (n.includes('investment')) return 'investment_gains_losses';
+    return 'w2';
   };
 
-  const handleGenerateDocument = async (documentType: string) => {
-    setGeneratingDocType(documentType);
+  const handleGenerateDocument = async (documentLabel: string) => {
+    setGeneratingDocType(documentLabel);
     setLoading(true);
 
     try {
-      // Mock document generation - in production, call actual API
-      console.log(`Generating document: ${documentType}`);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const docRow = documents.find((d) => d.name === documentLabel || d.name.includes(documentLabel));
+      const isTax = docRow?.type === 'tax';
 
-      // Update document status
-      setDocuments(prev => prev.map(doc => 
-        doc.name.includes(documentType) 
-          ? { ...doc, status: 'ready' as const, generatedAt: new Date().toISOString() }
-          : doc
-      ));
+      if (isTax && isServiceConfigured('resaurce')) {
+        const cave = await loadResaurceInventoryCave({ forceRefresh: true });
+        if (cave) {
+          const traceId = `tax-gen-${Date.now()}`;
+          const sessionId = `tax-sess-${Date.now()}`;
+          const out = (await cave.robotCopy.executeFlow(
+            'tax_generate_enqueue',
+            {
+              userId: inventoryUserId,
+              year: new Date().getFullYear(),
+              documentType: inferTaxDocumentType(documentLabel),
+              traceId,
+              sessionId,
+            },
+            { traceId, tenant: tenantId ?? null }
+          )) as { ok?: boolean; error?: string; document?: Record<string, unknown> };
+          if (out.ok) {
+            setDocuments((prev) =>
+              prev.map((doc) =>
+                doc.name === documentLabel || doc.name.includes(documentLabel)
+                  ? { ...doc, status: 'ready' as const, generatedAt: new Date().toISOString() }
+                  : doc
+              )
+            );
+            alert(`Tax document generated via Resaurce Cave (${documentLabel}).`);
+            return;
+          }
+          console.warn('tax_generate_enqueue failed', out);
+        }
+      }
 
-      alert(`Document generated successfully: ${documentType}`);
+      console.log(`Generating document: ${documentLabel}`);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setDocuments((prev) =>
+        prev.map((doc) =>
+          doc.name.includes(documentLabel)
+            ? { ...doc, status: 'ready' as const, generatedAt: new Date().toISOString() }
+            : doc
+        )
+      );
+      alert(`Document generated successfully: ${documentLabel}`);
     } catch (error) {
       console.error('Failed to generate document:', error);
       alert('Failed to generate document. Please try again.');
@@ -240,16 +364,36 @@ const DocumentsPage: React.FC = () => {
           📄 Documents
         </Typography>
         
-        {/* Get HR Help Button */}
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<HelpIcon />}
-          onClick={handleGetHRHelp}
-          size="large"
-        >
-          Get HR Help
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          {resaurceHrPrimary ? (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<HelpIcon />}
+              onClick={() => setHrRemoteDialogOpen(true)}
+              size="large"
+            >
+              Get HR Help
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<HelpIcon />}
+                onClick={handleGetHRHelp}
+                size="large"
+              >
+                Get HR Help
+              </Button>
+              {hrRemoteModuleEnabled && isServiceConfigured('resaurce') && (
+                <Button variant="outlined" color="primary" onClick={() => setHrRemoteDialogOpen(true)} size="large">
+                  HR workspace (Resaurce)
+                </Button>
+              )}
+            </>
+          )}
+        </Box>
       </Box>
 
       {/* Document Categories */}
@@ -437,8 +581,8 @@ const DocumentsPage: React.FC = () => {
         </Grid>
       </Grid>
 
-      {/* HR Help Dialog */}
-      <Dialog open={hrHelpDialogOpen} onClose={() => setHrHelpDialogOpen(false)} maxWidth="sm" fullWidth>
+      {/* Legacy in-memory HR help (hidden when Resaurce HR remote is the primary path) */}
+      <Dialog open={!resaurceHrPrimary && hrHelpDialogOpen} onClose={() => setHrHelpDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>🆘 Get HR Help</DialogTitle>
         <DialogContent>
           {selectedHREmployee ? (
@@ -488,6 +632,30 @@ const DocumentsPage: React.FC = () => {
           >
             Start Chat
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={hrRemoteDialogOpen} onClose={() => setHrRemoteDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>HR workspace</DialogTitle>
+        <DialogContent>
+          {hrCaveError && <Alert severity="error">{hrCaveError}</Alert>}
+          {!resaurceCave && !hrCaveError ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : null}
+          {resaurceCave ? (
+            <Suspense fallback={<CircularProgress />}>
+              <HrChatRemote
+                executeFlow={executeRobotCopyFlow}
+                userId={inventoryUserId}
+                tenant={tenantId ?? null}
+              />
+            </Suspense>
+          ) : null}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setHrRemoteDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

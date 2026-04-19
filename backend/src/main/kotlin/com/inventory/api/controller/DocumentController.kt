@@ -1,6 +1,8 @@
 package com.inventory.api.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.inventory.api.service.DocumentJobQueueService
+import com.inventory.api.service.ResaurceCaveClient
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -15,8 +17,10 @@ import java.util.UUID
 @RequestMapping("/api/documents")
 @CrossOrigin(origins = ["http://localhost:3000"])
 class DocumentController(
-    private val documentJobQueueService: DocumentJobQueueService
+    private val documentJobQueueService: DocumentJobQueueService,
+    private val resaurceCaveClient: ResaurceCaveClient,
 ) {
+    private val objectMapper = ObjectMapper()
 
     /**
      * Generate tax documents (W2, 1099-C, investment gains/losses)
@@ -32,16 +36,53 @@ class DocumentController(
         // Create session ID for tracking
         val sessionId = UUID.randomUUID().toString()
         session.setAttribute("document_session_$sessionId", sessionId)
-        
-        // Queue the document generation job
+
+        val lr = lvmRoute ?: request.lvmRoute
+        val payload = mutableMapOf<String, Any>(
+            "user_id" to request.userId,
+            "year" to request.year,
+            "document_type" to request.documentType,
+            "trace_id" to sessionId,
+            "session_id" to sessionId,
+        )
+        if (!lr.isNullOrBlank()) {
+            payload["lvm_route"] = lr
+        }
+        val caveBody = mapOf(
+            "schema_version" to "2.0",
+            "route" to "resaurce:tax/generate/enqueue",
+            "payload" to payload,
+            "trace_id" to sessionId,
+            "reply_mode" to "sync_http",
+        )
+        val caveRes = resaurceCaveClient.postCaveRoute(caveBody)
+        if (caveRes != null && caveRes.path("ok").asBoolean(false)) {
+            val doc = caveRes.get("document")
+            if (doc != null && !doc.isNull && !doc.isMissingNode) {
+                val jobId = caveRes.path("job_id").asText(null) ?: UUID.randomUUID().toString()
+                val bytes = objectMapper.writeValueAsBytes(doc)
+                documentJobQueueService.recordTaxJobCompletedFromResaurce(sessionId, jobId, bytes)
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(
+                    DocumentJobResponse(
+                        sessionId = sessionId,
+                        jobId = jobId,
+                        status = "completed",
+                        message = "Tax document generated via resaurce Cave.",
+                        estimatedCompletionSeconds = 0,
+                    ),
+                )
+            }
+        }
+
+        // Queue the document generation job (Python worker) when resaurce is unavailable
         val jobId = documentJobQueueService.queueTaxDocumentGeneration(
             userId = request.userId,
             year = request.year,
             documentType = request.documentType,
             sessionId = sessionId,
-            lvmRoute = lvmRoute ?: request.lvmRoute
+            lvmRoute = lr,
         )
-        
+
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(
             DocumentJobResponse(
                 sessionId = sessionId,

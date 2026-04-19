@@ -5,7 +5,10 @@
 
 import { ChatService, ChatRoom } from './ChatService';
 import SlackIntegrationService from './SlackIntegrationService';
-import { sendCaveRoute, isCaveConfigured } from './resaurceClient';
+import { sendCaveRoute } from './resaurceClient';
+import { isServiceConfigured, isSoaStrictMode } from './soaRegistry';
+import { RESAURCE_HR_EMPLOYEES_AVAILABLE } from './soaRoutes';
+import { createHrHelpSessionFromResaurceCave } from './hrResaurceBridge';
 import { readPresenceFromWindow, verifyUserPresence } from '../adapters/userPresenceCaveAdapter';
 
 /** Integration / documents-page style HR help response (resaurce-routed or local). */
@@ -155,7 +158,7 @@ export class HRHelpService {
   }
 
   /**
-   * Main function to get HR help (routes to resaurce Cave when `REACT_APP_CAVE_BASE_URL` is set).
+   * Main function to get HR help (routes to resaurce Cave when `REACT_APP_SOA_RES_AURCE_URL` or legacy `REACT_APP_CAVE_BASE_URL` is set).
    */
   async getHRHelp(helpRequest: HelpRequest): Promise<HRHelpSession>;
   async getHRHelp(userId: string, documentCtx: HRDocumentHelpContext): Promise<HRHelpDeskResult>;
@@ -188,33 +191,20 @@ export class HRHelpService {
   private async getHRHelpInternal(helpRequest: HelpRequest): Promise<HRHelpSession> {
     console.log(`🆘 Processing HR help request from user: ${helpRequest.userId}`);
 
-    if (isCaveConfigured()) {
+    if (isServiceConfigured('resaurce')) {
       const presence = await verifyUserPresence(readPresenceFromWindow());
-      const caveRes = await sendCaveRoute(
-        'resaurce:hr/help/request',
-        {
-          userId: helpRequest.userId,
-          context: helpRequest.context,
-          skillsRequired: helpRequest.skillsRequired,
-          urgency: helpRequest.urgency,
-        },
-        { presence: presence.ok ? readPresenceFromWindow() : null }
-      );
-      if (caveRes.ok && caveRes.hrEmployeeId && caveRes.chatRoomId) {
-        const session: HRHelpSession = {
-          id: (caveRes.sessionId as string) || `hr_session_${Date.now()}`,
-          requesterId: helpRequest.userId,
-          hrEmployeeId: caveRes.hrEmployeeId as string,
-          chatRoomId: caveRes.chatRoomId as string,
-          context: helpRequest.context,
-          startTime: new Date().toISOString(),
-          status: 'active',
-        };
-        this.activeSessions.set(session.id, session);
-        return session;
+      const attempt = await createHrHelpSessionFromResaurceCave(helpRequest, {
+        presence: presence.ok ? readPresenceFromWindow() : null,
+      });
+      if (attempt.kind === 'session') {
+        this.activeSessions.set(attempt.session.id, attempt.session);
+        return attempt.session;
       }
-      if (!caveRes.skipped) {
-        console.warn('Cave HR route returned non-ok; falling back to local mock', caveRes);
+      if (attempt.kind !== 'skipped') {
+        console.warn('Cave HR route returned non-ok; falling back to local mock', attempt.raw);
+      }
+      if (isSoaStrictMode()) {
+        throw new Error(`resaurce Cave HR route failed in strict mode: ${JSON.stringify(attempt.raw)}`);
       }
     }
 
@@ -264,10 +254,42 @@ export class HRHelpService {
     return session;
   }
 
+  private mapResaurceEmployee(e: Record<string, unknown>): HREmployee {
+    return {
+      id: String(e.id ?? ''),
+      name: String(e.name ?? ''),
+      email: String(e.email ?? ''),
+      skills: Array.isArray(e.skills) ? (e.skills as string[]).map(String) : [],
+      availability: this.generateMockAvailability(),
+      currentLoad: Number(e.currentLoad ?? 0),
+      maxLoad: Number(e.maxLoad ?? 5),
+      rating: Number(e.rating ?? 0),
+    };
+  }
+
   /**
    * Find available HR employees based on time and skills
    */
   async findAvailableHREmployees(requestTime: string, skillsRequired: string[]): Promise<HREmployee[]> {
+    if (isServiceConfigured('resaurce')) {
+      try {
+        const raw = (await sendCaveRoute(
+          RESAURCE_HR_EMPLOYEES_AVAILABLE,
+          { request_time: requestTime, skills_required: skillsRequired },
+          {}
+        )) as Record<string, unknown>;
+        if (raw?.ok && Array.isArray(raw.employees)) {
+          return (raw.employees as Record<string, unknown>[]).map((row) => this.mapResaurceEmployee(row));
+        }
+        if (isSoaStrictMode()) {
+          throw new Error(`resaurce hr/employees/available failed: ${JSON.stringify(raw)}`);
+        }
+      } catch (err) {
+        if (isSoaStrictMode()) throw err;
+        console.warn('resaurce hr/employees/available failed; using local HR roster', err);
+      }
+    }
+
     const requestDate = new Date(requestTime);
     const availableEmployees: HREmployee[] = [];
 

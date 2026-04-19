@@ -1,0 +1,12 @@
+{
+  "name": "@inventory/cave-pilot-configs",
+  "version": "0.1.0",
+  "description": "Shared resaurce/saurce pilot Tome configs (createTomeConfig) for editor and inventory",
+  "type": "module",
+  "main": "src/index.js",
+  "license": "MIT",
+  "files": ["src"],
+  "dependencies": {
+    "log-view-machine": "file:../../../log-view-machine"
+  }
+}

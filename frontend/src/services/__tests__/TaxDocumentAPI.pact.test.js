@@ -39,6 +39,8 @@ describe('Tax Document API PACT Tests', () => {
     expect(res.status).toBe(202);
     expect(body.jobId).toBeTruthy();
     expect(body.sessionId).toBeTruthy();
+    // Kotlin may complete synchronously via resaurce Cave (`completed`) or queue locally (`queued`).
+    expect(['queued', 'completed']).toContain(body.status);
   });
 });
 

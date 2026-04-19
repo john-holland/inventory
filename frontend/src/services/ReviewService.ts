@@ -1,6 +1,8 @@
 // Review Service - Handles cabin reviews, priority queue, and auto ticket creation
 import { PermissionService, UserRole } from './PermissionService';
 import { ChatService } from './ChatService';
+import { isServiceConfigured } from './soaRegistry';
+import { listSaurceReviewQueue, submitSaurceCabinReview } from './saurceBridge';
 
 export interface CabinReview {
   id: string;
@@ -51,6 +53,8 @@ export class ReviewService {
   private reviews: Map<string, CabinReview> = new Map();
   private tickets: Map<string, ReviewTicket> = new Map();
   private priorityQueue: ReviewQueueItem[] = [];
+  /** Queue rows mirrored from saurce when SOA URL is set. */
+  private remoteQueueCache: ReviewQueueItem[] = [];
   private chatService: ChatService;
   private permissionService: PermissionService;
 
@@ -84,6 +88,31 @@ export class ReviewService {
   constructor() {
     this.chatService = ChatService.getInstance();
     this.permissionService = PermissionService.getInstance();
+  }
+
+  /** Pull durable review queue from saurce (no-op if saurce URL unset). */
+  async refreshQueueFromSaurceIfConfigured(): Promise<void> {
+    if (!isServiceConfigured('saurce')) {
+      this.remoteQueueCache = [];
+      return;
+    }
+    try {
+      const r = await listSaurceReviewQueue();
+      const q = (r as { queue?: unknown }).queue;
+      if (r && r.ok !== false && !r.skipped && Array.isArray(q)) {
+        this.remoteQueueCache = (q as Array<Record<string, unknown>>).map((row) => ({
+          ticketId: String(row.ticketId || row.ticket_id || ''),
+          priority: Number(row.priority ?? 3),
+          createdAt: String(row.createdAt || row.created_at || new Date().toISOString()),
+          category: String(row.category || 'review'),
+          severity: (String(row.severity || 'medium') as ReviewQueueItem['severity']) || 'medium',
+        }));
+      } else {
+        this.remoteQueueCache = [];
+      }
+    } catch {
+      this.remoteQueueCache = [];
+    }
   }
 
   // Create a new review
@@ -130,6 +159,25 @@ export class ReviewService {
         reportCount: 0,
         status: 'pending'
       };
+
+      if (isServiceConfigured('saurce')) {
+        try {
+          const cave = await submitSaurceCabinReview({
+            cabin_id: cabinId,
+            reviewer_id: reviewerId,
+            reviewer_name: reviewerName,
+            rating,
+            title,
+            content,
+          });
+          const remote = (cave as { review?: { id?: string } }).review;
+          if (cave && cave.ok !== false && !cave.skipped && remote && remote.id) {
+            review.id = String(remote.id);
+          }
+        } catch {
+          /* keep locally generated id */
+        }
+      }
 
       // Store review
       this.reviews.set(review.id, review);
@@ -325,7 +373,7 @@ Please assign this ticket to an available CSR.`,
 
   // Get priority queue for CSR dashboard
   getPriorityQueue(): ReviewQueueItem[] {
-    return [...this.priorityQueue];
+    return [...this.remoteQueueCache, ...this.priorityQueue].sort((a, b) => a.priority - b.priority);
   }
 
   // Get tickets assigned to specific CSR
