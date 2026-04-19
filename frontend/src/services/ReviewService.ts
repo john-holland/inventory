@@ -110,7 +110,11 @@ export class ReviewService {
       } else {
         this.remoteQueueCache = [];
       }
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn('[ReviewService] refreshQueueFromSaurce failed; clearing remote queue cache', {
+        error: message,
+      });
       this.remoteQueueCache = [];
     }
   }
@@ -173,9 +177,22 @@ export class ReviewService {
           const remote = (cave as { review?: { id?: string } }).review;
           if (cave && cave.ok !== false && !cave.skipped && remote && remote.id) {
             review.id = String(remote.id);
+          } else if (cave && (cave.ok === false || cave.skipped)) {
+            console.warn('[ReviewService] saurce cabin review did not return remote id; keeping local id', {
+              localReviewId: review.id,
+              cabinId,
+              ok: (cave as { ok?: boolean }).ok,
+              skipped: (cave as { skipped?: boolean }).skipped,
+              error: (cave as { error?: string }).error,
+            });
           }
-        } catch {
-          /* keep locally generated id */
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          console.warn('[ReviewService] saurce cabin review failed; keeping locally generated id', {
+            localReviewId: review.id,
+            cabinId,
+            error: message,
+          });
         }
       }
 
