@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://saurce.local/schemas/saurce-frontend-tome-v1.json",
+  "title": "Saurce frontend UI Tome",
+  "type": "object",
+  "required": ["tome_semver", "service", "surfaces", "allowed_routes"],
+  "properties": {
+    "tome_semver": { "type": "string" },
+    "service": { "const": "saurce" },
+    "assets_base": { "type": "string" },
+    "surfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" }
+        }
+      }
+    },
+    "allowed_routes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^saurce:[a-z0-9_/]+$" }
+    },
+    "default_reply_mode": { "type": "string", "enum": ["sync_http", "async_queue", "async_poll_token"] },
+    "lvm_view_hints": { "type": "object" },
+    "robotcopy": {
+      "type": "object",
+      "required": ["flows"],
+      "properties": {
+        "flows": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["route", "payload_template"],
+            "properties": {
+              "route": { "type": "string", "pattern": "^saurce:" },
+              "requires_presence": { "type": "boolean" },
+              "payload_template": { "type": "object", "additionalProperties": true }
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

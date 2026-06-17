@@ -1,7 +1,7 @@
 // Review Service - Handles cabin reviews, priority queue, and auto ticket creation
 import { PermissionService, UserRole } from './PermissionService';
 import { ChatService } from './ChatService';
-import { isServiceConfigured } from './soaRegistry';
+import { isServiceConfigured, isCaveDevFallback } from './soaRegistry';
 import { listSaurceReviewQueue, submitSaurceCabinReview } from './saurceBridge';
 
 export interface CabinReview {
@@ -390,7 +390,13 @@ Please assign this ticket to an available CSR.`,
 
   // Get priority queue for CSR dashboard
   getPriorityQueue(): ReviewQueueItem[] {
-    return [...this.remoteQueueCache, ...this.priorityQueue].sort((a, b) => a.priority - b.priority);
+    if (isServiceConfigured('saurce')) {
+      return [...this.remoteQueueCache].sort((a, b) => a.priority - b.priority);
+    }
+    if (!isCaveDevFallback()) {
+      return [];
+    }
+    return [...this.priorityQueue].sort((a, b) => a.priority - b.priority);
   }
 
   // Get tickets assigned to specific CSR

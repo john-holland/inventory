@@ -1,0 +1,87 @@
+{
+  "schema_version": "tome-surface-index/1",
+  "service": "resaurce",
+  "surface": "sales_reports",
+  "machineId": "inventory:salesReportsUi",
+  "initial": "idle",
+  "states": [
+    "idle",
+    "loading",
+    "ready",
+    "generating",
+    "error"
+  ],
+  "views": [
+    "SalesReportsIdleView",
+    "SalesReportsLoadingView",
+    "SalesReportsReadyView",
+    "SalesReportsGeneratingView",
+    "SalesReportsErrorView"
+  ],
+  "messages": [
+    "sales_report_list",
+    "sales_report_enqueue"
+  ],
+  "messages_map": {
+    "sales_report_list": "sales/report/list",
+    "sales_report_enqueue": "sales/report/enqueue"
+  },
+  "subMachines": [],
+  "sub_machines": {},
+  "state_middleware": [
+    "trace",
+    "presence",
+    "delegation",
+    "robotCopy",
+    "caveDbSnapshot",
+    "log"
+  ],
+  "views_map": {
+    "SalesReportsIdleView": {
+      "module": "documents/sales/IdleView"
+    },
+    "SalesReportsLoadingView": {
+      "module": "documents/sales/LoadingView"
+    },
+    "SalesReportsReadyView": {
+      "module": "documents/sales/ReadyView"
+    },
+    "SalesReportsGeneratingView": {
+      "module": "documents/sales/GeneratingView"
+    },
+    "SalesReportsErrorView": {
+      "module": "documents/sales/ErrorView"
+    }
+  },
+  "lvm": {
+    "machines": [
+      {
+        "id": "inventory:salesReportsUi",
+        "initial": "idle",
+        "states": {
+          "idle": {
+            "view": "SalesReportsIdleView"
+          },
+          "loading": {
+            "view": "SalesReportsLoadingView",
+            "on_enter": {
+              "message": "sales_report_list"
+            }
+          },
+          "ready": {
+            "view": "SalesReportsReadyView"
+          },
+          "generating": {
+            "view": "SalesReportsGeneratingView",
+            "on_enter": {
+              "message": "sales_report_enqueue"
+            }
+          },
+          "error": {
+            "view": "SalesReportsErrorView"
+          }
+        }
+      }
+    ]
+  }
+}

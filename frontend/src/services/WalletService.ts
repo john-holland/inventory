@@ -11,7 +11,7 @@
  */
 
 import { InvestmentService } from './InvestmentService';
-import { isServiceConfigured, isSaurceBridgeEnabled, isSoaStrictMode } from './soaRegistry';
+import { isServiceConfigured, isSaurceBridgeEnabled, isSoaStrictMode, isCaveDevFallback } from './soaRegistry';
 import {
   applySaurceWalletHold,
   enableSaurceInvestmentMode,
@@ -67,7 +67,9 @@ export class WalletService {
 
   constructor() {
     console.log('💳 Wallet Service initialized');
-    this.seedDefaultWallets();
+    if (isCaveDevFallback() || !isServiceConfigured('saurce')) {
+      this.seedDefaultWallets();
+    }
   }
 
   /**
@@ -611,6 +613,12 @@ export class WalletService {
     shippingCost: number,
     insuranceCost: number
   ): Promise<boolean> {
+    if (this.isSaurceWalletLedger() && !isCaveDevFallback()) {
+      throw new Error(
+        'Fallout settlement is owned by saurce Cave; enable REACT_APP_CAVE_DEV_FALLBACK for local simulation only.'
+      );
+    }
+
     const borrowerWallet = this.wallets.get(borrowerWalletId);
     const ownerWallet = this.wallets.get(ownerWalletId);
     

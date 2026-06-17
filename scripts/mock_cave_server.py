@@ -39,14 +39,72 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if parsed.path == "/cave/route":
+            route = body.get("route") or ""
+            explicit = None
+            if isinstance(route, str) and ":" in route:
+                explicit = route.split(":", 1)[0].strip().lower() or None
+            # Smoke shapes for local SOA tests (inventory plan: repos-cave smoke)
+            if isinstance(route, str) and route.startswith("saurce:crypto/"):
+                self._send(
+                    200,
+                    {
+                        "ok": True,
+                        "echo_route": route,
+                        "explicit_service": explicit,
+                        "trace_id": body.get("trace_id"),
+                        "yield_apy": 0.042,
+                        "portfolio_id": "mock_portfolio",
+                    },
+                )
+                return
+            if isinstance(route, str) and route.startswith("saurce:commerce/"):
+                self._send(
+                    200,
+                    {
+                        "ok": True,
+                        "echo_route": route,
+                        "explicit_service": explicit,
+                        "trace_id": body.get("trace_id"),
+                        "balance": 12345.67,
+                        "advertised_balance": 12345.67,
+                    },
+                )
+                return
+            if isinstance(route, str) and route.startswith("resaurce:hr/"):
+                self._send(
+                    200,
+                    {
+                        "ok": True,
+                        "echo_route": route,
+                        "explicit_service": explicit,
+                        "trace_id": body.get("trace_id"),
+                        "hrEmployeeId": "hr_mock",
+                        "chatRoomId": "room_mock",
+                    },
+                )
+                return
+            if isinstance(route, str) and route.startswith("resaurce:legal/"):
+                self._send(
+                    200,
+                    {
+                        "ok": True,
+                        "echo_route": route,
+                        "explicit_service": explicit,
+                        "trace_id": body.get("trace_id"),
+                        "review_job_id": "legal_mock_1",
+                    },
+                )
+                return
             self._send(
                 200,
                 {
                     "ok": True,
-                    "echo_route": body.get("route"),
+                    "echo_route": route,
+                    "explicit_service": explicit,
                     "trace_id": body.get("trace_id"),
                 },
             )
+            return
         elif parsed.path == "/lvm/append":
             n = len(body.get("events") or [])
             self._send(200, {"ok": True, "appended": n})

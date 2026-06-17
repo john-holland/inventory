@@ -1,0 +1,60 @@
+schema_version: tome-module/2
+service: saurce
+surface: commerce_wallet
+
+cave_robit:
+  middleware: [presence_forward, envelope_v2, trace_loop_guard]
+
+messages:
+  wallet_list: wallet/list
+  wallet_transactions_list: wallet/transactions/list
+  wallet_hold_apply: wallet/hold/apply
+
+robotcopy:
+  flows:
+    wallet_list:
+      message: wallet_list
+      payload_template: {}
+    wallet_transactions_list:
+      message: wallet_transactions_list
+      payload_template:
+        wallet_id: "{{walletId}}"
+    wallet_hold_apply:
+      message: wallet_hold_apply
+      payload_template:
+        wallet_id: "{{walletId}}"
+        item_id: "{{itemId}}"
+        lines: "{{lines}}"
+
+lvm:
+  machines:
+    - id: inventory:partnerWalletUi
+      initial: idle
+      states:
+        idle:
+          view: WalletIdleView
+        loading:
+          view: WalletLoadingView
+          on_enter:
+            message: wallet_list
+        ready:
+          view: WalletReadyView
+        awaiting_presence:
+          view: PresenceSignInView
+          requires_presence: true
+        error:
+          view: WalletErrorView
+
+state_middleware: [trace, presence, delegation, robotCopy, caveDbSnapshot, log]
+
+views:
+  WalletIdleView:
+    module: partner/wallet/IdleView
+  WalletLoadingView:
+    module: partner/wallet/LoadingView
+  WalletReadyView:
+    module: partner/wallet/ReadyView
+  WalletErrorView:
+    module: partner/wallet/ErrorView
+  PresenceSignInView:
+    module: presence/SignInView

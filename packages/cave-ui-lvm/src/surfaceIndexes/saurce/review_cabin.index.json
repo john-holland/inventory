@@ -1,0 +1,89 @@
+{
+  "schema_version": "tome-surface-index/1",
+  "service": "saurce",
+  "surface": "review_cabin",
+  "machineId": "inventory:reviewCabinUi",
+  "initial": "idle",
+  "states": [
+    "idle",
+    "loading",
+    "ready",
+    "submitting",
+    "error"
+  ],
+  "views": [
+    "ReviewIdleView",
+    "ReviewLoadingView",
+    "ReviewReadyView",
+    "ReviewSubmittingView",
+    "ReviewErrorView"
+  ],
+  "messages": [
+    "review_queue_list",
+    "review_cabin_submit",
+    "review_ticket_create"
+  ],
+  "messages_map": {
+    "review_queue_list": "review/queue/list",
+    "review_cabin_submit": "review/cabin/submit",
+    "review_ticket_create": "review/ticket/create"
+  },
+  "subMachines": [],
+  "sub_machines": {},
+  "state_middleware": [
+    "trace",
+    "presence",
+    "delegation",
+    "robotCopy",
+    "caveDbSnapshot",
+    "log"
+  ],
+  "views_map": {
+    "ReviewIdleView": {
+      "module": "review/cabin/IdleView"
+    },
+    "ReviewLoadingView": {
+      "module": "review/cabin/LoadingView"
+    },
+    "ReviewReadyView": {
+      "module": "review/cabin/ReadyView"
+    },
+    "ReviewSubmittingView": {
+      "module": "review/cabin/SubmittingView"
+    },
+    "ReviewErrorView": {
+      "module": "review/cabin/ErrorView"
+    }
+  },
+  "lvm": {
+    "machines": [
+      {
+        "id": "inventory:reviewCabinUi",
+        "initial": "idle",
+        "states": {
+          "idle": {
+            "view": "ReviewIdleView"
+          },
+          "loading": {
+            "view": "ReviewLoadingView",
+            "on_enter": {
+              "message": "review_queue_list"
+            }
+          },
+          "ready": {
+            "view": "ReviewReadyView"
+          },
+          "submitting": {
+            "view": "ReviewSubmittingView",
+            "on_enter": {
+              "message": "review_cabin_submit"
+            }
+          },
+          "error": {
+            "view": "ReviewErrorView"
+          }
+        }
+      }
+    ]
+  }
+}

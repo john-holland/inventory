@@ -1,0 +1,152 @@
+{
+  "consumer": {
+    "name": "Frontend"
+  },
+  "interactions": [
+    {
+      "description": "a request for ML warehouse data",
+      "providerState": "ML warehouse has collected data",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/market/ml-warehouse/data"
+      },
+      "response": {
+        "body": {
+          "cronMetrics": {
+            "optimalFrequency": "veryhigh",
+            "responseTimeMs": 145,
+            "successRate": 0.95
+          },
+          "marketData": {
+            "correlation": 0.67,
+            "trend": "downward",
+            "volatility": 0.25
+          },
+          "totalDataPoints": 1000
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to process market alert",
+      "providerState": "market alert triggered",
+      "request": {
+        "body": {
+          "alertType": "downturn",
+          "message": "Market downturn detected",
+          "severity": "high"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.message": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/market/alert/process"
+      },
+      "response": {
+        "body": {
+          "emergencyProtocolsTriggered": true,
+          "processed": true,
+          "robotsNotified": 3
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for current market volatility",
+      "providerState": "market data is available",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/market/volatility/current"
+      },
+      "response": {
+        "body": {
+          "lastUpdated": "2024-01-15T10:00:00Z",
+          "riskLevel": "high",
+          "trend": "downward",
+          "volatility": 0.25
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.lastUpdated": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to adjust cron frequency",
+      "providerState": "market volatility changed to 25%",
+      "request": {
+        "body": {
+          "apiCallsMade": 85,
+          "currentFrequency": "high",
+          "currentVolatility": 0.25,
+          "jobId": "market_monitoring_001"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.jobId": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/market/cron/adjust-frequency"
+      },
+      "response": {
+        "body": {
+          "intervalMinutes": 15,
+          "jobId": "market_monitoring_001",
+          "newFrequency": "veryhigh",
+          "previousFrequency": "high",
+          "reason": "Volatility exceeded 20% threshold"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.reason": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "10.4.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "Market Monitoring API"
+  }
+}

@@ -1,0 +1,203 @@
+{
+  "consumer": {
+    "name": "Frontend"
+  },
+  "interactions": [
+    {
+      "description": "a request to sync message to Slack",
+      "providerState": "chat message sent in chat room",
+      "request": {
+        "body": {
+          "channelId": "#inventory-dispute",
+          "chatRoomId": "chat_dispute_001",
+          "message": "Dispute resolution initiated"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.chatRoomId": {
+            "match": "type"
+          },
+          "$.body.message": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/chat/slack/sync"
+      },
+      "response": {
+        "body": {
+          "channelId": "#inventory-dispute",
+          "slackMessageId": "slack_msg_123456",
+          "synced": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.slackMessageId": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to create dispute resolution chat room",
+      "providerState": "investment fallout scenario triggered",
+      "request": {
+        "body": {
+          "automated": true,
+          "context": {
+            "borrowerShare": 25,
+            "itemId": "item_001",
+            "ownerShare": 25,
+            "totalLoss": 100
+          },
+          "contextType": "dispute",
+          "participantIds": [
+            "borrower_001",
+            "owner_001",
+            "mediator_001"
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.context.itemId": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/chat/create-contextual"
+      },
+      "response": {
+        "body": {
+          "automated": true,
+          "chatRoomId": "chat_dispute_001",
+          "contextType": "dispute",
+          "createdAt": "2024-01-15T10:00:00Z",
+          "participants": [
+            "borrower_001",
+            "owner_001",
+            "mediator_001"
+          ],
+          "type": "dispute"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.chatRoomId": {
+            "match": "type"
+          },
+          "$.body.createdAt": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to create HR onboarding chat room",
+      "providerState": "new employee onboarding triggered",
+      "request": {
+        "body": {
+          "automated": true,
+          "context": {
+            "department": "Engineering",
+            "employeeName": "Jane Doe",
+            "startDate": "2024-02-15"
+          },
+          "contextType": "hr_onboarding",
+          "participantIds": [
+            "employee_001",
+            "hr_employee_001"
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.context.employeeName": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/chat/create-contextual"
+      },
+      "response": {
+        "body": {
+          "automated": true,
+          "chatRoomId": "chat_hr_onboarding_001",
+          "contextType": "hr_onboarding",
+          "createdAt": "2024-01-15T10:00:00Z",
+          "participants": [
+            "employee_001",
+            "hr_employee_001"
+          ],
+          "type": "hr_onboarding"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.chatRoomId": {
+            "match": "type"
+          },
+          "$.body.createdAt": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to setup chat automation",
+      "providerState": "user wants to enable chat automation",
+      "request": {
+        "body": {
+          "autoCreateChat": true,
+          "feature": "investment_fallout",
+          "triggers": [
+            "market_downturn",
+            "investment_loss"
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/chat/automation/setup"
+      },
+      "response": {
+        "body": {
+          "automationEnabled": true,
+          "feature": "investment_fallout",
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "10.4.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "Chat Room Automation API"
+  }
+}

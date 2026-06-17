@@ -1,0 +1,16 @@
+{
+  "name": "@inventory/cave-cli",
+  "version": "0.1.0",
+  "description": "Generic Cave CLI: init, doctor, adapter list/add, introspect (no Ember scaffolding)",
+  "bin": {
+    "cave": "bin/cave.js"
+  },
+  "main": "lib/cli.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/tome.test.js"
+  },
+  "dependencies": {
+    "yaml": "^2.4.2"
+  }
+}

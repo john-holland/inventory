@@ -5,10 +5,10 @@
 
 import { ChatService, ChatRoom } from './ChatService';
 import SlackIntegrationService from './SlackIntegrationService';
-import { sendCaveRoute } from './resaurceClient';
-import { isServiceConfigured, isSoaStrictMode } from './soaRegistry';
-import { RESAURCE_HR_EMPLOYEES_AVAILABLE } from './soaRoutes';
+import { isServiceConfigured, isSoaStrictMode, isCaveDevFallback } from './soaRegistry';
+import { MSG_LIST_AVAILABLE_EMPLOYEES } from './soaRoutes';
 import { createHrHelpSessionFromResaurceCave } from './hrResaurceBridge';
+import { getResaurceRobotCopy } from '../cave/resaurceInventoryCave';
 import { readPresenceFromWindow, verifyUserPresence } from '../adapters/userPresenceCaveAdapter';
 
 /** Integration / documents-page style HR help response (resaurce-routed or local). */
@@ -78,7 +78,9 @@ export class HRHelpService {
   constructor() {
     this.chatService = ChatService.getInstance();
     this.slackService = SlackIntegrationService.getInstance();
-    this.initializeMockHREmployees();
+    if (isCaveDevFallback()) {
+      this.initializeMockHREmployees();
+    }
     console.log('🆘 HR Help Service initialized');
   }
 
@@ -206,9 +208,20 @@ export class HRHelpService {
       if (isSoaStrictMode()) {
         throw new Error(`resaurce Cave HR route failed in strict mode: ${JSON.stringify(attempt.raw)}`);
       }
+      if (!isCaveDevFallback()) {
+        throw new Error(
+          `HR help requires Resaurce Cave. Configure REACT_APP_SOA_RES_AURCE_URL or enable REACT_APP_CAVE_DEV_FALLBACK for local mocks.`
+        );
+      }
+    } else if (!isCaveDevFallback()) {
+      throw new Error('HR help requires Resaurce Cave (REACT_APP_SOA_RES_AURCE_URL unset).');
     }
 
-    // Find available HR employees
+    if (!isCaveDevFallback()) {
+      throw new Error('HR help unavailable');
+    }
+
+    // Dev-only local mock path below
     const availableEmployees = await this.findAvailableHREmployees(
       helpRequest.preferredTime || new Date().toISOString(),
       helpRequest.skillsRequired
@@ -273,11 +286,14 @@ export class HRHelpService {
   async findAvailableHREmployees(requestTime: string, skillsRequired: string[]): Promise<HREmployee[]> {
     if (isServiceConfigured('resaurce')) {
       try {
-        const raw = (await sendCaveRoute(
-          RESAURCE_HR_EMPLOYEES_AVAILABLE,
-          { request_time: requestTime, skills_required: skillsRequired },
-          {}
-        )) as Record<string, unknown>;
+        const rc = await getResaurceRobotCopy();
+        const raw = rc
+          ? ((await rc.sendMessage(
+              MSG_LIST_AVAILABLE_EMPLOYEES,
+              { request_time: requestTime, skills_required: skillsRequired },
+              { service: 'resaurce' }
+            )) as Record<string, unknown>)
+          : null;
         if (raw?.ok && Array.isArray(raw.employees)) {
           return (raw.employees as Record<string, unknown>[]).map((row) => this.mapResaurceEmployee(row));
         }
@@ -286,8 +302,13 @@ export class HRHelpService {
         }
       } catch (err) {
         if (isSoaStrictMode()) throw err;
-        console.warn('resaurce hr/employees/available failed; using local HR roster', err);
+        if (!isCaveDevFallback()) throw err;
+        console.warn('resaurce list_available_employees failed; using local HR roster (dev fallback)', err);
       }
+    }
+
+    if (!isCaveDevFallback()) {
+      return [];
     }
 
     const requestDate = new Date(requestTime);

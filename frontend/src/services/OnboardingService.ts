@@ -295,6 +295,10 @@ export class OnboardingService {
     }
   }
 
+  // todo: review: these are well meaning but need to pull from config flat files, unleash flag configs, or
+  //               the database with employee info queries, or the dotcms orm with flat file configs.
+  // todo: review: getSpecialistsForEmployeeType() getCabinSpecialists() getActiveEmployees()
+
   // Create Cabin training chat room for new employee
   async createCabinTrainingChatRoom(
     newEmployeeId: string,

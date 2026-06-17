@@ -1,0 +1,91 @@
+schema_version: tome-module/2
+service: saurce
+surface: cabin_session
+
+cave_robit:
+  middleware: [presence_forward, envelope_v2, trace_loop_guard]
+
+messages:
+  review_queue_list: review/queue/list
+  review_cabin_submit: review/cabin/submit
+  review_ticket_create: review/ticket/create
+
+robotcopy:
+  flows:
+    review_queue_list:
+      message: review_queue_list
+      payload_template: {}
+    review_cabin_submit:
+      message: review_cabin_submit
+      payload_template:
+        cabin_id: "{{cabinId}}"
+        reviewer_id: "{{reviewerId}}"
+        reviewer_name: "{{reviewerName}}"
+        rating: "{{rating}}"
+        title: "{{title}}"
+        content: "{{content}}"
+    review_ticket_create:
+      message: review_ticket_create
+      payload_template:
+        cabin_id: "{{cabinId}}"
+        reason: "{{reason}}"
+        priority: "{{priority}}"
+
+lvm:
+  machines:
+    - id: inventory:cabinSessionUi
+      initial: idle
+      states:
+        idle:
+          view: CabinIdleView
+        loading:
+          view: CabinLoadingView
+          on_enter:
+            message: review_queue_list
+        ready:
+          view: CabinReadyView
+        wizardActive:
+          view: CabinWizardShellView
+        submitting:
+          view: CabinSubmittingView
+        error:
+          view: CabinErrorView
+
+sub_machines:
+  createWizard:
+    id: inventory:cabinCreateWizard
+    initial: basic
+    states:
+      basic:
+        view: WizardBasicView
+      users:
+        view: WizardUsersView
+      airbnb:
+        view: WizardAirbnbView
+      confirm:
+        view: WizardConfirmView
+
+capsule: subMachineRouter
+state_middleware: [trace, presence, delegation, robotCopy, caveDbSnapshot, log, capsule]
+
+views:
+  CabinIdleView:
+    module: cabin/session/IdleView
+  CabinLoadingView:
+    module: cabin/session/LoadingView
+  CabinReadyView:
+    module: cabin/session/ReadyView
+  CabinWizardShellView:
+    module: cabin/session/WizardShellView
+  CabinSubmittingView:
+    module: cabin/session/SubmittingView
+  CabinErrorView:
+    module: cabin/session/ErrorView
+  WizardBasicView:
+    module: cabin/session/wizard/BasicView
+  WizardUsersView:
+    module: cabin/session/wizard/UsersView
+  WizardAirbnbView:
+    module: cabin/session/wizard/AirbnbView
+  WizardConfirmView:
+    module: cabin/session/wizard/ConfirmView

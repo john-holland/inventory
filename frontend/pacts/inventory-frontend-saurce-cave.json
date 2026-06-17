@@ -1,0 +1,442 @@
+{
+  "consumer": {
+    "name": "inventory-frontend"
+  },
+  "interactions": [
+    {
+      "description": "a Cave envelope for saurce wallet route",
+      "providerState": "saurce Cave is healthy",
+      "request": {
+        "body": {
+          "payload": {
+            "user_id": "u1"
+          },
+          "reply_mode": "sync_http",
+          "route": "saurce:wallet/balance",
+          "schema_version": "2.0",
+          "trace_id": "trace-wallet"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.payload.user_id": {
+            "match": "type"
+          },
+          "$.body.trace_id": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/cave/route"
+      },
+      "response": {
+        "body": {
+          "echoed_route": "saurce:wallet/balance",
+          "ok": true,
+          "service": "saurce"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.echoed_route": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a message-first Cave envelope for investment_mode_enable",
+      "providerState": "saurce Cave is healthy",
+      "request": {
+        "body": {
+          "message": "investment_mode_enable",
+          "payload": {
+            "item_id": "item_1"
+          },
+          "reply_mode": "sync_http",
+          "schema_version": "2.0",
+          "service": "saurce",
+          "trace_id": "trace-inv-mode"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.payload.item_id": {
+            "match": "type"
+          },
+          "$.body.trace_id": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/cave/route"
+      },
+      "response": {
+        "body": {
+          "item_id": "item_1",
+          "ok": true,
+          "risky_mode_enabled": true,
+          "service": "saurce"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.item_id": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a message-first Cave envelope for review_cabin_submit",
+      "providerState": "saurce Cave is healthy",
+      "request": {
+        "body": {
+          "message": "review_cabin_submit",
+          "payload": {
+            "cabin_id": "cabin_1",
+            "content": "Loved the session",
+            "rating": 5,
+            "reviewer_id": "user_1",
+            "reviewer_name": "Jane",
+            "title": "Great demo"
+          },
+          "reply_mode": "sync_http",
+          "schema_version": "2.0",
+          "service": "saurce",
+          "trace_id": "trace-review-submit"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.payload.cabin_id": {
+            "match": "type"
+          },
+          "$.body.payload.content": {
+            "match": "type"
+          },
+          "$.body.payload.rating": {
+            "match": "type"
+          },
+          "$.body.payload.reviewer_id": {
+            "match": "type"
+          },
+          "$.body.payload.reviewer_name": {
+            "match": "type"
+          },
+          "$.body.payload.title": {
+            "match": "type"
+          },
+          "$.body.trace_id": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/cave/route"
+      },
+      "response": {
+        "body": {
+          "ok": true,
+          "review": {
+            "cabinId": "cabin_1",
+            "id": "review_1",
+            "rating": 5,
+            "status": "pending",
+            "title": "Great demo"
+          },
+          "service": "saurce",
+          "trace_id": "trace-review-submit"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.review.cabinId": {
+            "match": "type"
+          },
+          "$.body.review.id": {
+            "match": "type"
+          },
+          "$.body.review.rating": {
+            "match": "type"
+          },
+          "$.body.review.status": {
+            "match": "type"
+          },
+          "$.body.review.title": {
+            "match": "type"
+          },
+          "$.body.trace_id": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a message-first Cave envelope for review_queue_list",
+      "providerState": "saurce Cave is healthy",
+      "request": {
+        "body": {
+          "message": "review_queue_list",
+          "payload": {},
+          "reply_mode": "sync_http",
+          "schema_version": "2.0",
+          "service": "saurce",
+          "trace_id": "trace-review-queue"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.trace_id": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/cave/route"
+      },
+      "response": {
+        "body": {
+          "ok": true,
+          "queue": [],
+          "service": "saurce",
+          "trace_id": "trace-review-queue"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.trace_id": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a message-first Cave envelope for review_ticket_create",
+      "providerState": "saurce Cave is healthy",
+      "request": {
+        "body": {
+          "message": "review_ticket_create",
+          "payload": {
+            "cabin_id": "cabin_1",
+            "priority": "high",
+            "reason": "Needs CSR follow-up"
+          },
+          "reply_mode": "sync_http",
+          "schema_version": "2.0",
+          "service": "saurce",
+          "trace_id": "trace-ticket"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.payload.cabin_id": {
+            "match": "type"
+          },
+          "$.body.payload.priority": {
+            "match": "type"
+          },
+          "$.body.payload.reason": {
+            "match": "type"
+          },
+          "$.body.trace_id": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/cave/route"
+      },
+      "response": {
+        "body": {
+          "ok": true,
+          "queue_item": {
+            "category": "general",
+            "priority": 3,
+            "severity": "medium",
+            "ticketId": "ticket_1"
+          },
+          "service": "saurce",
+          "ticket": {
+            "cabinId": "cabin_1",
+            "id": "ticket_1",
+            "priority": "high",
+            "reason": "Needs CSR follow-up",
+            "status": "open"
+          },
+          "trace_id": "trace-ticket"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.queue_item.category": {
+            "match": "type"
+          },
+          "$.body.queue_item.priority": {
+            "match": "type"
+          },
+          "$.body.queue_item.severity": {
+            "match": "type"
+          },
+          "$.body.queue_item.ticketId": {
+            "match": "type"
+          },
+          "$.body.ticket.cabinId": {
+            "match": "type"
+          },
+          "$.body.ticket.id": {
+            "match": "type"
+          },
+          "$.body.ticket.priority": {
+            "match": "type"
+          },
+          "$.body.ticket.reason": {
+            "match": "type"
+          },
+          "$.body.ticket.status": {
+            "match": "type"
+          },
+          "$.body.trace_id": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a message-first Cave envelope for wallet_list",
+      "providerState": "saurce Cave is healthy",
+      "request": {
+        "body": {
+          "message": "wallet_list",
+          "payload": {},
+          "reply_mode": "sync_http",
+          "schema_version": "2.0",
+          "service": "saurce",
+          "trace_id": "trace-wallet-list"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.trace_id": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/cave/route"
+      },
+      "response": {
+        "body": {
+          "ok": true,
+          "service": "saurce",
+          "trace_id": "trace-wallet-list",
+          "wallets": [
+            {
+              "balance": 100,
+              "id": "wallet_1"
+            }
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.trace_id": {
+            "match": "type"
+          },
+          "$.body.wallets": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body.wallets[*].balance": {
+            "match": "type"
+          },
+          "$.body.wallets[*].id": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "investment eligibility evaluate",
+      "providerState": "saurce Cave is healthy",
+      "request": {
+        "body": {
+          "payload": {
+            "hold_type": "additional",
+            "item_id": "item_1",
+            "shipping_item_status": ""
+          },
+          "reply_mode": "sync_http",
+          "route": "saurce:investment/eligibility/evaluate",
+          "schema_version": "2.0",
+          "trace_id": "trace-inv"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.payload.hold_type": {
+            "match": "type"
+          },
+          "$.body.payload.item_id": {
+            "match": "type"
+          },
+          "$.body.payload.shipping_item_status": {
+            "match": "type"
+          },
+          "$.body.trace_id": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/cave/route"
+      },
+      "response": {
+        "body": {
+          "hold_type": "additional",
+          "is_eligible": true,
+          "ok": true,
+          "service": "saurce"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.hold_type": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "10.4.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "saurce-cave"
+  }
+}

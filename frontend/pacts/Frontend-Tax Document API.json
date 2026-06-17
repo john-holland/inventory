@@ -1,0 +1,215 @@
+{
+  "consumer": {
+    "name": "Frontend"
+  },
+  "interactions": [
+    {
+      "description": "a request to generate 1099-C document",
+      "providerState": "debt cancellation occurred",
+      "request": {
+        "body": {
+          "cancellationDate": "2024-01-01",
+          "creditorName": "Bank ABC",
+          "debtAmount": 5000,
+          "debtorName": "John Doe"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.creditorName": {
+            "match": "type"
+          },
+          "$.body.debtorName": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/tax/generate-1099c"
+      },
+      "response": {
+        "body": {
+          "documentType": "1099c",
+          "estimatedCompletion": "2024-01-15T10:05:00Z",
+          "jobId": "job_789012",
+          "status": "processing"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.estimatedCompletion": {
+            "match": "type"
+          },
+          "$.body.jobId": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to download document",
+      "providerState": "document generation is completed",
+      "request": {
+        "headers": {
+          "Accept": "application/pdf"
+        },
+        "method": "GET",
+        "path": "/api/tax/download/doc_123456"
+      },
+      "response": {
+        "body": "PDF_BINARY_CONTENT",
+        "headers": {
+          "Content-Type": "application/pdf"
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for document status",
+      "providerState": "document generation job is in progress",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/tax/document-status/job_123456"
+      },
+      "response": {
+        "body": {
+          "completedAt": "2024-01-15T10:05:00Z",
+          "documentId": "doc_123456",
+          "downloadUrl": "/api/tax/download/doc_123456",
+          "jobId": "job_123456",
+          "status": "completed"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.completedAt": {
+            "match": "type"
+          },
+          "$.body.documentId": {
+            "match": "type"
+          },
+          "$.body.downloadUrl": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to generate capital loss report",
+      "providerState": "investment fallout scenario occurred",
+      "request": {
+        "body": {
+          "borrowerCapitalLoss": 25,
+          "falloutDate": "2024-01-15T10:00:00Z",
+          "itemId": "item_001",
+          "ownerCapitalLoss": 25,
+          "totalInvestmentLoss": 50,
+          "userId": "user_001"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.falloutDate": {
+            "match": "type"
+          },
+          "$.body.itemId": {
+            "match": "type"
+          },
+          "$.body.userId": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/tax/generate-capital-loss"
+      },
+      "response": {
+        "body": {
+          "borrowerCapitalLoss": 25,
+          "documentType": "capital_loss_report",
+          "estimatedCompletion": "2024-01-15T10:05:00Z",
+          "jobId": "job_345678",
+          "ownerCapitalLoss": 25,
+          "status": "processing"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.estimatedCompletion": {
+            "match": "type"
+          },
+          "$.body.jobId": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to generate W2 document",
+      "providerState": "user has employment data for 2024",
+      "request": {
+        "body": {
+          "federalWithheld": 12000,
+          "stateWithheld": 4500,
+          "userId": "user_001",
+          "wages": 75000,
+          "year": 2024
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.userId": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/tax/generate-w2"
+      },
+      "response": {
+        "body": {
+          "documentType": "w2",
+          "estimatedCompletion": "2024-01-15T10:05:00Z",
+          "jobId": "job_123456",
+          "status": "processing"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.estimatedCompletion": {
+            "match": "type"
+          },
+          "$.body.jobId": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "10.4.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "Tax Document API"
+  }
+}

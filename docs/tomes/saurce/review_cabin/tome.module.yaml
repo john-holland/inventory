@@ -1,0 +1,60 @@
+schema_version: tome-module/2
+service: saurce
+surface: review_cabin
+
+cave_robit:
+  middleware: [presence_forward, envelope_v2, trace_loop_guard]
+
+messages:
+  review_queue_list: review/queue/list
+  review_cabin_submit: review/cabin/submit
+  review_ticket_create: review/ticket/create
+
+robotcopy:
+  flows:
+    review_queue_list:
+      message: review_queue_list
+      payload_template: {}
+    review_cabin_submit:
+      message: review_cabin_submit
+      payload_template:
+        cabin_id: "{{cabinId}}"
+    review_ticket_create:
+      message: review_ticket_create
+      payload_template:
+        reason: "{{reason}}"
+        priority: "{{priority}}"
+
+lvm:
+  machines:
+    - id: inventory:reviewCabinUi
+      initial: idle
+      states:
+        idle:
+          view: ReviewIdleView
+        loading:
+          view: ReviewLoadingView
+          on_enter:
+            message: review_queue_list
+        ready:
+          view: ReviewReadyView
+        submitting:
+          view: ReviewSubmittingView
+          on_enter:
+            message: review_cabin_submit
+        error:
+          view: ReviewErrorView
+
+state_middleware: [trace, presence, delegation, robotCopy, caveDbSnapshot, log]
+
+views:
+  ReviewIdleView:
+    module: review/cabin/IdleView
+  ReviewLoadingView:
+    module: review/cabin/LoadingView
+  ReviewReadyView:
+    module: review/cabin/ReadyView
+  ReviewSubmittingView:
+    module: review/cabin/SubmittingView
+  ReviewErrorView:
+    module: review/cabin/ErrorView

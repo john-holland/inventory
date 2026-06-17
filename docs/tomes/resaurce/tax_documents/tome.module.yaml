@@ -1,0 +1,62 @@
+schema_version: tome-module/2
+service: resaurce
+surface: tax_documents
+
+cave_robit:
+  middleware: [presence_forward, envelope_v2, trace_loop_guard]
+
+messages:
+  tax_documents_list: tax/documents/list
+  tax_generate_enqueue: tax/generate/enqueue
+  tax_generate_status: tax/generate/status
+  tax_generate_result: tax/generate/result
+
+robotcopy:
+  flows:
+    tax_documents_list:
+      message: tax_documents_list
+      payload_template: {}
+    tax_generate_enqueue:
+      message: tax_generate_enqueue
+      payload_template:
+        document_type: "{{documentType}}"
+    tax_generate_status:
+      message: tax_generate_status
+      payload_template:
+        job_id: "{{jobId}}"
+    tax_generate_result:
+      message: tax_generate_result
+      payload_template:
+        job_id: "{{jobId}}"
+
+lvm:
+  machines:
+    - id: inventory:taxDocumentsUi
+      initial: idle
+      states:
+        idle:
+          view: TaxIdleView
+        loading:
+          view: TaxLoadingView
+          on_enter:
+            message: tax_documents_list
+        ready:
+          view: TaxReadyView
+        generating:
+          view: TaxGeneratingView
+        error:
+          view: TaxErrorView
+
+state_middleware: [trace, presence, delegation, robotCopy, caveDbSnapshot, log]
+
+views:
+  TaxIdleView:
+    module: documents/tax/IdleView
+  TaxLoadingView:
+    module: documents/tax/LoadingView
+  TaxReadyView:
+    module: documents/tax/ReadyView
+  TaxGeneratingView:
+    module: documents/tax/GeneratingView
+  TaxErrorView:
+    module: documents/tax/ErrorView

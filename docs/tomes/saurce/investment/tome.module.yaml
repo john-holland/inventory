@@ -1,0 +1,67 @@
+schema_version: tome-module/2
+service: saurce
+surface: investment
+
+cave_robit:
+  middleware: [presence_forward, envelope_v2, trace_loop_guard]
+
+messages:
+  investment_eligibility: investment/eligibility/evaluate
+  investment_mode_enable: investment/mode/enable
+  wallet_hold_apply: wallet/hold/apply
+
+robotcopy:
+  flows:
+    investment_eligibility:
+      message: investment_eligibility
+      payload_template:
+        item_id: "{{itemId}}"
+        hold_type: "{{holdType}}"
+    investment_mode_enable:
+      message: investment_mode_enable
+      payload_template: {}
+    wallet_hold_apply:
+      message: wallet_hold_apply
+      payload_template:
+        wallet_id: "{{walletId}}"
+        item_id: "{{itemId}}"
+        lines: "{{lines}}"
+
+lvm:
+  machines:
+    - id: inventory:investmentUi
+      initial: idle
+      states:
+        idle:
+          view: InvestmentIdleView
+        loading:
+          view: InvestmentLoadingView
+          on_enter:
+            message: investment_eligibility
+        ready:
+          view: InvestmentReadyView
+        submitting:
+          view: InvestmentSubmittingView
+          on_enter:
+            message: investment_mode_enable
+        awaiting_presence:
+          view: PresenceSignInView
+          requires_presence: true
+        error:
+          view: InvestmentErrorView
+
+state_middleware: [trace, presence, delegation, robotCopy, caveDbSnapshot, log]
+
+views:
+  InvestmentIdleView:
+    module: item/investment/IdleView
+  InvestmentLoadingView:
+    module: item/investment/LoadingView
+  InvestmentReadyView:
+    module: item/investment/ReadyView
+  InvestmentSubmittingView:
+    module: item/investment/SubmittingView
+  InvestmentErrorView:
+    module: item/investment/ErrorView
+  PresenceSignInView:
+    module: presence/SignInView

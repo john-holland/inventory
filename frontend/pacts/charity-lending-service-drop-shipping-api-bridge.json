@@ -1,0 +1,91 @@
+{
+  "consumer": {
+    "name": "charity-lending-service"
+  },
+  "interactions": [
+    {
+      "description": "a request to connect to drop shipping APIs",
+      "providerState": "charity features enabled",
+      "request": {
+        "body": {
+          "charityFeaturesEnabled": true,
+          "platforms": [
+            "amazon",
+            "ebay",
+            "walmart"
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/connect"
+      },
+      "response": {
+        "body": {
+          "complianceStatus": "compliant",
+          "connectedPlatforms": [
+            "amazon",
+            "ebay",
+            "walmart"
+          ],
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to lookup charity item info",
+      "providerState": "charity item lookup",
+      "request": {
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Charity-ID": "charity-123"
+        },
+        "method": "GET",
+        "path": "/api/items/amazon/B08N5WRWNW"
+      },
+      "response": {
+        "body": {
+          "available": true,
+          "charityEligible": true,
+          "itemId": "B08N5WRWNW",
+          "lastChecked": "2024-01-01T00:00:00Z",
+          "platform": "amazon",
+          "price": 25.99,
+          "title": "Test Charity Item"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.lastChecked": {
+            "match": "type"
+          },
+          "$.body.title": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "10.4.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "drop-shipping-api-bridge"
+  }
+}

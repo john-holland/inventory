@@ -1,0 +1,14 @@
+{
+  "contexts": {
+    "default": {
+      "resaurce": "http://127.0.0.1:8765",
+      "saurce": "http://127.0.0.1:8766",
+      "inventory": "http://127.0.0.1:8765"
+    },
+    "vpc-example__subnet-example": {
+      "resaurce": "https://cave.resaurce.internal",
+      "saurce": "https://cave.saurce.internal",
+      "inventory": "https://cave.inventory.internal"
+    }
+  }
+}

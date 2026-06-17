@@ -1,11 +1,30 @@
 /**
  * @inventory/cave-pilot-configs — HR + wallet pilot Tome definitions (log-view-machine createTomeConfig).
- * Consumed by log-view-machine node-mod-editor and any host that registers the same pilots.
  */
 import { createTomeConfig } from 'log-view-machine';
 
-async function postCaveRoute(baseUrl, envelope) {
+function traceId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `trace_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/**
+ * Send message-first Cave envelope via fetch (pilot hosts wire RobotCopy.sendDelegatedMessage in production).
+ */
+async function sendCaveMessage(baseUrl, message, payload, options = {}) {
   const url = `${String(baseUrl).replace(/\/$/, '')}/cave/route`;
+  const envelope = {
+    schema_version: '2.0',
+    message,
+    payload: payload || {},
+    trace_id: options.traceId || traceId(),
+    tenant: options.tenant || 'pilot',
+    presence: options.presence || 'pilot',
+    reply_mode: 'sync_http',
+    ...(options.service ? { service: options.service } : {}),
+  };
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -20,13 +39,6 @@ async function postCaveRoute(baseUrl, envelope) {
   return { ok: res.ok, status: res.status, json };
 }
 
-function traceId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  return `trace_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-}
-
 /**
  * @param {{ resaurceBaseUrl?: string; duckdbPath?: string }} options
  */
@@ -37,7 +49,10 @@ export function buildResaurceHrPilotTomeConfig(options = {}) {
   return createTomeConfig({
     id: 'resaurce-hr-pilot-tome',
     name: 'resaurce HR help pilot',
-    description: 'ViewStateMachine pilot aligned with resaurce HR help Tome (orchestration + Cave envelope v2)',
+    description: 'ViewStateMachine pilot aligned with resaurce HR help Tome (message delegation)',
+    messages: {
+      request_hr_help: 'hr/help/request',
+    },
     persistence: {
       enabled: true,
       adapter: 'duckdb',
@@ -53,41 +68,22 @@ export function buildResaurceHrPilotTomeConfig(options = {}) {
           id: 'resaurce-hr-help-pilot',
           initial: 'idle',
           states: {
-            idle: {
-              on: { request: 'sessionRequested' },
-            },
-            sessionRequested: {
-              on: { chat_created: 'sessionActive', CAVE_FAIL: 'idle' },
-            },
-            sessionActive: {
-              on: { RESET: 'idle' },
-            },
+            idle: { on: { request: 'sessionRequested' } },
+            sessionRequested: { on: { chat_created: 'sessionActive', CAVE_FAIL: 'idle' } },
+            sessionActive: { on: { RESET: 'idle' } },
           },
         },
         logStates: {
           idle: async (ctx) => {
-            await ctx.log('resaurce HR pilot: idle', {
-              route: 'resaurce:hr/help/request',
-              machineId: 'resaurce-hr-help-pilot',
-            });
+            await ctx.log('resaurce HR pilot: idle', { message: 'request_hr_help', machineId: 'resaurce-hr-help-pilot' });
           },
           sessionRequested: async (ctx) => {
             const tid = traceId();
-            await ctx.log('resaurce HR pilot: calling Cave', {
-              trace_id: tid,
-              route: 'resaurce:hr/help/request',
-              tenant: 'pilot',
+            await ctx.log('resaurce HR pilot: calling Cave', { trace_id: tid, message: 'request_hr_help', tenant: 'pilot' });
+            const { ok, json } = await sendCaveMessage(resaurceBaseUrl, 'request_hr_help', { context: 'lvm-hr-pilot' }, {
+              traceId: tid,
+              service: 'resaurce',
             });
-            const envelope = {
-              schema_version: '2.0',
-              route: 'resaurce:hr/help/request',
-              payload: { context: 'lvm-hr-pilot' },
-              trace_id: tid,
-              tenant: 'pilot',
-              presence: 'pilot',
-              reply_mode: 'sync_http',
-            };
-            const { ok, json } = await postCaveRoute(resaurceBaseUrl, envelope);
             if (!ok || json?.ok === false) {
               await ctx.log('resaurce HR pilot: Cave error', { trace_id: tid, json, status: ok });
               ctx.send({ type: 'CAVE_FAIL' });
@@ -115,9 +111,7 @@ export function buildResaurceHrPilotTomeConfig(options = {}) {
     },
     routing: {
       basePath: '/api/pilot/resaurce-hr',
-      routes: {
-        hrHelpPilot: { path: '/events', method: 'POST' },
-      },
+      routes: { hrHelpPilot: { path: '/events', method: 'POST' } },
     },
   });
 }
@@ -132,7 +126,10 @@ export function buildSaurceWalletHoldPilotTomeConfig(options = {}) {
   return createTomeConfig({
     id: 'saurce-wallet-pilot-tome',
     name: 'saurce wallet hold pilot',
-    description: 'ViewStateMachine pilot for saurce wallet hold apply (Cave envelope v2)',
+    description: 'ViewStateMachine pilot for saurce wallet hold apply (message delegation)',
+    messages: {
+      wallet_hold_apply: 'wallet/hold/apply',
+    },
     persistence: {
       enabled: true,
       adapter: 'duckdb',
@@ -148,31 +145,23 @@ export function buildSaurceWalletHoldPilotTomeConfig(options = {}) {
           id: 'saurce-wallet-hold-pilot',
           initial: 'idle',
           states: {
-            idle: {
-              on: { APPLY_HOLD: 'applyingHold' },
-            },
-            applyingHold: {
-              on: { CAVE_OK: 'success', CAVE_FAIL: 'error' },
-            },
-            success: {
-              on: { RESET: 'idle' },
-            },
-            error: {
-              on: { RESET: 'idle' },
-            },
+            idle: { on: { APPLY_HOLD: 'applyingHold' } },
+            applyingHold: { on: { CAVE_OK: 'success', CAVE_FAIL: 'error' } },
+            success: { on: { RESET: 'idle' } },
+            error: { on: { RESET: 'idle' } },
           },
         },
         logStates: {
           idle: async (ctx) => {
-            await ctx.log('saurce wallet pilot: idle', { route: 'saurce:wallet/hold/apply' });
+            await ctx.log('saurce wallet pilot: idle', { message: 'wallet_hold_apply' });
           },
           applyingHold: async (ctx) => {
             const tid = traceId();
             await ctx.log('saurce wallet pilot: applying hold', { trace_id: tid });
-            const envelope = {
-              schema_version: '2.0',
-              route: 'saurce:wallet/hold/apply',
-              payload: {
+            const { ok, json } = await sendCaveMessage(
+              saurceBaseUrl,
+              'wallet_hold_apply',
+              {
                 wallet_id: 'wallet_001',
                 item_id: 'item_pilot',
                 lines: [
@@ -185,12 +174,8 @@ export function buildSaurceWalletHoldPilotTomeConfig(options = {}) {
                   },
                 ],
               },
-              trace_id: tid,
-              tenant: 'pilot',
-              presence: 'pilot',
-              reply_mode: 'sync_http',
-            };
-            const { ok, json } = await postCaveRoute(saurceBaseUrl, envelope);
+              { traceId: tid, service: 'saurce' }
+            );
             if (!ok || json?.ok === false) {
               await ctx.log('saurce wallet pilot: Cave error', { trace_id: tid, json });
               ctx.send({ type: 'CAVE_FAIL' });
@@ -216,9 +201,7 @@ export function buildSaurceWalletHoldPilotTomeConfig(options = {}) {
     },
     routing: {
       basePath: '/api/pilot/saurce-wallet',
-      routes: {
-        walletHoldPilot: { path: '/events', method: 'POST' },
-      },
+      routes: { walletHoldPilot: { path: '/events', method: 'POST' } },
     },
   });
 }

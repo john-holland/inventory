@@ -11,6 +11,10 @@ A decentralized platform for sharing physical items with smart contract-based se
 - Modern web interface with Material-UI
 - Kotlin backend with JAX-RS (Jersey)
 
+## Related Cave services (sibling repos)
+
+When this repo lives next to **resaurce** and **saurce** under the same parent directory, run those Node Cave hosts for real SOA responses (see [scripts/SMOKE_SOA.md](scripts/SMOKE_SOA.md)). Contract drift is avoided by `./scripts/sync-cave-contracts-to-siblings.sh`.
+
 ## Prerequisites
 
 - JDK 17 or later

@@ -1,0 +1,55 @@
+schema_version: tome-module/2
+service: resaurce
+surface: legal_review
+
+cave_robit:
+  middleware: [presence_forward, envelope_v2, trace_loop_guard]
+
+messages:
+  legal_documents_list: legal/documents/list
+  legal_document_enqueue: legal/document/enqueue
+
+robotcopy:
+  flows:
+    legal_documents_list:
+      message: legal_documents_list
+      payload_template: {}
+    legal_document_enqueue:
+      message: legal_document_enqueue
+      payload_template:
+        document_id: "{{documentId}}"
+        document_type: "{{documentType}}"
+
+lvm:
+  machines:
+    - id: inventory:legalReviewUi
+      initial: idle
+      states:
+        idle:
+          view: LegalIdleView
+        loading:
+          view: LegalLoadingView
+          on_enter:
+            message: legal_documents_list
+        ready:
+          view: LegalReadyView
+        generating:
+          view: LegalGeneratingView
+          on_enter:
+            message: legal_document_enqueue
+        error:
+          view: LegalErrorView
+
+state_middleware: [trace, presence, delegation, robotCopy, caveDbSnapshot, log]
+
+views:
+  LegalIdleView:
+    module: documents/legal/IdleView
+  LegalLoadingView:
+    module: documents/legal/LoadingView
+  LegalReadyView:
+    module: documents/legal/ReadyView
+  LegalGeneratingView:
+    module: documents/legal/GeneratingView
+  LegalErrorView:
+    module: documents/legal/ErrorView

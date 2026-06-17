@@ -26,15 +26,88 @@ JSON fields:
 | Field | Description |
 |--------|-------------|
 | `schema_version` | `"2.0"` |
-| `route` | Full route string including optional prefix |
+| `route` | Full route string including optional prefix (**optional when `message` present**) |
+| `message` | Logical message name; serving Cave resolves via `cave.manifest.yaml` |
 | `payload` | Object body |
 | `trace_id` | Correlation ID |
 | `causation_id` | Optional upstream id |
+| `causality_path` | Hop chain appended by each Cave (loop detection) |
 | `presence` | Opaque presence handle / token |
 | `reply_mode` | `sync_http` \| `async_queue` \| `async_poll_token` |
 | `reply_to` | Optional callback route or queue name |
 | `tome_semver` | Optional Tome bundle version |
 | `tenant` | Optional tenant id |
+| `trace_loop` | Optional `{ prevent?: boolean }` override |
+
+**Client rule:** inventory browser app code sends **`message`** via **RobotCopy** (`robotCopyRuntime.sendMessage` / `executeFlow`). Transport adapters (`cave-adapter-ts`, BFF proxy) forward envelopes without resolving routes.
+
+## Cave manifest (`cave.manifest.yaml`)
+
+Each Cave host owns one authoritative manifest served at `GET /cave/manifest`:
+
+| Section | Purpose |
+|---------|---------|
+| `messages` | Root logical message → relative or explicit route |
+| `tomes.*.messages` | Per-Tome overrides |
+| `cave.structural.*.messages` | Structural pattern overrides |
+| `lvm.machines` | XState interpreter metadata |
+| `lvm.multicast` | Server-orchestrated fan-out (not client routing tables) |
+| `encapsulation.allowed_routes` | Server-side route allowlist |
+| `trace_loop` | `detect: true`, **`prevent: true`** default |
+
+Static federation (Module Federation remotes only) is served at `GET /tome/{service}-frontend` and optional `GET /cave/federation` — **no messages, machines, or routing tables**.
+
+## Location-invariant routing
+
+The **shape** of `cave.manifest.yaml` is identical across cloud placements (messages, tomes, lvm, trace_loop, robotcopy). The SOA registry supplies **base URLs only** (`REACT_APP_SOA_*_URL`, `SOA_REGISTRY_PATH`); it must **not** embed routing tables, message maps, or machine metadata.
+
+**Enforcement (inventory browser):** `validateLocationInvariantRegistry()` in [soaRegistry.ts](../frontend/src/services/soaRegistry.ts) rejects registry objects that contain `messages`, `routes`, `machines`, etc., or URL values with non-empty paths. With `REACT_APP_SOA_STRICT_MODE=true`, invalid registries throw at startup check via `assertLocationInvariantEnvRegistry()`.
+
+Clients resolve logical **`message`** names only through RobotCopy; the serving Cave host resolves routes from its manifest.
+
+## Trace loop guard
+
+On every `POST /cave/route`, before delegation and dispatch:
+
+1. Append hop to `causality_path`
+2. Detect cycles (`CAUSAL_LOOP_DETECTED` when `prevent: true`, default)
+3. `trace_heartbeat` / `presence_verify` exempt per manifest `trace_loop.heartbeat`
+
+Multicast and cross-Cave outbound legs forward the same `trace_id` and accumulated `causality_path`.
+
+## Inventory UI availability (CaveFeatureGate)
+
+Cave-dependent UI uses `useCaveShell` + `CaveFeatureGate` with a required **`surface`** id (e.g. `commerce_wallet`, `tax_documents`, `investment`):
+
+- **`initialModel`** — optional `Record<string, unknown>` passed to `useTomeSurface` / `machine.useViewStateMachine` so surfaces receive context (`itemId`, `tenantId`, `userId`) without page-level service calls.
+- **`surfaceTransitions`** — per-surface XState extras merged in `getSurfaceChartExtras` (e.g. `ready` → `submitting` on `SUBMIT_REVIEW`, `GENERATE` → `generating` for document surfaces).
+
+| State | UI |
+|-------|-----|
+| unset | Info alert — configure `REACT_APP_SOA_*_URL` |
+| loading | `CircularProgress` placeholder |
+| error | Error alert + retry |
+| ready | LVM **`withState`** view stack via `useTomeSurface` / `@inventory/cave-ui-lvm` |
+
+No local domain mocks in production paths. Optional `REACT_APP_CAVE_DEV_FALLBACK=true` enables legacy mock data for Jest/integration only.
+
+RobotCopy flow definitions load from `GET /cave/manifest` → `robotcopy.flows` (not static federation JSON).
+
+## State middleware and withState (browser LVM)
+
+**Separation:** middleware runs **before** `withState` handlers on every state entry; handlers return views only via `ctx.view(...)`.
+
+| Layer | Responsibility |
+|-------|----------------|
+| **State middleware** | `trace`, `presence`, `delegation`, `robotCopy`, `caveDbSnapshot`, `log`; optional **capsule** catchall for sub-machines |
+| **withState handler** | Read model; `ctx.view(<StatelessView />)`; user events via `ctx.send` only |
+| **React page shell** | `CaveFeatureGate` + `{machine.viewStack}` — **no large `switch (state)`** |
+
+**Static analysis index:** `cave-cli tome index` emits `{ states, views, messages }`; `ClientGenerator.ingestTomeModuleIndex()` merges with live `getRegisteredStateHandlerNames()` from each `ViewStateMachine`.
+
+**Browser entry:** import from `log-view-machine/browser` (no Express). IndexedDB CaveDB via `@inventory/cave-ui-lvm` `createBrowserCaveDb`.
+
+**Exceptions (narrow):** event pattern match inside one handler; singular `surfaceTemplate()` when all states share chrome.
 
 ## LVM2.0 lifecycle (tax example)
 
@@ -95,7 +168,7 @@ Editor pilot tomes (`resaurce-hr-pilot-tome`, `saurce-wallet-pilot-tome`) in `lo
 | resaurce | `legal/` | `resaurce:legalDocument` |
 | resaurce | `presence/` | `resaurce:presence` |
 
-**LVM2 CLI / tooling:** Static manifests live at `contracts/lvm2/saurce-machines.json` and `contracts/lvm2/resaurce-machines.json`. **Discovery:** `GET /lvm2/discover` on each Cave host returns the same JSON. **Log-view-machine** `ClientGenerator.ingestNodeCaveManifest()` plus `parseNodeCaveMachineManifest()` merge those routes into `discover().nodeCaveMachines` and the generated markdown documentation.
+**LVM2 CLI / tooling:** Machine metadata is authoritative in each host's `cave.manifest.yaml` (`lvm.machines`). **Discovery:** `GET /lvm2/discover` projects from the manifest. **Log-view-machine** `ClientGenerator.ingestCaveManifest()` merges manifest messages/machines into tooling docs; `ingestStaticFederationSlice()` is UI federation only.
 
 **Investment numeric checks:** `investment/mode/enable` anti-collateral validation uses `inventory/backend/python-apis/wallet-ledger/wallet_math.py` (Decimal) when the script is reachable (`SAURCE_WALLET_MATH_SCRIPT` or sibling `inventory/...` path from the saurce install); otherwise the prior floating-point check is used as a fallback.
 
@@ -103,12 +176,37 @@ Editor pilot tomes (`resaurce-hr-pilot-tome`, `saurce-wallet-pilot-tome`) in `lo
 
 Domain YAML under `resaurce/tomes/**` and `saurce/tomes/**` may declare `structural_routes` on each `transitions[]` entry. `domainTomeLoader` indexes those paths so `getLvmEventNamesForStructuralRoute` stays aligned with Cave mutating routes without a hand-maintained `if` chain.
 
+### Shared service CaveDB (browser)
+
+All LVM surfaces on the same SOA service share one IndexedDB namespace via `getServiceCaveDb(service)` (`@inventory/cave-ui-lvm`). The tome id is `{service}-inventory-ui` (e.g. `saurce-inventory-ui`). Keys include `presence:token`, `pending:<machineId>:<trace_id>`, and `snapshot:<machineId>:<trace_id>`. Surfaces such as `cabin_session` and `review_cabin` on saurce read/write the same store so presence defer and middleware snapshots stay consistent across pages.
+
+### Hybrid surfaces and sub-machines
+
+When one product area needs both a full page flow and a separate CSR/admin surface, split **surfaces** instead of sharing one view map:
+
+| Surface | Page | Machine |
+|---------|------|---------|
+| `cabin_session` | CabinPage | `inventory:cabinSessionUi` + sub-machine `createWizard` |
+| `review_cabin` | CSRDashboard | `inventory:reviewCabinUi` |
+| `commerce_wallet` | PartnerDashboard | `inventory:partnerWalletUi` |
+| `investment` | ItemDetailsPage | `inventory:investmentUi` (`initialModel.itemId`) |
+| `tax_documents` | DocumentsPage | `inventory:taxDocumentsUi` |
+| `legal_review` | DocumentsPage | `inventory:legalReviewUi` |
+| `inventory_reports` | DocumentsPage | `inventory:inventoryReportsUi` |
+| `sales_reports` | DocumentsPage | `inventory:salesReportsUi` |
+| `hr_help` | DocumentsPage (dialog) | `inventory:hrHelpUi` (`initialModel.tenantId`, `userId`) |
+
+DocumentsPage is a **multi-surface thin shell**: four grid `CaveFeatureGate` cells plus an HR dialog gate. Each document category owns list/generate UI in its Ready view; `loading.on_enter` fires the list message (not `idle`).
+
+Parent state `wizardActive` on `cabin_session` uses capsule `subMachineRouter` to delegate to the `createWizard` sub-machine. Cross-surface Cave messages use the same manifest delegation map and shared service CaveDB.
+
 ### CaveDB and `withState` / `logStates`
 
 When orchestration needs idempotent snapshots or cross-request reads, inject a **CaveDBAdapter** on the ViewStateMachine (`ctx.db`) and use **`find` / `findOne` before `put`** with a stable document key (e.g. `snapshot:<machineId>:<trace_id>`). Node Cave in-memory stores remain separate from CaveDB unless explicitly bridged.
 
 ### Publishable adapters (inventory packages)
 
-- **`@inventory/cave-federation-host`** — default `fetch` Cave client (`createStructuralCaveClient`) and `readFederationFromUiTome` for UI Tome JSON.
-- **`@inventory/cave-pilot-configs`** — shared `createTomeConfig` pilots for resaurce HR and saurce wallet (consumed by log-view-machine `node-mod-editor`).
+- **`@inventory/cave-federation-host`** — static federation slice reader (`fetchStaticFederationSlice`, `readFederationFromUiTome`). `createStructuralCaveClient.caveRoute` is **deprecated**; use RobotCopy.
+- **`@inventory/cave-pilot-configs`** — pilots send **message-first** envelopes (`request_hr_help`, `wallet_hold_apply`).
+- **`frontend/src/cave/robotCopyRuntime.ts`** — sole public Cave API for inventory browser.
 

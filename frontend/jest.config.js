@@ -2,6 +2,7 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: [
     '**/src/pacts/**/*.pact.js',
+    '**/src/pacts/**/*.pact.test.js',
     '**/src/**/*.test.js',
     '**/src/**/*.spec.js'
   ],

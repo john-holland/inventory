@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, asdict
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 import json
 import uuid
 
@@ -23,9 +23,12 @@ class MessageEnvelope:
 
     schema_version: str = "2.0"
     route: str = ""
+    message: Optional[str] = None
+    service: Optional[str] = None
     payload: Dict[str, Any] = field(default_factory=dict)
     trace_id: str = ""
     causation_id: Optional[str] = None
+    causality_path: Optional[List[Any]] = None
     presence: Optional[str] = None
     reply_mode: str = ReplyMode.sync_http.value
     reply_to: Optional[str] = None
@@ -34,7 +37,7 @@ class MessageEnvelope:
 
     def to_json(self) -> str:
         d = asdict(self)
-        return json.dumps(d, separators=(",", ":"))
+        return json.dumps({k: v for k, v in d.items() if v is not None and v != ""}, separators=(",", ":"))
 
 
 def build_envelope(
@@ -47,6 +50,8 @@ def build_envelope(
     reply_to: Optional[str] = None,
     tenant: Optional[str] = None,
     tome_semver: Optional[str] = None,
+    causation_id: Optional[str] = None,
+    causality_path: Optional[List[Any]] = None,
 ) -> MessageEnvelope:
     return MessageEnvelope(
         route=route,
@@ -57,5 +62,36 @@ def build_envelope(
         reply_to=reply_to,
         tenant=tenant,
         tome_semver=tome_semver,
+        causation_id=causation_id,
+        causality_path=causality_path,
     )
 
+
+def build_message_envelope(
+    message: str,
+    payload: Optional[Dict[str, Any]] = None,
+    *,
+    service: Optional[str] = None,
+    trace_id: Optional[str] = None,
+    presence: Optional[str] = None,
+    reply_mode: ReplyMode = ReplyMode.sync_http,
+    reply_to: Optional[str] = None,
+    tenant: Optional[str] = None,
+    tome_semver: Optional[str] = None,
+    causation_id: Optional[str] = None,
+    causality_path: Optional[List[Any]] = None,
+) -> MessageEnvelope:
+    """Message-first envelope; serving Cave resolves route from cave.manifest.yaml."""
+    return MessageEnvelope(
+        message=message,
+        service=service,
+        payload=payload or {},
+        trace_id=trace_id or str(uuid.uuid4()),
+        presence=presence,
+        reply_mode=reply_mode.value,
+        reply_to=reply_to,
+        tenant=tenant,
+        tome_semver=tome_semver,
+        causation_id=causation_id,
+        causality_path=causality_path,
+    )

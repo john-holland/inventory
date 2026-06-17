@@ -5,7 +5,7 @@
 
 import { WalletService } from './WalletService';
 import { ShippingService } from './ShippingService';
-import { isServiceConfigured, isSaurceBridgeEnabled, isSoaStrictMode } from './soaRegistry';
+import { isServiceConfigured, isSaurceBridgeEnabled, isSoaStrictMode, isCaveDevFallback } from './soaRegistry';
 import { evaluateSaurceInvestmentEligibility, fetchCryptoPortfolioSnapshot } from './saurceBridge';
 
 export interface HoldBalance {
@@ -136,6 +136,14 @@ export class InvestmentService {
         }
       } catch (e) {
         if (isSoaStrictMode()) throw e;
+      }
+      if (!isCaveDevFallback()) {
+        return {
+          holdType,
+          isEligible: false,
+          reason: 'Investment eligibility requires saurce Cave (REACT_APP_SOA_SAURCE_URL).',
+          requirements: [],
+        };
       }
     }
 
@@ -325,13 +333,28 @@ export class InvestmentService {
    * Get current risk boundary error based on market conditions
    */
   async getRiskBoundaryError(): Promise<number> {
-    // In production, this would query market data and calculate risk
-    // For now, return a mock value based on current market conditions
-    const mockMarketVolatility = 0.15; // 15% volatility
-    const riskBoundaryError = Math.min(mockMarketVolatility, 0.25); // Cap at 25%
-    
-    console.log(`📊 Risk boundary error calculated: ${(riskBoundaryError * 100).toFixed(2)}%`);
-    return riskBoundaryError;
+    if (isServiceConfigured('saurce')) {
+      try {
+        const snap = await fetchCryptoPortfolioSnapshot({ userId: 'system', walletId: '' });
+        const rb = (snap as { risk_boundary_error?: unknown }).risk_boundary_error;
+        if (typeof rb === 'number' && Number.isFinite(rb)) {
+          return rb;
+        }
+        if (isSoaStrictMode()) {
+          throw new Error(`saurce risk boundary unavailable: ${JSON.stringify(snap)}`);
+        }
+        if (!isCaveDevFallback()) {
+          throw new Error('Risk boundary requires saurce Cave (REACT_APP_SOA_SAURCE_URL).');
+        }
+      } catch (e) {
+        if (isSoaStrictMode() || !isCaveDevFallback()) throw e;
+      }
+    } else if (!isCaveDevFallback()) {
+      throw new Error('Risk boundary requires saurce Cave (REACT_APP_SOA_SAURCE_URL).');
+    }
+
+    const mockMarketVolatility = 0.15;
+    return Math.min(mockMarketVolatility, 0.25);
   }
 
   /**
@@ -356,18 +379,25 @@ export class InvestmentService {
    * Get current investments for an item
    */
   private async getCurrentInvestments(itemId: string): Promise<number> {
-    // In production, this would query actual investment data
-    // For now, return mock data
-    return 150.00; // Mock investment amount
+    if (isServiceConfigured('saurce')) {
+      const snap = await fetchCryptoPortfolioSnapshot({ userId: 'system', walletId: '' });
+      const v = (snap as { current_investments?: unknown }).current_investments;
+      if (typeof v === 'number') return v;
+      if (!isCaveDevFallback()) return 0;
+    }
+    if (!isCaveDevFallback()) return 0;
+    return 150.0;
   }
 
-  /**
-   * Calculate investment return for an item
-   */
   private async calculateInvestmentReturn(itemId: string): Promise<number> {
-    // In production, this would calculate actual returns
-    // For now, return mock data
-    return 15.00; // Mock return amount
+    if (isServiceConfigured('saurce')) {
+      const snap = await fetchCryptoPortfolioSnapshot({ userId: 'system', walletId: '' });
+      const v = (snap as { investment_return?: unknown }).investment_return;
+      if (typeof v === 'number') return v;
+      if (!isCaveDevFallback()) return 0;
+    }
+    if (!isCaveDevFallback()) return 0;
+    return 15.0;
   }
 
   /**

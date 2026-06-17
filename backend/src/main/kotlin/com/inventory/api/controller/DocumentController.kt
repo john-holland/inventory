@@ -50,7 +50,8 @@ class DocumentController(
         }
         val caveBody = mapOf(
             "schema_version" to "2.0",
-            "route" to "resaurce:tax/generate/enqueue",
+            "message" to "tax_generate_enqueue",
+            "service" to "resaurce",
             "payload" to payload,
             "trace_id" to sessionId,
             "reply_mode" to "sync_http",

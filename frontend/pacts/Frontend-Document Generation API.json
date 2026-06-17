@@ -1,0 +1,131 @@
+{
+  "consumer": {
+    "name": "Frontend"
+  },
+  "interactions": [
+    {
+      "description": "a request to generate inventory report with prices",
+      "providerState": "user has inventory items",
+      "request": {
+        "body": {
+          "format": "pdf",
+          "includePrices": true,
+          "organizedBySize": true,
+          "userId": "user_001"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.userId": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/documents/inventory-report"
+      },
+      "response": {
+        "body": {
+          "documentType": "inventory_report",
+          "jobId": "job_inv_001",
+          "status": "processing"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.jobId": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to generate sales report without PII",
+      "providerState": "user has sales data",
+      "request": {
+        "body": {
+          "endDate": "2024-12-31",
+          "includePII": false,
+          "startDate": "2024-01-01",
+          "userId": "user_001"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.userId": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/documents/sales-report"
+      },
+      "response": {
+        "body": {
+          "documentType": "sales_report",
+          "jobId": "job_sales_001",
+          "piiExcluded": true,
+          "status": "processing"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.jobId": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to generate Terms of Service",
+      "providerState": "user needs Terms of Service document",
+      "request": {
+        "body": {
+          "documentType": "terms_of_service",
+          "effectiveDate": "2024-01-15",
+          "version": "2.0"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/documents/legal-document"
+      },
+      "response": {
+        "body": {
+          "documentType": "terms_of_service",
+          "jobId": "job_legal_001",
+          "status": "processing"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.jobId": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "10.4.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "Document Generation API"
+  }
+}

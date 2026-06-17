@@ -1,5 +1,6 @@
 /**
- * @inventory/cave-federation-host — LVM2-aligned default Cave HTTP + federation hints.
+ * @inventory/cave-federation-host — static federation slice reader (Module Federation remotes).
+ * Outbound Cave HTTP must go through RobotCopy / sendCaveMessage — not this package.
  */
 
 /**
@@ -19,7 +20,23 @@ export function readFederationFromUiTome(tome) {
 }
 
 /**
- * @param {{ baseUrl: string, fetchImpl?: typeof fetch }} options Cave base (no trailing slash required)
+ * Fetch static federation slice from a Cave host.
+ * @param {{ baseUrl: string, service?: string, fetchImpl?: typeof fetch }} options
+ */
+export async function fetchStaticFederationSlice(options) {
+  const base = String(options.baseUrl || '').replace(/\/$/, '');
+  const service = options.service || 'resaurce';
+  const fetchFn = options.fetchImpl || (typeof fetch !== 'undefined' ? fetch.bind(globalThis) : null);
+  if (!base) throw new Error('fetchStaticFederationSlice: baseUrl required');
+  if (!fetchFn) throw new Error('fetchStaticFederationSlice: fetch not available');
+  const res = await fetchFn(`${base}/tome/${service}-frontend`, { headers: { Accept: 'application/json' } });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+/**
+ * @deprecated Use RobotCopy.sendMessage / sendCaveMessage — direct route HTTP bypasses message delegation.
+ * @param {{ baseUrl: string, fetchImpl?: typeof fetch }} options
  */
 export function createStructuralCaveClient(options) {
   const base = String(options.baseUrl || '').replace(/\/$/, '');
@@ -30,11 +47,12 @@ export function createStructuralCaveClient(options) {
   return {
     baseUrl: base,
     /**
-     * @param {string} route full route e.g. resaurce:hr/help/session
-     * @param {Record<string, unknown>} payload
-     * @param {{ traceId?: string, replyMode?: string, tenant?: string }} [opts]
+     * @deprecated use message-first envelopes via RobotCopy
      */
     async caveRoute(route, payload, opts = {}) {
+      console.warn(
+        '[cave-federation-host] caveRoute is deprecated; use RobotCopy.sendMessage with logical message names'
+      );
       const traceId =
         opts.traceId ||
         (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `trace-${Date.now()}`);

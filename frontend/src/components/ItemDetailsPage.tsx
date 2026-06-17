@@ -41,17 +41,12 @@ import {
   LocationOn as LocationIcon,
   OpenInNew as OpenInNewIcon,
   Chat as ChatIcon,
-  TrendingUp as TrendingUpIcon,
-  Security as SecurityIcon,
   LocalShipping as ShippingIcon,
   ExpandMore as ExpandMoreIcon,
-  Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
   Block as BlockIcon,
-  AttachMoney as MoneyIcon,
   Speed as SpeedIcon,
   Settings as SettingsIcon,
-  SmartToy as RobotIcon,
   Savings as SavingsIcon
 } from '@mui/icons-material';
 import { mockInventoryItems } from '../data/mockInventoryItems';
@@ -59,8 +54,8 @@ import { getItemTypeChip, getPriceLabel, getItemActionConfig, getChatTemplateMes
 import { ChatService } from '../services/ChatService';
 import { RouteMap } from './RouteMap';
 import { WalletService } from '../services/WalletService';
+import CaveFeatureGate from '../cave/CaveFeatureGate';
 import { dropShippingIntegration } from '../services/DropShippingIntegrationService';
-import { InvestmentService } from '../services/InvestmentService';
 import { ShipStationService } from '../services/ShipStationService';
 import { ShippingService } from '../services/ShippingService';
 
@@ -69,44 +64,31 @@ export const ItemDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const chatService = ChatService.getInstance();
   const walletService = WalletService.getInstance();
-  const investmentService = InvestmentService.getInstance();
   const shipStationService = ShipStationService.getInstance();
   const shippingService = ShippingService.getInstance();
   
   const [processing, setProcessing] = useState(false);
-  const [investmentStatus, setInvestmentStatus] = useState<any>(null);
-  const [riskyModeEnabled, setRiskyModeEnabled] = useState(false);
-  const [riskPercentage, setRiskPercentage] = useState(50);
   const [shipStationSettings, setShipStationSettings] = useState({
     autoOptimize: true,
     minimumSavings: 2.00,
     riskTolerance: 'conservative' as 'conservative' | 'moderate' | 'aggressive'
   });
   const [optimizationOpportunity, setOptimizationOpportunity] = useState<any>(null);
-  const [showInvestmentModal, setShowInvestmentModal] = useState(false);
   const [showShipStationModal, setShowShipStationModal] = useState(false);
 
-  // Load investment status on component mount
   React.useEffect(() => {
-    const loadInvestmentStatus = async () => {
+    const loadShipping = async () => {
       if (id) {
         try {
-          const status = await investmentService.getInvestmentStatus(id);
-          setInvestmentStatus(status);
-          setRiskyModeEnabled(status.riskyModeEnabled);
-          setRiskPercentage(status.riskPercentage);
-          
-          // Check for optimization opportunities
           const optimization = await shippingService.checkLabelOptimization(id);
           setOptimizationOpportunity(optimization);
         } catch (error) {
-          console.error('Failed to load investment status:', error);
+          console.error('Failed to load shipping optimization:', error);
         }
       }
     };
-    
-    loadInvestmentStatus();
-  }, [id, investmentService, shippingService]);
+    void loadShipping();
+  }, [id, shippingService]);
 
   // Update ShipStation settings
   const handleShipStationSettingsChange = (newSettings: Partial<typeof shipStationSettings>) => {
@@ -120,45 +102,6 @@ export const ItemDetailsPage: React.FC = () => {
   };
 
   // New event handlers for Plan #3
-
-  /**
-   * Enable risky investment mode
-   */
-  const handleEnableRiskyMode = async () => {
-    if (!id) return;
-    
-    try {
-      setProcessing(true);
-      
-      // Anti-collateral matches InvestmentService.enableRiskyInvestmentMode: (2x shipping × risk%) × risk boundary
-      const shipping2x = investmentStatus?.holdBalance?.shippingHold2x || 0;
-      const amountAtRisk = (shipping2x * riskPercentage) / 100;
-      const antiCollateral = await investmentService.calculateAntiCollateral(amountAtRisk, riskPercentage);
-      
-      // Enable risky mode
-      const walletId = 'wallet_001'; // Default wallet
-      await walletService.enableRiskyInvestmentMode(walletId, id, riskPercentage, antiCollateral);
-      
-      // Refresh investment status
-      const status = await investmentService.getInvestmentStatus(id);
-      setInvestmentStatus(status);
-      setRiskyModeEnabled(true);
-      
-      console.log(`✅ Risky investment mode enabled at ${riskPercentage}% risk`);
-    } catch (error) {
-      console.error('Failed to enable risky mode:', error);
-      alert(`Failed to enable risky mode: ${error}`);
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  /**
-   * Update risk percentage slider
-   */
-  const handleRiskPercentageChange = (value: number) => {
-    setRiskPercentage(value);
-  };
 
   /**
    * Trigger shipping optimization
@@ -546,184 +489,12 @@ export const ItemDetailsPage: React.FC = () => {
 
         {/* Investment Status Section */}
         <Grid item xs={12}>
-          <Card sx={{ backgroundColor: '#1e1e1e', border: '1px solid #333', p: 3 }}>
-            <Typography variant="h6" sx={{ color: '#fff', mb: 2, display: 'flex', alignItems: 'center' }}>
-              <TrendingUpIcon sx={{ mr: 1, color: '#4caf50' }} />
-              Investment Status
-            </Typography>
-            
-            {investmentStatus && (
-              <Box>
-                {/* Hold Balances Display */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  <Grid item xs={12} md={4}>
-                    <Box sx={{ p: 2, backgroundColor: '#2a2a2a', borderRadius: 1 }}>
-                      <Typography variant="body2" sx={{ color: '#999', mb: 1 }}>
-                        Shipping Holds (2x)
-                      </Typography>
-                      <Typography variant="h6" sx={{ color: '#ff9800' }}>
-                        ${investmentStatus.holdBalance?.shippingHold2x?.toFixed(2) || '0.00'}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: '#ccc' }}>
-                        Non-investable
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Box sx={{ p: 2, backgroundColor: '#2a2a2a', borderRadius: 1 }}>
-                      <Typography variant="body2" sx={{ color: '#999', mb: 1 }}>
-                        Additional Holds (3rd x)
-                      </Typography>
-                      <Typography variant="h6" sx={{ color: '#4caf50' }}>
-                        ${investmentStatus.holdBalance?.additionalHold?.toFixed(2) || '0.00'}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: '#ccc' }}>
-                        Investable
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Box sx={{ p: 2, backgroundColor: '#2a2a2a', borderRadius: 1 }}>
-                      <Typography variant="body2" sx={{ color: '#999', mb: 1 }}>
-                        Insurance Holds
-                      </Typography>
-                      <Typography variant="h6" sx={{ color: '#4caf50' }}>
-                        ${investmentStatus.holdBalance?.insuranceHold?.toFixed(2) || '0.00'}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: '#ccc' }}>
-                        Investable after shipping
-                      </Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
-
-                {/* Investment Summary */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" sx={{ color: '#999', mb: 1 }}>
-                    Total Investable: ${investmentStatus.holdBalance?.totalInvestable?.toFixed(2) || '0.00'}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#999', mb: 1 }}>
-                    Current Investments: ${investmentStatus.currentInvestments?.toFixed(2) || '0.00'}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: '#999' }}>
-                    Investment Return: +${investmentStatus.investmentReturn?.toFixed(2) || '0.00'} 
-                    (+{investmentStatus.investmentReturnPercentage?.toFixed(1) || '0.0'}%)
-                  </Typography>
-                </Box>
-
-                {/* Risky Investment Mode Section */}
-                <Accordion sx={{ backgroundColor: '#2a2a2a', color: '#fff', mb: 2 }}>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#4caf50' }} />}>
-                    <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center' }}>
-                      <WarningIcon sx={{ mr: 1, color: '#ff9800' }} />
-                      Risky Investment Mode
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {!riskyModeEnabled ? (
-                      <Box>
-                        <Typography variant="body2" sx={{ color: '#ccc', mb: 2 }}>
-                          Enable risky investment mode to invest shipping holds (2x) with additional collateral.
-                        </Typography>
-                        
-                        <Box sx={{ mb: 2 }}>
-                          <Typography variant="body2" sx={{ color: '#999', mb: 1 }}>
-                            Risk Percentage: {riskPercentage}%
-                          </Typography>
-                          <LinearProgress 
-                            variant="determinate" 
-                            value={riskPercentage} 
-                            sx={{ 
-                              backgroundColor: '#333',
-                              '& .MuiLinearProgress-bar': { backgroundColor: '#ff9800' }
-                            }}
-                          />
-                        </Box>
-                        
-                        <Box sx={{ mb: 2 }}>
-                          <Typography variant="body2" sx={{ color: '#999', mb: 1 }}>
-                            Anti-collateral Required: ${investmentStatus.antiCollateralRequired?.toFixed(2) || '0.00'}
-                          </Typography>
-                        </Box>
-                        
-                        <Alert severity="warning" sx={{ mb: 2 }}>
-                          <Typography variant="body2">
-                            ⚠️ Warning: Risky investment mode puts shipping holds at risk. 
-                            In case of investment failure, losses will be shared 50/50 between borrower and owner.
-                          </Typography>
-                        </Alert>
-                        
-                        <Button
-                          variant="outlined"
-                          startIcon={<WarningIcon />}
-                          onClick={handleEnableRiskyMode}
-                          disabled={processing}
-                          sx={{
-                            borderColor: '#ff9800',
-                            color: '#ff9800',
-                            '&:hover': { borderColor: '#ffb74d', backgroundColor: 'rgba(255, 152, 0, 0.1)' }
-                          }}
-                        >
-                          Enable Risky Mode
-                        </Button>
-                      </Box>
-                    ) : (
-                      <Box>
-                        <Alert severity="warning" sx={{ mb: 2 }}>
-                          <Typography variant="body2">
-                            ⚠️ Risky Investment Mode Active ({riskPercentage}% risk)
-                          </Typography>
-                          <Typography variant="caption">
-                            Anti-collateral deposited: ${investmentStatus.antiCollateralDeposited?.toFixed(2) || '0.00'}
-                          </Typography>
-                        </Alert>
-                        
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                          <RobotIcon sx={{ mr: 1, color: investmentStatus.robotsActive ? '#4caf50' : '#666' }} />
-                          <Typography variant="body2" sx={{ color: '#ccc' }}>
-                            Investment Robots: {investmentStatus.robotsActive ? 'Active' : 'Inactive'}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    )}
-                  </AccordionDetails>
-                </Accordion>
-
-                {/* Investment Actions */}
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<TrendingUpIcon />}
-                    onClick={() => setShowInvestmentModal(true)}
-                    disabled={investmentStatus.holdBalance?.totalInvestable === 0}
-                    sx={{
-                      borderColor: '#4caf50',
-                      color: '#4caf50',
-                      '&:hover': { borderColor: '#66bb6a', backgroundColor: 'rgba(76, 175, 80, 0.1)' }
-                    }}
-                  >
-                    Investment Options
-                  </Button>
-                  
-                  <Button
-                    variant="outlined"
-                    startIcon={<MoneyIcon />}
-                    onClick={() => {
-                      // Show investment history
-                      alert('Investment history would be displayed here');
-                    }}
-                    sx={{
-                      borderColor: '#2196f3',
-                      color: '#2196f3',
-                      '&:hover': { borderColor: '#42a5f5', backgroundColor: 'rgba(33, 150, 243, 0.1)' }
-                    }}
-                  >
-                    Investment History
-                  </Button>
-                </Box>
-              </Box>
-            )}
-          </Card>
+          <CaveFeatureGate
+            service="saurce"
+            surface="investment"
+            featureLabel="Investment and wallet holds"
+            initialModel={{ itemId: id }}
+          />
         </Grid>
 
         {/* ShipStation Optimization Section */}

@@ -8,6 +8,9 @@ describe('HR Help Service PACT Tests', () => {
   let hrService;
 
   beforeEach(() => {
+    process.env.REACT_APP_CAVE_DEV_FALLBACK = 'true';
+    delete process.env.REACT_APP_SOA_RES_AURCE_URL;
+    delete process.env.REACT_APP_CAVE_BASE_URL;
     hrService = HRHelpService.getInstance();
     hrService.resetMockStateForTests();
   });

@@ -1,32 +1,34 @@
 /**
- * Inventory-local Cave surface for saurce: UI Tome + createTome shell + RobotCopy runtime.
+ * Inventory-local Cave surface for saurce: UI Tome + browser shell stub + RobotCopy runtime.
  */
 
-import type { TomeInstance } from 'log-view-machine';
 import { fetchSaurceFrontendTome, type SaurceFrontendTome } from '../services/saurceUiTome';
-import type { ResaurceFrontendTome } from '../services/resaurceUiTome';
-import { sendCaveRoute } from '../services/resaurceClient';
-import { resolveCaveBaseUrlForRoute } from '../services/soaRegistry';
-import { SAURCE_COMMERCE_WALLET_BALANCE } from '../services/soaRoutes';
+import type { RobotCopyFlowDef } from '../services/resaurceUiTome';
+import { sendCaveMessage, sendCaveRoute } from '../services/resaurceClient';
 import { createRobotCopyRuntime, type RobotCopyRuntime } from './robotCopyRuntime';
 import { createSaurceInventoryShellTome } from './inventorySaurceShell';
+import { getOrRefreshStaticFederation } from '../services/federationStatic';
+import { fetchCaveManifest, robotCopyFlowsFromManifest } from './fetchCaveManifest';
+import type { CaveShellInstance } from './caveShellInstance';
 
 export type SaurceInventoryCave = {
   tome: SaurceFrontendTome;
   robotCopy: RobotCopyRuntime;
-  tomeInstance: TomeInstance;
+  tomeInstance: CaveShellInstance;
 };
 
 let cached: { semver: string; cave: SaurceInventoryCave } | null = null;
+let robotCopyPromise: Promise<RobotCopyRuntime | null> | null = null;
 
-/**
- * Load UI Tome from saurce and create RobotCopy runtime. Caches by tome_semver.
- */
 export async function loadSaurceInventoryCave(options?: {
   baseUrlOverride?: string;
   forceRefresh?: boolean;
 }): Promise<SaurceInventoryCave | null> {
-  const tome = await fetchSaurceFrontendTome(options?.baseUrlOverride);
+  const base = options?.baseUrlOverride;
+  const [tome, manifest] = await Promise.all([
+    fetchSaurceFrontendTome(base),
+    fetchCaveManifest('saurce', base),
+  ]);
   if (!tome || !tome.tome_semver) return null;
   if (!options?.forceRefresh && cached && cached.semver === tome.tome_semver) {
     return cached.cave;
@@ -35,18 +37,37 @@ export async function loadSaurceInventoryCave(options?: {
   if (typeof tomeInstance.start === 'function') {
     await tomeInstance.start();
   }
-  const robotCopy = createRobotCopyRuntime(tome as ResaurceFrontendTome, {
+  await getOrRefreshStaticFederation();
+  const manifestFlows = robotCopyFlowsFromManifest(manifest) as Record<string, RobotCopyFlowDef>;
+  const robotCopy = createRobotCopyRuntime(tome, {
     sendCaveRoute,
-    verifyPresence: async () => ({ ok: true as const, subject: 'saurce' }),
+    sendCaveMessage,
+    verifyPresence: async () => ({ ok: true as const }),
     readPresence: () => null,
+    defaultService: 'saurce',
+    flows: manifestFlows,
   });
+  try {
+    await robotCopy.sendMessage(
+      'trace_heartbeat',
+      { source: 'inventory-saurce-shell' },
+      { traceId: `saurce-shell-${Date.now()}`, service: 'saurce' }
+    );
+  } catch {
+    /* optional shell heartbeat */
+  }
   const cave = { tome, robotCopy, tomeInstance };
   cached = { semver: tome.tome_semver, cave };
+  robotCopyPromise = Promise.resolve(robotCopy);
   return cave;
 }
 
-export function saurceFederationEntryUrl(_tome: SaurceFrontendTome, _baseOverride?: string): string | null {
-  return null;
+/** Cached RobotCopy for service-layer callers (WalletService, etc.). */
+export async function getSaurceRobotCopy(forceRefresh = false): Promise<RobotCopyRuntime | null> {
+  if (!forceRefresh && cached?.cave?.robotCopy) return cached.cave.robotCopy;
+  if (!forceRefresh && robotCopyPromise) return robotCopyPromise;
+  const cave = await loadSaurceInventoryCave({ forceRefresh });
+  return cave?.robotCopy ?? null;
 }
 
 export async function clearSaurceInventoryCaveCache(): Promise<void> {
@@ -54,9 +75,9 @@ export async function clearSaurceInventoryCaveCache(): Promise<void> {
     await cached.cave.tomeInstance.stop();
   }
   cached = null;
+  robotCopyPromise = null;
 }
 
-export function saurceInventoryCaveBaseUrl(override?: string): string | null {
-  const base = (override || resolveCaveBaseUrlForRoute(SAURCE_COMMERCE_WALLET_BALANCE) || '').replace(/\/$/, '');
-  return base || null;
+export function saurceFederationEntryUrl(_tome: SaurceFrontendTome, _baseOverride?: string): string | null {
+  return null;
 }

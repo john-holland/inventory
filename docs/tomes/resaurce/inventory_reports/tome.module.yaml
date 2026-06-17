@@ -1,0 +1,54 @@
+schema_version: tome-module/2
+service: resaurce
+surface: inventory_reports
+
+cave_robit:
+  middleware: [presence_forward, envelope_v2, trace_loop_guard]
+
+messages:
+  inventory_report_list: inventory/report/list
+  inventory_report_enqueue: inventory/report/enqueue
+
+robotcopy:
+  flows:
+    inventory_report_list:
+      message: inventory_report_list
+      payload_template: {}
+    inventory_report_enqueue:
+      message: inventory_report_enqueue
+      payload_template:
+        report_type: "{{reportType}}"
+
+lvm:
+  machines:
+    - id: inventory:inventoryReportsUi
+      initial: idle
+      states:
+        idle:
+          view: InventoryReportsIdleView
+        loading:
+          view: InventoryReportsLoadingView
+          on_enter:
+            message: inventory_report_list
+        ready:
+          view: InventoryReportsReadyView
+        generating:
+          view: InventoryReportsGeneratingView
+          on_enter:
+            message: inventory_report_enqueue
+        error:
+          view: InventoryReportsErrorView
+
+state_middleware: [trace, presence, delegation, robotCopy, caveDbSnapshot, log]
+
+views:
+  InventoryReportsIdleView:
+    module: documents/inventory/IdleView
+  InventoryReportsLoadingView:
+    module: documents/inventory/LoadingView
+  InventoryReportsReadyView:
+    module: documents/inventory/ReadyView
+  InventoryReportsGeneratingView:
+    module: documents/inventory/GeneratingView
+  InventoryReportsErrorView:
+    module: documents/inventory/ErrorView

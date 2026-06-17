@@ -1,0 +1,215 @@
+{
+  "consumer": {
+    "name": "inventory-frontend"
+  },
+  "interactions": [
+    {
+      "description": "a request when rate limited",
+      "providerState": "AirBnB API is rate limited",
+      "request": {
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer mock_token"
+        },
+        "method": "GET",
+        "path": "/api/v1/listings/airbnb_12345"
+      },
+      "response": {
+        "body": {
+          "code": "RATE_LIMIT_EXCEEDED",
+          "error": "Rate limit exceeded",
+          "retryAfter": 60
+        },
+        "headers": {
+          "Content-Type": "application/json",
+          "Retry-After": "60"
+        },
+        "status": 429
+      }
+    },
+    {
+      "description": "a request for non-existent AirBnB listing",
+      "providerState": "AirBnB listing does not exist",
+      "request": {
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer mock_token"
+        },
+        "method": "GET",
+        "path": "/api/v1/listings/nonexistent_listing"
+      },
+      "response": {
+        "body": {
+          "code": "LISTING_NOT_FOUND",
+          "error": "Listing not found"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 404
+      }
+    },
+    {
+      "description": "a request for AirBnB listing details",
+      "providerState": "AirBnB listing exists",
+      "request": {
+        "headers": {
+          "Accept": "application/json",
+          "Authorization": "Bearer mock_token"
+        },
+        "method": "GET",
+        "path": "/api/v1/listings/airbnb_12345"
+      },
+      "response": {
+        "body": {
+          "address": {
+            "city": "Mountain View",
+            "country": "USA",
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "state": "CA",
+            "street": "123 Cabin Lane",
+            "zipCode": "94041"
+          },
+          "amenities": [
+            "WiFi",
+            "Kitchen",
+            "Parking",
+            "Workspace"
+          ],
+          "bathrooms": 2,
+          "bedrooms": 3,
+          "checkInTime": "3:00 PM",
+          "checkOutTime": "11:00 AM",
+          "description": "Perfect for item demos and team retreats",
+          "hostId": "host_123",
+          "hostName": "John Host",
+          "houseRules": [
+            "No smoking",
+            "No pets",
+            "Quiet hours after 10 PM",
+            "Clean up after demos"
+          ],
+          "id": "airbnb_12345",
+          "maxGuests": 8,
+          "photos": [
+            "https://example.com/photo1.jpg",
+            "https://example.com/photo2.jpg"
+          ],
+          "pricePerNight": 150,
+          "title": "Cozy Cabin in the Woods"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to create calendar event",
+      "providerState": "Calendar service is available",
+      "request": {
+        "body": {
+          "attendees": [
+            "user1@example.com",
+            "user2@example.com"
+          ],
+          "description": "Cabin for showcasing new inventory items",
+          "endTime": "2024-02-03T11:00:00Z",
+          "location": "123 Cabin Lane, Mountain View, CA 94041",
+          "organizer": "current-user@example.com",
+          "startTime": "2024-02-01T15:00:00Z",
+          "title": "Cabin Demo: Tech Demo Cabin"
+        },
+        "headers": {
+          "Authorization": "Bearer mock_token",
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/v1/calendar/events"
+      },
+      "response": {
+        "body": {
+          "attendees": [
+            "user1@example.com",
+            "user2@example.com"
+          ],
+          "createdAt": "2024-01-15T10:00:00Z",
+          "description": "Cabin for showcasing new inventory items",
+          "endTime": "2024-02-03T11:00:00Z",
+          "id": "cal_cabin_1234567890",
+          "location": "123 Cabin Lane, Mountain View, CA 94041",
+          "organizer": "current-user@example.com",
+          "startTime": "2024-02-01T15:00:00Z",
+          "status": "confirmed",
+          "title": "Cabin Demo: Tech Demo Cabin"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.createdAt": {
+            "match": "type"
+          }
+        },
+        "status": 201
+      }
+    },
+    {
+      "description": "a request to create cabin chat room",
+      "providerState": "Chat service is available",
+      "request": {
+        "body": {
+          "name": "Cabin Chat - cabin_1234567890",
+          "participants": [
+            "user1",
+            "user2"
+          ],
+          "type": "channel"
+        },
+        "headers": {
+          "Authorization": "Bearer mock_token",
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/v1/chat/rooms"
+      },
+      "response": {
+        "body": {
+          "createdAt": "2024-01-15T10:00:00Z",
+          "id": "cabin_chat_cabin_1234567890",
+          "name": "Cabin Chat - cabin_1234567890",
+          "participants": [
+            "user1",
+            "user2"
+          ],
+          "type": "channel"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.createdAt": {
+            "match": "type"
+          }
+        },
+        "status": 201
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "10.4.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "airbnb-api-mock"
+  }
+}

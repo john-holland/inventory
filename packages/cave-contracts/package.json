@@ -1,0 +1,7 @@
+{
+  "name": "@inventory/cave-contracts",
+  "version": "0.1.0",
+  "description": "Shared Cave envelope v2 and route contracts for inventory, resaurce, saurce",
+  "license": "MIT",
+  "files": ["schemas", "README.md"]
+}

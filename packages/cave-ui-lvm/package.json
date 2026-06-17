@@ -1,0 +1,20 @@
+{
+  "name": "@inventory/cave-ui-lvm",
+  "version": "0.1.0",
+  "description": "Browser CaveDB, tome surface loader, buildSurfaceMachine, useTomeSurface for inventory UI",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "files": ["src", "scripts"],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "log-view-machine": "file:../../../log-view-machine/log-view-machine"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}

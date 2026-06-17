@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://inventory.local/schemas/cave-federation-static-v1.json",
+  "title": "CaveFederationStaticV1",
+  "type": "object",
+  "required": ["tome_semver", "service", "surfaces"],
+  "properties": {
+    "tome_semver": { "type": "string" },
+    "service": { "type": "string" },
+    "surfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" }
+        }
+      }
+    },
+    "assets_base": { "type": "string" },
+    "federation": {
+      "type": "object",
+      "properties": {
+        "remote_name": { "type": "string" },
+        "remote_entry_path": { "type": "string" },
+        "exposed_module": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

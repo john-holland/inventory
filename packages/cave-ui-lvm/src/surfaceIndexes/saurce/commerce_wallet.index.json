@@ -1,0 +1,87 @@
+{
+  "schema_version": "tome-surface-index/1",
+  "service": "saurce",
+  "surface": "commerce_wallet",
+  "machineId": "inventory:partnerWalletUi",
+  "initial": "idle",
+  "states": [
+    "idle",
+    "loading",
+    "ready",
+    "awaiting_presence",
+    "error"
+  ],
+  "views": [
+    "WalletIdleView",
+    "WalletLoadingView",
+    "WalletReadyView",
+    "PresenceSignInView",
+    "WalletErrorView"
+  ],
+  "messages": [
+    "wallet_list",
+    "wallet_transactions_list",
+    "wallet_hold_apply"
+  ],
+  "messages_map": {
+    "wallet_list": "wallet/list",
+    "wallet_transactions_list": "wallet/transactions/list",
+    "wallet_hold_apply": "wallet/hold/apply"
+  },
+  "subMachines": [],
+  "sub_machines": {},
+  "state_middleware": [
+    "trace",
+    "presence",
+    "delegation",
+    "robotCopy",
+    "caveDbSnapshot",
+    "log"
+  ],
+  "views_map": {
+    "WalletIdleView": {
+      "module": "partner/wallet/IdleView"
+    },
+    "WalletLoadingView": {
+      "module": "partner/wallet/LoadingView"
+    },
+    "WalletReadyView": {
+      "module": "partner/wallet/ReadyView"
+    },
+    "WalletErrorView": {
+      "module": "partner/wallet/ErrorView"
+    },
+    "PresenceSignInView": {
+      "module": "presence/SignInView"
+    }
+  },
+  "lvm": {
+    "machines": [
+      {
+        "id": "inventory:partnerWalletUi",
+        "initial": "idle",
+        "states": {
+          "idle": {
+            "view": "WalletIdleView"
+          },
+          "loading": {
+            "view": "WalletLoadingView",
+            "on_enter": {
+              "message": "wallet_list"
+            }
+          },
+          "ready": {
+            "view": "WalletReadyView"
+          },
+          "awaiting_presence": {
+            "view": "PresenceSignInView",
+            "requires_presence": true
+          },
+          "error": {
+            "view": "WalletErrorView"
+          }
+        }
+      }
+    ]
+  }
+}

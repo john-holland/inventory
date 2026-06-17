@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://inventory.local/schemas/cave-manifest-v1.json",
+  "title": "CaveManifestV1",
+  "type": "object",
+  "required": ["schema_version", "service"],
+  "properties": {
+    "schema_version": { "const": "cave-manifest/1" },
+    "service": { "type": "string" },
+    "cave": { "type": "object" },
+    "messages": { "type": "object", "additionalProperties": true },
+    "tomes": { "type": "object" },
+    "lvm": { "type": "object" },
+    "encapsulation": { "type": "object" },
+    "trace_loop": { "type": "object" }
+  },
+  "additionalProperties": true
+}

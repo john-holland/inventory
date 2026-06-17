@@ -1,0 +1,1 @@
+Consumer pact JSON is generated under **`frontend/pacts/`** when you run the Jest pact specs in `frontend/src/pacts/inventory-*-cave.pact.js`. Copy stable versions here for tagged releases or submodule consumers.

@@ -1,0 +1,169 @@
+{
+  "consumer": {
+    "name": "Frontend"
+  },
+  "interactions": [
+    {
+      "description": "a request to create HR help chat",
+      "providerState": "HR employee is available",
+      "request": {
+        "body": {
+          "context": {
+            "issues": [
+              "capital_loss_question"
+            ],
+            "page": "documents"
+          },
+          "hrEmployeeId": "hr_employee_001",
+          "userId": "user_001"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.hrEmployeeId": {
+            "match": "type"
+          },
+          "$.body.userId": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/hr/create-chat"
+      },
+      "response": {
+        "body": {
+          "chatRoomId": "chat_hr_help_001",
+          "participants": [
+            "user_001",
+            "hr_employee_001"
+          ],
+          "slackChannel": "#hr-help-direct",
+          "type": "hr_help_1on1"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.chatRoomId": {
+            "match": "type"
+          },
+          "$.body.slackChannel": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for available HR employees",
+      "providerState": "HR employees exist and calendar is integrated",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/hr/available-employees"
+      },
+      "response": {
+        "body": {
+          "availableEmployees": [
+            {
+              "available": true,
+              "id": "hr_employee_001",
+              "name": "Sarah Johnson"
+            }
+          ],
+          "count": 2
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.availableEmployees": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body.availableEmployees[*].id": {
+            "match": "type"
+          },
+          "$.body.availableEmployees[*].name": {
+            "match": "type"
+          },
+          "$.body.count": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to get HR help",
+      "providerState": "user needs HR help for tax document",
+      "request": {
+        "body": {
+          "context": {
+            "issues": [
+              "capital_loss_question",
+              "tax_form_help"
+            ],
+            "page": "documents"
+          },
+          "userId": "user_001"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.userId": {
+            "match": "type"
+          }
+        },
+        "method": "POST",
+        "path": "/api/hr/get-help"
+      },
+      "response": {
+        "body": {
+          "chatRoomId": "chat_hr_help_001",
+          "hrEmployeeId": "hr_employee_001",
+          "hrEmployeeName": "Sarah Johnson",
+          "nextAvailableSlot": "2024-02-15T14:00:00Z",
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.chatRoomId": {
+            "match": "type"
+          },
+          "$.body.hrEmployeeId": {
+            "match": "type"
+          },
+          "$.body.hrEmployeeName": {
+            "match": "type"
+          },
+          "$.body.nextAvailableSlot": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "10.4.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "HR Help Service API"
+  }
+}

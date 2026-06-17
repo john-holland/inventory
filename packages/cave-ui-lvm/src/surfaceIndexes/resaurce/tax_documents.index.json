@@ -1,0 +1,88 @@
+{
+  "schema_version": "tome-surface-index/1",
+  "service": "resaurce",
+  "surface": "tax_documents",
+  "machineId": "inventory:taxDocumentsUi",
+  "initial": "idle",
+  "states": [
+    "idle",
+    "loading",
+    "ready",
+    "generating",
+    "error"
+  ],
+  "views": [
+    "TaxIdleView",
+    "TaxLoadingView",
+    "TaxReadyView",
+    "TaxGeneratingView",
+    "TaxErrorView"
+  ],
+  "messages": [
+    "tax_documents_list",
+    "tax_generate_enqueue",
+    "tax_generate_status",
+    "tax_generate_result"
+  ],
+  "messages_map": {
+    "tax_documents_list": "tax/documents/list",
+    "tax_generate_enqueue": "tax/generate/enqueue",
+    "tax_generate_status": "tax/generate/status",
+    "tax_generate_result": "tax/generate/result"
+  },
+  "subMachines": [],
+  "sub_machines": {},
+  "state_middleware": [
+    "trace",
+    "presence",
+    "delegation",
+    "robotCopy",
+    "caveDbSnapshot",
+    "log"
+  ],
+  "views_map": {
+    "TaxIdleView": {
+      "module": "documents/tax/IdleView"
+    },
+    "TaxLoadingView": {
+      "module": "documents/tax/LoadingView"
+    },
+    "TaxReadyView": {
+      "module": "documents/tax/ReadyView"
+    },
+    "TaxGeneratingView": {
+      "module": "documents/tax/GeneratingView"
+    },
+    "TaxErrorView": {
+      "module": "documents/tax/ErrorView"
+    }
+  },
+  "lvm": {
+    "machines": [
+      {
+        "id": "inventory:taxDocumentsUi",
+        "initial": "idle",
+        "states": {
+          "idle": {
+            "view": "TaxIdleView"
+          },
+          "loading": {
+            "view": "TaxLoadingView",
+            "on_enter": {
+              "message": "tax_documents_list"
+            }
+          },
+          "ready": {
+            "view": "TaxReadyView"
+          },
+          "generating": {
+            "view": "TaxGeneratingView"
+          },
+          "error": {
+            "view": "TaxErrorView"
+          }
+        }
+      }
+    ]
+  }
+}

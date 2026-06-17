@@ -14,14 +14,15 @@
     "pact:charity:publish": "node scripts/run-charity-pact-tests.js --publish-only",
     "pact:cabin": "node scripts/run-cabin-pact-tests.js",
     "pact:cabin:publish": "node scripts/run-cabin-pact-tests.js --publish",
-    "pact:cross-cave": "CI=true npm test -- --watchAll=false src/pacts/inventory-resaurce-cave.pact.test.js src/pacts/inventory-saurce-cave.pact.test.js"
+    "pact:cross-cave": "CI=true npm test -- --watchAll=false --runInBand src/pacts/inventory-resaurce-cave.pact.test.js src/pacts/inventory-saurce-cave.pact.test.js",
+    "pact:all": "CI=true npm test -- --watchAll=false --runInBand --testPathPattern=src/pacts"
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@inventory/cave-adapter": "file:../packages/cave-adapter-ts",
     "@inventory/cave-federation-host": "file:../packages/cave-federation-host",
-    "log-view-machine": "file:../../log-view-machine/log-view-machine",
+    "@inventory/cave-ui-lvm": "file:../packages/cave-ui-lvm",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.0",
     "@pact-foundation/pact": "^10.4.0",

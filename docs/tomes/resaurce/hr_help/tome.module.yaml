@@ -1,0 +1,69 @@
+schema_version: tome-module/2
+service: resaurce
+surface: hr_help
+
+cave_robit:
+  middleware: [presence_forward, envelope_v2, trace_loop_guard]
+
+messages:
+  request_hr_help: hr/help/request
+  list_available_employees: hr/employees/available
+  create_chat_room: hr/chat/room/create
+  send_chat_message: hr/chat/message/send
+  list_chat_messages: hr/chat/messages/list
+
+robotcopy:
+  flows:
+    request_hr_help:
+      message: request_hr_help
+      payload_template:
+        context: "{{context}}"
+    list_available_employees:
+      message: list_available_employees
+      payload_template: {}
+    create_chat_room:
+      message: create_chat_room
+      payload_template:
+        employee_id: "{{employeeId}}"
+    send_chat_message:
+      message: send_chat_message
+      payload_template:
+        room_id: "{{roomId}}"
+        text: "{{text}}"
+    list_chat_messages:
+      message: list_chat_messages
+      payload_template:
+        room_id: "{{roomId}}"
+
+lvm:
+  machines:
+    - id: inventory:hrHelpUi
+      initial: idle
+      states:
+        idle:
+          view: HrIdleView
+        loading:
+          view: HrLoadingView
+          on_enter:
+            message: request_hr_help
+        ready:
+          view: HrReadyView
+        awaiting_presence:
+          view: PresenceSignInView
+          requires_presence: true
+        error:
+          view: HrErrorView
+
+state_middleware: [trace, presence, delegation, robotCopy, caveDbSnapshot, log]
+
+views:
+  HrIdleView:
+    module: documents/hr/IdleView
+  HrLoadingView:
+    module: documents/hr/LoadingView
+  HrReadyView:
+    module: documents/hr/ReadyView
+  HrErrorView:
+    module: documents/hr/ErrorView
+  PresenceSignInView:
+    module: presence/SignInView

@@ -1,0 +1,321 @@
+{
+  "consumer": {
+    "name": "InvestmentService"
+  },
+  "interactions": [
+    {
+      "description": "a request to check additional hold eligibility",
+      "providerState": "item has additional holds",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/investment/eligibility/pact_item_002/additional"
+      },
+      "response": {
+        "body": {
+          "holdType": "additional",
+          "isEligible": true,
+          "reason": "Additional holds (3rd x) are immediately investable",
+          "requirements": []
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.reason": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for investment status",
+      "providerState": "item has all hold types and risky mode enabled",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/investment/status/pact_item_009"
+      },
+      "response": {
+        "body": {
+          "antiCollateralDeposited": 18,
+          "antiCollateralRequired": 18,
+          "currentInvestments": 105,
+          "holdBalance": {
+            "additionalHold": 35,
+            "insuranceHold": 20,
+            "shippingHold2x": 50,
+            "totalInvestable": 55,
+            "totalNonInvestable": 50
+          },
+          "investmentReturn": 5.25,
+          "investmentReturnPercentage": 5,
+          "itemId": "pact_item_009",
+          "lastUpdated": "2024-01-15T10:30:00Z",
+          "riskPercentage": 60,
+          "riskyModeEnabled": true,
+          "robotsActive": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.lastUpdated": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to check insurance hold eligibility",
+      "providerState": "item has insurance holds but has not shipped",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/investment/eligibility/pact_item_003/insurance"
+      },
+      "response": {
+        "body": {
+          "holdType": "insurance",
+          "isEligible": false,
+          "reason": "Insurance holds investable only after item ships",
+          "requirements": [
+            "Wait for item to ship"
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.reason": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to invest additional hold",
+      "providerState": "item has investable additional holds",
+      "request": {
+        "body": {
+          "amount": 25,
+          "holdType": "additional",
+          "investmentType": "crypto"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/investment/invest/pact_item_006"
+      },
+      "response": {
+        "body": {
+          "amount": 25,
+          "holdType": "additional",
+          "investmentType": "crypto",
+          "itemId": "pact_item_006",
+          "success": true,
+          "transactionId": "tx_123456789"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.transactionId": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to handle fallout scenario",
+      "providerState": "item has risky investment mode enabled and investment failed",
+      "request": {
+        "body": {
+          "borrowerShare": 20,
+          "insuranceRefund": 5,
+          "investmentLoss": 35,
+          "ownerShare": 20,
+          "shippingRefund": 15,
+          "totalLoss": 75
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/investment/fallout/pact_item_008"
+      },
+      "response": {
+        "body": {
+          "borrowerRefund": 20,
+          "capitalLoss": 35,
+          "falloutProcessed": true,
+          "itemId": "pact_item_008",
+          "ownerRefund": 20,
+          "riskyModeDisabled": true,
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to enable risky investment mode",
+      "providerState": "item has shipping holds and sufficient anti-collateral",
+      "request": {
+        "body": {
+          "antiCollateral": 15,
+          "riskPercentage": 50
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/investment/risky-mode/pact_item_004"
+      },
+      "response": {
+        "body": {
+          "amountAtRisk": 30,
+          "antiCollateral": 15,
+          "itemId": "pact_item_004",
+          "riskBoundaryError": 0.15,
+          "riskPercentage": 50,
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to enable risky investment mode with invalid anti-collateral",
+      "providerState": "item has shipping holds but insufficient anti-collateral",
+      "request": {
+        "body": {
+          "antiCollateral": 5,
+          "riskPercentage": 60
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/investment/risky-mode/pact_item_005"
+      },
+      "response": {
+        "body": {
+          "error": "Anti-collateral must equal opposite of risk boundary error",
+          "expectedAntiCollateral": 12,
+          "providedAntiCollateral": 5,
+          "success": false
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.error": {
+            "match": "type"
+          }
+        },
+        "status": 400
+      }
+    },
+    {
+      "description": "a request to check shipping hold eligibility",
+      "providerState": "item has shipping holds but risky mode disabled",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/investment/eligibility/pact_item_001/shipping_2x"
+      },
+      "response": {
+        "body": {
+          "holdType": "shipping_2x",
+          "isEligible": false,
+          "reason": "Shipping holds reserved for round-trip shipping",
+          "requirements": [
+            "Enable risky investment mode",
+            "Deposit anti-collateral"
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.reason": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to invest non-eligible shipping hold",
+      "providerState": "item has shipping holds but risky mode disabled",
+      "request": {
+        "body": {
+          "amount": 30,
+          "holdType": "shipping_2x",
+          "investmentType": "crypto"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/investment/invest/pact_item_007"
+      },
+      "response": {
+        "body": {
+          "eligibility": {
+            "holdType": "shipping_2x",
+            "isEligible": false,
+            "reason": "Shipping holds reserved"
+          },
+          "error": "Cannot invest shipping_2x hold",
+          "success": false
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.eligibility.reason": {
+            "match": "type"
+          },
+          "$.body.error": {
+            "match": "type"
+          }
+        },
+        "status": 400
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "10.4.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "WalletService"
+  }
+}

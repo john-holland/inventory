@@ -1,0 +1,54 @@
+schema_version: tome-module/2
+service: resaurce
+surface: sales_reports
+
+cave_robit:
+  middleware: [presence_forward, envelope_v2, trace_loop_guard]
+
+messages:
+  sales_report_list: sales/report/list
+  sales_report_enqueue: sales/report/enqueue
+
+robotcopy:
+  flows:
+    sales_report_list:
+      message: sales_report_list
+      payload_template: {}
+    sales_report_enqueue:
+      message: sales_report_enqueue
+      payload_template:
+        report_type: "{{reportType}}"
+
+lvm:
+  machines:
+    - id: inventory:salesReportsUi
+      initial: idle
+      states:
+        idle:
+          view: SalesReportsIdleView
+        loading:
+          view: SalesReportsLoadingView
+          on_enter:
+            message: sales_report_list
+        ready:
+          view: SalesReportsReadyView
+        generating:
+          view: SalesReportsGeneratingView
+          on_enter:
+            message: sales_report_enqueue
+        error:
+          view: SalesReportsErrorView
+
+state_middleware: [trace, presence, delegation, robotCopy, caveDbSnapshot, log]
+
+views:
+  SalesReportsIdleView:
+    module: documents/sales/IdleView
+  SalesReportsLoadingView:
+    module: documents/sales/LoadingView
+  SalesReportsReadyView:
+    module: documents/sales/ReadyView
+  SalesReportsGeneratingView:
+    module: documents/sales/GeneratingView
+  SalesReportsErrorView:
+    module: documents/sales/ErrorView
